@@ -13,6 +13,7 @@
         "ACHIEVEMENT_FILTER_INCOMPLETE",
         "AchievementFrameCategories_Update",
         "SlashCmdList",
-        "ACHIEVEMENT_FILTER_ALL"
+        "ACHIEVEMENT_FILTER_ALL",
+        "ExpandFactionHeader"
     ]
 }

@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.2 by SMoRG75
+-- SMoRGsQoL v1.0.3 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
 -- Now with throttled updates, SQOL/SQOL_DB table structure, and richer debug.
@@ -592,6 +592,34 @@ local _wipe = rawget(_G, "wipe") or function(t)
     for k in pairs(t) do t[k] = nil end
 end
 
+local function SQOL_ExpandAllFactionHeaders()
+    -- Modern API (Retail)
+    if C_Reputation and C_Reputation.ExpandAllFactionHeaders then
+        safe_pcall(function()
+            C_Reputation.ExpandAllFactionHeaders()
+        end)
+        return
+    end
+
+    -- Legacy fallback (still works on Retail for most clients)
+    if type(GetNumFactions) ~= "function" or type(GetFactionInfo) ~= "function" or type(ExpandFactionHeader) ~= "function" then
+        return
+    end
+
+    local num = GetNumFactions()
+    local i = 1
+    while i <= num do
+        local _, _, _, _, _, _, _, _, isHeader, isCollapsed = GetFactionInfo(i)
+        if isHeader and isCollapsed then
+            safe_pcall(function()
+                ExpandFactionHeader(i)
+            end)
+            num = GetNumFactions()
+        end
+        i = i + 1
+    end
+end
+
 local function SQOL_GetWatchedFactionID()
     if C_Reputation and C_Reputation.GetWatchedFactionData then
         local data = C_Reputation.GetWatchedFactionData()
@@ -600,23 +628,10 @@ local function SQOL_GetWatchedFactionID()
 
     local legacy = rawget(_G, "GetWatchedFactionInfo")
     if type(legacy) == "function" then
+        -- name, standingID, barMin, barMax, barValue
         local _, _, _, _, _, factionID = legacy()
         return factionID
     end
-
-    return nil
-end
-
-local function SQOL_GetFactionValueFromData(data)
-    if not data then return nil end
-
-    -- FactionData.reaction is the current bar value within the current standing.
-    local v = rawget(data, "reaction")
-    if type(v) == "number" then return v end
-
-    -- Fallbacks (future-proofing)
-    v = rawget(data, "barValue") or rawget(data, "currentValue")
-    if type(v) == "number" then return v end
 
     return nil
 end
@@ -626,27 +641,21 @@ local function SQOL_BuildReputationCache()
     _wipe(SQOL._repIndexByID)
     _wipe(SQOL._repNameByID)
 
-    local num = (C_Reputation and C_Reputation.GetNumFactions and C_Reputation.GetNumFactions())
-             or (type(GetNumFactions) == "function" and GetNumFactions())
-             or 0
+    SQOL_ExpandAllFactionHeaders()
 
+    if type(GetNumFactions) ~= "function" or type(GetFactionInfo) ~= "function" then
+        dprint("RepWatch -> GetFactionInfo/GetNumFactions not available")
+        return
+    end
+
+    local num = GetNumFactions()
     for i = 1, num do
-        local factionID, name, value
+        -- GetFactionInfo returns:
+        -- name, description, standingId, bottomValue, topValue, earnedValue, ..., isHeader, isCollapsed, hasRep, ..., factionID
+        local name, _, _, _, _, earnedValue, _, _, isHeader, _, hasRep, _, _, factionID = GetFactionInfo(i)
 
-        if C_Reputation and C_Reputation.GetFactionDataByIndex then
-            local data = C_Reputation.GetFactionDataByIndex(i)
-            factionID = data and rawget(data, "factionID")
-            name      = data and rawget(data, "name")
-            value     = SQOL_GetFactionValueFromData(data)
-        end
-
-        if not factionID and type(GetFactionInfo) == "function" then
-            local n, _, _, _, barValue, _, _, _, _, _, _, _, _, fid = GetFactionInfo(i)
-            factionID, name, value = fid, n, barValue
-        end
-
-        if type(factionID) == "number" then
-            SQOL._repCache[factionID] = tonumber(value) or 0
+        if type(factionID) == "number" and (hasRep or not isHeader) then
+            SQOL._repCache[factionID] = tonumber(earnedValue) or 0
             SQOL._repIndexByID[factionID] = i
             SQOL._repNameByID[factionID] = name or ("FactionID:" .. factionID)
         end
@@ -694,33 +703,23 @@ local function SQOL_ScanReputationChanges()
         return
     end
 
+    SQOL_ExpandAllFactionHeaders()
+
+    if type(GetNumFactions) ~= "function" or type(GetFactionInfo) ~= "function" then
+        return
+    end
+
     local watchedID = SQOL_GetWatchedFactionID()
 
-    local num = (C_Reputation and C_Reputation.GetNumFactions and C_Reputation.GetNumFactions())
-             or (type(GetNumFactions) == "function" and GetNumFactions())
-             or 0
-
+    local num = GetNumFactions()
     local bestFactionID, bestDelta = nil, 0
     local bestName = nil
 
     for i = 1, num do
-        local factionID, name, value
-
-        if C_Reputation and C_Reputation.GetFactionDataByIndex then
-            local data = C_Reputation.GetFactionDataByIndex(i)
-            factionID = data and rawget(data, "factionID")
-            name      = data and rawget(data, "name")
-            value     = SQOL_GetFactionValueFromData(data)
-        end
-
-        if not factionID and type(GetFactionInfo) == "function" then
-            local n, _, _, _, barValue, _, _, _, _, _, _, _, _, fid = GetFactionInfo(i)
-            factionID, name, value = fid, n, barValue
-        end
-
-        if type(factionID) == "number" then
-            local newVal = tonumber(value) or 0
-            local oldVal = tonumber(SQOL._repCache[factionID]) or 0
+        local name, _, _, _, _, earnedValue, _, _, isHeader, _, hasRep, _, _, factionID = GetFactionInfo(i)
+        if type(factionID) == "number" and (hasRep or not isHeader) then
+            local newVal = tonumber(earnedValue) or 0
+            local oldVal = tonumber(SQOL._repCache[factionID]) or newVal
             local delta = newVal - oldVal
 
             -- Keep the cache up-to-date and keep index mapping fresh
@@ -751,7 +750,7 @@ local function SQOL_OnFactionUpdate()
     if SQOL._repScanPending then return end
 
     SQOL._repScanPending = true
-    C_Timer.After(0.1, function()
+    C_Timer.After(0.2, function()
         SQOL._repScanPending = false
         SQOL_ScanReputationChanges()
     end)
@@ -856,6 +855,7 @@ f:RegisterEvent("QUEST_LOG_UPDATE")
 f:RegisterEvent("QUEST_TURNED_IN")
 f:RegisterEvent("QUEST_REMOVED")
 f:RegisterEvent("UPDATE_FACTION")
+f:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 f:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
@@ -945,6 +945,9 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "UPDATE_FACTION" then
+        SQOL_OnFactionUpdate()
+
+    elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
         SQOL_OnFactionUpdate()
 
     elseif event == "QUEST_LOG_UPDATE" then
