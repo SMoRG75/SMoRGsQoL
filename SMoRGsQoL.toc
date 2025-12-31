@@ -13,3 +13,4 @@
 ## X-Localizations: enUS
 
 SMoRGsQoL.lua
+Options.lua

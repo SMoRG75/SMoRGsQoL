@@ -5,9 +5,10 @@
 -- Now with throttled updates and a stable PlayerFrame iLvl+Speed line.
 ------------------------------------------------------------
 
-local ADDON_NAME = select(1, ...) or "SMoRGsQoL"
+local ADDON_NAME, SQOL = ...
+ADDON_NAME = ADDON_NAME or "SMoRGsQoL"
 
-local SQOL = {}          -- addon namespace table
+SQOL = SQOL or {}        -- addon namespace table (shared across files)
 SQOL.ADDON_NAME = ADDON_NAME
 local f = CreateFrame("Frame")
 
@@ -1064,23 +1065,41 @@ local function SQOL_Help()
 end
 
 ------------------------------------------------------------
--- Slash commands
+-- Public option helpers (used by Settings UI and slash commands)
 ------------------------------------------------------------
-SLASH_SQOL1 = "/SQOL"
-SlashCmdList["SQOL"] = function(msg)
-    msg = (msg or ""):lower():match("^%s*(.-)%s*$")
+SQOL._settingsObjects = SQOL._settingsObjects or {}
+SQOL._settingsSync = SQOL._settingsSync or false
 
-    local function toggle(key, label)
-        SQOL.DB[key] = not SQOL.DB[key]
-        local s = SQOL.DB[key] and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        print("|cff33ff99SQoL:|r " .. label .. " " .. s)
+function SQOL.RegisterSettingObject(key, settingObj)
+    if type(key) ~= "string" then return end
+    SQOL._settingsObjects[key] = settingObj
+end
+
+function SQOL.SyncSettingObject(key)
+    local settingObj = SQOL._settingsObjects and SQOL._settingsObjects[key]
+    if not settingObj or not SQOL.DB then return end
+    if type(settingObj.GetValue) ~= "function" or type(settingObj.SetValue) ~= "function" then return end
+
+    local desired = SQOL.DB[key]
+    local ok, cur = pcall(settingObj.GetValue, settingObj)
+    if ok and cur ~= desired then
+        SQOL._settingsSync = true
+        pcall(settingObj.SetValue, settingObj, desired)
+        SQOL._settingsSync = false
     end
+end
 
-    if msg == "autotrack" or msg == "at" then
-        toggle("AutoTrack", "Auto-track is")
+function SQOL.SyncAllSettingsObjects()
+    if not SQOL.defaults then return end
+    for k in pairs(SQOL.defaults) do
+        SQOL.SyncSettingObject(k)
+    end
+end
 
-    elseif msg == "color" or msg == "col" then
-        toggle("ColorProgress", "Progress colorization is")
+function SQOL.ApplyOption(key)
+    if not SQOL.DB then return end
+
+    if key == "ColorProgress" then
         if SQOL.DB.ColorProgress then
             SQOL_EnableCustomInfoMessages()
         else
@@ -1089,11 +1108,13 @@ SlashCmdList["SQOL"] = function(msg)
             end
         end
 
-    elseif msg == "splash" then
-        toggle("ShowSplash", "Splash is")
+    elseif key == "HideDoneAchievements" then
+        if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
+            C_AddOns.LoadAddOn("Blizzard_AchievementUI")
+        end
+        SQOL_ApplyAchievementFilter()
 
-    elseif msg == "rep" or msg == "rw" then
-        toggle("RepWatch", "RepWatch is")
+    elseif key == "RepWatch" then
         if SQOL.DB.RepWatch then
             SQOL._repLastStanding = nil
             if SQOL_Rep_RebuildNameMap then
@@ -1104,30 +1125,67 @@ SlashCmdList["SQOL"] = function(msg)
             end
         end
 
-    elseif msg == "stats" or msg == "ilvl" then
-        toggle("ShowIlvlSpd", "PlayerFrame iLvl+Spd line is")
+    elseif key == "ShowIlvlSpd" then
         if SQOL.DB.ShowIlvlSpd then
             SQOL_TryEnsurePlayerFrameIlvlUI(0)
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end
+    end
+
+    SQOL.SyncSettingObject(key)
+end
+
+function SQOL.SetOption(key, value)
+    if not SQOL.DB then return end
+    SQOL.DB[key] = value
+    SQOL.ApplyOption(key)
+end
+
+function SQOL.ToggleOption(key)
+    if not SQOL.DB then return end
+    SQOL.SetOption(key, not SQOL.DB[key])
+end
+
+------------------------------------------------------------
+-- Slash commands
+------------------------------------------------------------
+SLASH_SQOL1 = "/SQOL"
+SlashCmdList["SQOL"] = function(msg)
+    msg = (msg or ""):lower():match("^%s*(.-)%s*$")
+
+    local function toggle(key, label)
+        SQOL.ToggleOption(key)
+        local s = SQOL.DB[key] and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+        print("|cff33ff99SQoL:|r " .. label .. " " .. s)
+    end
+
+    if msg == "autotrack" or msg == "at" then
+        toggle("AutoTrack", "Auto-track is")
+
+    elseif msg == "color" or msg == "col" then
+        toggle("ColorProgress", "Progress colorization is")
+
+    elseif msg == "splash" then
+        toggle("ShowSplash", "Splash is")
+
+    elseif msg == "rep" or msg == "rw" then
+        toggle("RepWatch", "RepWatch is")
+
+    elseif msg == "stats" or msg == "ilvl" then
+        toggle("ShowIlvlSpd", "PlayerFrame iLvl+Spd line is")
 
     elseif msg == "debugtrack" or msg == "dbg" then
         toggle("DebugTrack", "Debug tracking")
 
     elseif msg == "hideach" or msg == "ha" then
-        SQOL.DB.HideDoneAchievements = not SQOL.DB.HideDoneAchievements
-        local s = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        print("|cff33ff99SQoL:|r Hide completed achievements is " .. s)
-
-        if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
-            C_AddOns.LoadAddOn("Blizzard_AchievementUI")
-        end
-
-        SQOL_ApplyAchievementFilter()
+        toggle("HideDoneAchievements", "Hide completed achievements is")
 
     elseif msg == "reset" then
         SQOL.Init(true)
+        if SQOL.SyncAllSettingsObjects then
+            SQOL.SyncAllSettingsObjects()
+        end
 
     elseif msg == "help" then
         SQOL_Help()
