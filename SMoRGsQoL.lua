@@ -917,7 +917,8 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
-    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. repState)
+    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState)
+    print("|cff33ff99RepWatch:|r " .. repState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
