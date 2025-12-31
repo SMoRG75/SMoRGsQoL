@@ -91,7 +91,7 @@ function SQOL.Init(reset)
     SQOL.DB = SQOL_DB
 
     if reset then
-        print("|cff33ff99SQOL:|r All settings have been reset to defaults.")
+        print("|cff33ff99SQoL:|r All settings have been reset to defaults.")
 
         -- 🟢 Apply Achievement filter after reset
         if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
@@ -99,7 +99,7 @@ function SQOL.Init(reset)
         end
         C_Timer.After(0.1, function()
             SQOL_ApplyAchievementFilter()
-            print("|cff33ff99SQOL:|r Achievement filter reset to show all achievements.")
+            print("|cff33ff99SQoL:|r Achievement filter reset to show all achievements.")
         end)
     end
 end
@@ -239,7 +239,16 @@ local function SQOL_EnableCustomInfoMessages()
 
             local label, cur, total = message:match("^(.+):%s*(%d+)%s*/%s*(%d+)$")
             if not (label and cur and total) then
-                SQOL.MessageFrame:AddMessage(message)
+                -- Keep Blizzard's standard UI_INFO_MESSAGE colors (e.g. discoveries are yellow).
+                local r, g, b = 1, 0.82, 0
+                if type(GetGameMessageInfo) == "function" then
+                    local rr, gg, bb = GetGameMessageInfo(messageType)
+                    if type(rr) == "number" and type(gg) == "number" and type(bb) == "number" then
+                        r, g, b = rr, gg, bb
+                    end
+                end
+
+                SQOL.MessageFrame:AddMessage(message, r, g, b)
                 return
             end
 
@@ -517,7 +526,7 @@ local function SQOL_TryAutoTrack(questID, retries)
     dprint("Attempting to track:", title)
 
     C_QuestLog.AddQuestWatch(questID)
-    print("And |cff33ff99QCS|r auto-tracked it")
+    print("And |cff33ff99SQoL|r auto-tracked it")
 
 end
 
@@ -874,11 +883,11 @@ local function SQOL_CheckQuestProgress()
 
                     if isTask or isWorld then
                         -- Bonus or world quest
-                        print("|cff33ff99SQOL:|r |cffffff00" ..
+                        print("|cff33ff99SQoL:|r |cffffff00" ..
                             (info.title or info.questID) .. "|r |cff00ff00is done!|r")
                     else
                         -- Normal quest
-                        print("|cff33ff99SQOL:|r |cffffff00" ..
+                        print("|cff33ff99SQoL:|r |cffffff00" ..
                             (info.title or info.questID) .. "|r |cff00ff00is ready to turn in!|r")
                     end
                 end
@@ -922,7 +931,7 @@ SlashCmdList["SQOL"] = function(msg)
     local function toggle(key, label)
         SQOL.DB[key] = not SQOL.DB[key]
         local s = SQOL.DB[key] and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        print("|cff33ff99SQOL:|r " .. label .. " " .. s)
+        print("|cff33ff99SQoL:|r " .. label .. " " .. s)
     end
 
     if msg == "autotrack" or msg == "at" then
@@ -959,7 +968,7 @@ SlashCmdList["SQOL"] = function(msg)
     elseif msg == "hideach" or msg == "ha" then
         SQOL.DB.HideDoneAchievements = not SQOL.DB.HideDoneAchievements
         local s = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        print("|cff33ff99SQOL:|r Hide completed achievements is " .. s)
+        print("|cff33ff99SQoL:|r Hide completed achievements is " .. s)
 
         if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
             C_AddOns.LoadAddOn("Blizzard_AchievementUI")
@@ -975,7 +984,7 @@ SlashCmdList["SQOL"] = function(msg)
 
     else
         local version, at, sp, co, lo, rep = SQOL_GetStateStrings()
-        print("|cff33ff99SQOL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep)
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep)
         print("|cffccccccCommands:|r help for more info")
     end
 end
