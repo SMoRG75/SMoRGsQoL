@@ -452,11 +452,46 @@ local function SQOL_UpdatePlayerFrameIlvlAnchor()
     SQOL.iLvlHolder:ClearAllPoints()
 
     -- Prefer anchoring next to the level text to avoid overlap with the level badge.
-    local levelText = rawget(_G, "PlayerLevelText") or rawget(playerFrame, "PlayerLevelText") or (playerFrame and playerFrame.PlayerLevelText)
+    -- The user wants iLvl + Spd on the SAME line as PlayerName + PlayerLevelText.
+    local levelText = rawget(_G, "PlayerLevelText")
+        or rawget(playerFrame, "PlayerLevelText")
+        or (playerFrame and playerFrame.PlayerLevelText)
+
+    -- Best-effort lookup for the name FontString (Retail has moved this around a few times).
+    local nameText = rawget(_G, "PlayerName")
+        or rawget(_G, "PlayerFrameName")
+        or rawget(playerFrame, "name")
+        or rawget(playerFrame, "PlayerName")
+        or rawget(playerFrame, "PlayerFrameName")
+        or (playerFrame and playerFrame.name)
+
     if levelText and levelText.GetCenter then
         -- Build to the left: iLvl + speed will be right-justified and won't get covered by the level badge.
-        SQOL.iLvlHolder:SetPoint("TOPRIGHT", levelText, "BOTTOMLEFT", -6, 1)
+        -- Use RIGHT/LEFT anchoring (not TOP/BOTTOM) to stay on the same line as the level text.
+        local padding = 6
+        local defaultWidth = 240
+
+        -- Try to auto-fit between name and level (so long names don't overlap the stat line).
+        local width = defaultWidth
+        if nameText and nameText.GetRight and levelText.GetLeft then
+            local nameRight = nameText:GetRight()
+            local levelLeft = levelText:GetLeft()
+            if type(nameRight) == "number" and type(levelLeft) == "number" then
+                local available = (levelLeft - padding) - (nameRight + 8)
+                if available and available > 60 then
+                    width = math.min(defaultWidth, available)
+                end
+            end
+        end
+
+        SQOL.iLvlHolder:SetSize(width, 14)
+        SQOL.iLvlText:SetWidth(width)
+        SQOL.iLvlHolder:SetPoint("RIGHT", levelText, "LEFT", -padding, 0)
     else
+        -- Ensure we don't keep a reduced width from the auto-fit branch.
+        SQOL.iLvlHolder:SetSize(240, 14)
+        SQOL.iLvlText:SetWidth(240)
+
         local healthBar = SQOL_GetPlayerHealthBarFrame(playerFrame)
         local portrait = SQOL_GetPlayerPortraitFrame(playerFrame)
 
@@ -1203,3 +1238,4 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL_RecolorQuestObjectives_Throttle()
     end
 end)
+
