@@ -1,8 +1,8 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.4 by SMoRG75
+-- SMoRGsQoL v1.0.5 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
--- Now with throttled updates, SQOL/SQOL_DB table structure, and richer debug.
+-- Now with throttled updates and a stable PlayerFrame iLvl+Speed line.
 ------------------------------------------------------------
 
 local ADDON_NAME = select(1, ...) or "SMoRGsQoL"
@@ -277,57 +277,7 @@ SQOL._cachedIlvlText = "--"
 SQOL._cachedIlvlMissingInfo = false
 SQOL._cachedIlvlAt = 0
 
-
--- Returns movement speed as a percentage of normal run speed (100% = base).
--- Note: Some APIs return 0 when standing still; we keep the last non-zero value as fallback.
-local function SQOL_GetMovementSpeedPercent()
-    -- Debug-friendly speed calculation.
-    -- Returns: pct, rawSpeed, baseRunSpeed, apiUsed, isMoving, rawSpeed2
-    local baseRunSpeed = (type(BASE_MOVEMENT_SPEED) == "number" and BASE_MOVEMENT_SPEED) or 7 -- yards/sec (100% run speed)
-
-    local speed1, speed2
-    local apiUsed = "none"
-
-    if type(GetUnitSpeed) == "function" then
-        speed1 = GetUnitSpeed("player")
-        apiUsed = "GetUnitSpeed"
-    end
-
-    -- Some clients/versions expose UnitSpeed; keep it as an extra signal for debug.
-    if type(UnitSpeed) == "function" then
-        speed2 = UnitSpeed("player")
-        if apiUsed == "none" then
-            apiUsed = "UnitSpeed"
-        else
-            apiUsed = apiUsed .. "+UnitSpeed"
-        end
-    end
-
-    -- Choose the best numeric candidate
-    local speed = nil
-    if type(speed1) == "number" then speed = speed1 end
-    if type(speed2) == "number" and (not speed or speed2 > speed) then speed = speed2 end
-
-    local movingFlag = nil
-    if type(IsPlayerMoving) == "function" then
-        movingFlag = IsPlayerMoving()
-    end
-
-    if type(speed) ~= "number" then
-        return nil, speed, baseRunSpeed, apiUsed, (movingFlag == true), speed2
-    end
-
-    local isMoving = (movingFlag == true) or (speed > 0)
-
-    -- Some APIs return 0 when standing still; keep last non-zero as fallback.
-    if speed <= 0 then
-        return SQOL._lastSpeedPct, speed, baseRunSpeed, apiUsed, isMoving, speed2
-    end
-
-    local pct = (speed / baseRunSpeed) * 100
-    SQOL._lastSpeedPct = pct
-    return pct, speed, baseRunSpeed, apiUsed, isMoving, speed2
-end
+SQOL._lastStatLineText = nil
 
 local function SQOL_GetEquippedItemLevel()
     if type(GetAverageItemLevel) == "function" then
@@ -378,36 +328,61 @@ end
 
 local function SQOL_RefreshIlvlCache(force)
     local now = (type(GetTime) == "function") and GetTime() or 0
-    local age = now - (SQOL._cachedIlvlAt or 0)
-
-    if not force then
-        -- Don't recompute too often; itemlevel scanning is relatively expensive.
-        if age < 2.0 and SQOL._cachedIlvlText and SQOL._cachedIlvlText ~= "--" then
-            return
-        end
+    if not force and (now - (SQOL._cachedIlvlAt or 0)) < 1.5 then
+        return
     end
 
     local ilvl, missingInfo = SQOL_GetEquippedItemLevel()
-    SQOL._cachedIlvlText = ilvl and string.format("%.1f", ilvl) or "--"
+    if type(ilvl) == "number" then
+        SQOL._cachedIlvlText = string.format("%.1f", ilvl)
+    else
+        SQOL._cachedIlvlText = "--"
+    end
+
     SQOL._cachedIlvlMissingInfo = (missingInfo == true)
     SQOL._cachedIlvlAt = now
 end
 
-local function SQOL_UpdateCharacterIlvlText()
+-- Returns movement speed as a percentage of normal run speed (100% = base).
+-- Note: GetUnitSpeed() returns 0 when standing still; we keep the last non-zero value as fallback.
+local function SQOL_GetMovementSpeedPercent()
+    local baseRunSpeed = 7 -- yards/sec (100% run speed)
+
+    if type(GetUnitSpeed) ~= "function" then
+        return nil
+    end
+
+    local speed = GetUnitSpeed("player")
+    if type(speed) ~= "number" then
+        return nil
+    end
+
+    -- When standing still, speed is 0; keep the last known non-zero value.
+    if speed <= 0 then
+        return SQOL._lastSpeedPct
+    end
+
+    local pct = (speed / baseRunSpeed) * 100
+    SQOL._lastSpeedPct = pct
+    return pct
+end
+
+local function SQOL_UpdateCharacterIlvlText(forceIlvlRefresh)
     if not SQOL.iLvlText then return end
 
     -- Keep iLvl cached so speed polling is cheap.
-    if (SQOL._cachedIlvlAt or 0) == 0 then
-        SQOL_RefreshIlvlCache(true)
-    elseif SQOL._cachedIlvlMissingInfo then
-        -- If info was missing, retry a bit more aggressively.
-        local now = (type(GetTime) == "function") and GetTime() or 0
-        if (now - (SQOL._cachedIlvlAt or 0)) > 0.5 then
+    SQOL_RefreshIlvlCache(forceIlvlRefresh == true)
+
+    if SQOL._cachedIlvlMissingInfo and not SQOL._ilvlRetryPending then
+        SQOL._ilvlRetryPending = true
+        C_Timer.After(0.5, function()
+            SQOL._ilvlRetryPending = false
             SQOL_RefreshIlvlCache(true)
-        end
+            SQOL_UpdateCharacterIlvlText(true)
+        end)
     end
 
-    local speedPct, rawSpeed, baseRunSpeed, apiUsed, isMoving, rawSpeed2 = SQOL_GetMovementSpeedPercent()
+    local speedPct = SQOL_GetMovementSpeedPercent()
 
     local ilvlText = SQOL._cachedIlvlText or "--"
     local speedText
@@ -417,60 +392,11 @@ local function SQOL_UpdateCharacterIlvlText()
         speedText = "--"
     end
 
-    -- Keep it on a single line, aligned to the right side of the PlayerFrame.
-    SQOL.iLvlText:SetText(string.format("iLvl: %s  Spd: %s", ilvlText, speedText))
-
-    -- Debug line (always-on in this debug build)
-    if SQOL.iLvlDebugText then
-        local rs1 = (type(rawSpeed) == "number") and string.format("%.2f", rawSpeed) or tostring(rawSpeed)
-        local rs2 = (type(rawSpeed2) == "number") and string.format("%.2f", rawSpeed2) or tostring(rawSpeed2)
-        local pct = (type(speedPct) == "number") and string.format("%.1f", speedPct) or tostring(speedPct)
-        local last = (type(SQOL._lastSpeedPct) == "number") and string.format("%.1f", SQOL._lastSpeedPct) or tostring(SQOL._lastSpeedPct)
-
-        local anc = tostring(SQOL._ilvlAnchorName or "?")
-        local offx = tostring(SQOL._ilvlAnchorOffX or "?")
-        local offy = tostring(SQOL._ilvlAnchorOffY or "?")
-
-        local movingStr = (isMoving == true) and "true" or "false"
-
-        SQOL.iLvlDebugText:SetText(string.format(
-            "DBG api=%s s1=%s s2=%s base=%s pct=%s last=%s moving=%s anc=%s(%s,%s)",
-            tostring(apiUsed), rs1, rs2, tostring(baseRunSpeed), pct, last, movingStr, anc, offx, offy
-        ))
+    local line = string.format("iLvl: %s  Spd: %s", ilvlText, speedText)
+    if SQOL._lastStatLineText ~= line then
+        SQOL._lastStatLineText = line
+        SQOL.iLvlText:SetText(line)
     end
-
-    -- If iLvl info is missing, schedule a retry (but keep it calm).
-    if SQOL._cachedIlvlMissingInfo and not SQOL._ilvlRetryPending then
-        SQOL._ilvlRetryPending = true
-        C_Timer.After(0.6, function()
-            SQOL._ilvlRetryPending = false
-            SQOL_RefreshIlvlCache(true)
-            SQOL_UpdateCharacterIlvlText()
-        end)
-    end
-end
-
-SQOL._statLineUpdatePending = false == false
-SQOL._statLineLastAt = 0
-
-local function SQOL_UpdateCharacterIlvlText_Throttle()
-    if SQOL._statLineUpdatePending then return end
-
-    local now = (type(GetTime) == 'function') and GetTime() or 0
-    local last = SQOL._statLineLastAt or 0
-
-    if (now - last) < 0.2 then
-        SQOL._statLineUpdatePending = true
-        C_Timer.After(0.2, function()
-            SQOL._statLineUpdatePending = false
-            SQOL._statLineLastAt = (type(GetTime) == 'function') and GetTime() or 0
-            SQOL_UpdateCharacterIlvlText_Throttle()
-        end)
-        return
-    end
-
-    SQOL._statLineLastAt = now
-    SQOL_UpdateCharacterIlvlText()
 end
 
 local function SQOL_GetPlayerPortraitFrame(playerFrame)
@@ -512,42 +438,6 @@ local function SQOL_GetPlayerHealthBarFrame(playerFrame)
     return fallback
 end
 
-local function SQOL_GetPlayerLevelTextFrame(playerFrame)
-    if not playerFrame then return nil end
-
-    local candidates = {}
-
-    -- Global / legacy names
-    candidates[#candidates + 1] = rawget(_G, "PlayerLevelText")
-    candidates[#candidates + 1] = rawget(_G, "PlayerFrameLevelText")
-
-    -- Common object fields (varies by UI version)
-    candidates[#candidates + 1] = rawget(playerFrame, "levelText")
-    candidates[#candidates + 1] = rawget(playerFrame, "LevelText")
-
-    local container = rawget(playerFrame, "PlayerFrameContainer")
-    if container then
-        candidates[#candidates + 1] = rawget(container, "PlayerLevelText")
-        candidates[#candidates + 1] = rawget(container, "levelText")
-        candidates[#candidates + 1] = rawget(container, "LevelText")
-    end
-
-    local content = rawget(playerFrame, "PlayerFrameContent")
-    local main = content and rawget(content, "PlayerFrameContentMain")
-    if main then
-        candidates[#candidates + 1] = rawget(main, "LevelText")
-        candidates[#candidates + 1] = rawget(main, "PlayerLevelText")
-    end
-
-    for _, frame in ipairs(candidates) do
-        if frame and frame.GetCenter then
-            return frame
-        end
-    end
-
-    return nil
-end
-
 local function SQOL_UpdatePlayerFrameIlvlAnchor()
     if not SQOL.iLvlHolder or not SQOL.iLvlText then
         return false
@@ -561,41 +451,23 @@ local function SQOL_UpdatePlayerFrameIlvlAnchor()
 
     SQOL.iLvlHolder:ClearAllPoints()
 
-    local healthBar = SQOL_GetPlayerHealthBarFrame(playerFrame)
-    local portrait = SQOL_GetPlayerPortraitFrame(playerFrame)
-    local levelText = SQOL_GetPlayerLevelTextFrame(playerFrame)
-
+    -- Prefer anchoring next to the level text to avoid overlap with the level badge.
+    local levelText = rawget(_G, "PlayerLevelText") or rawget(playerFrame, "PlayerLevelText") or (playerFrame and playerFrame.PlayerLevelText)
     if levelText and levelText.GetCenter then
-        -- Anchor just to the LEFT of the level badge, and slightly BELOW it.
-        -- This prevents the speed value from hiding underneath the level badge.
-        SQOL._ilvlAnchorName = "levelText"
-        SQOL._ilvlAnchorOffX = -6
-        SQOL._ilvlAnchorOffY = 1
+        -- Build to the left: iLvl + speed will be right-justified and won't get covered by the level badge.
         SQOL.iLvlHolder:SetPoint("TOPRIGHT", levelText, "BOTTOMLEFT", -6, 1)
-    elseif healthBar and healthBar.GetCenter then
-        -- Fallback: top-right of HP bar, shifted further left to avoid overlap with the level badge.
-        SQOL._ilvlAnchorName = "healthBar"
-        SQOL._ilvlAnchorOffX = -110
-        SQOL._ilvlAnchorOffY = 10
-        SQOL.iLvlHolder:SetPoint("TOPRIGHT", healthBar, "TOPRIGHT", -110, 10)
-    elseif portrait and portrait.GetCenter then
-        SQOL._ilvlAnchorName = "portrait"
-        SQOL._ilvlAnchorOffX = 0
-        SQOL._ilvlAnchorOffY = 4
-        SQOL.iLvlHolder:SetPoint("BOTTOM", portrait, "BOTTOM", 0, 4)
     else
-        SQOL._ilvlAnchorName = "playerFrame"
-        SQOL._ilvlAnchorOffX = 70
-        SQOL._ilvlAnchorOffY = -22
-        SQOL.iLvlHolder:SetPoint("TOPLEFT", playerFrame, "TOPLEFT", 70, -22)
-    end
+        local healthBar = SQOL_GetPlayerHealthBarFrame(playerFrame)
+        local portrait = SQOL_GetPlayerPortraitFrame(playerFrame)
 
-    -- Debug: try to stay above the level badge if possible (helps confirm overlap issues).
-    if levelText and SQOL.iLvlHolder.SetFrameLevel and levelText.GetFrameLevel then
-        local lv = levelText:GetFrameLevel() or 0
-        SQOL.iLvlHolder:SetFrameLevel(lv + 10)
-    elseif playerFrame and SQOL.iLvlHolder.SetFrameLevel and playerFrame.GetFrameLevel then
-        SQOL.iLvlHolder:SetFrameLevel((playerFrame:GetFrameLevel() or 0) + 10)
+        if healthBar and healthBar.GetCenter then
+            -- Fallback: top-right of HP bar, shifted left to keep clear of the level badge.
+            SQOL.iLvlHolder:SetPoint("TOPRIGHT", healthBar, "TOPRIGHT", -110, 10)
+        elseif portrait and portrait.GetCenter then
+            SQOL.iLvlHolder:SetPoint("BOTTOM", portrait, "BOTTOM", 0, 4)
+        else
+            SQOL.iLvlHolder:SetPoint("TOPLEFT", playerFrame, "TOPLEFT", 70, -22)
+        end
     end
 
     if playerFrame.IsShown and playerFrame:IsShown() then
@@ -615,82 +487,49 @@ local function SQOL_EnsurePlayerFrameIlvlUI()
 
     if not SQOL.iLvlHolder then
         SQOL.iLvlHolder = CreateFrame("Frame", "SQOL_PlayerFrameIlvlHolder", UIParent)
-        -- Debug build: slightly taller holder so we can show a 2nd debug line.
-        SQOL.iLvlHolder:SetSize(240, 28)
-        -- Debug build: draw above most of the PlayerFrame so we can see if we're being covered.
+        SQOL.iLvlHolder:SetSize(240, 14)
         SQOL.iLvlHolder:SetFrameStrata("HIGH")
         SQOL.iLvlHolder:Hide()
-
-        -- Debug background so you can see the holder bounds.
-        local bg = SQOL.iLvlHolder:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
-        if bg.SetColorTexture then
-            bg:SetColorTexture(1, 0, 0, 0.15)
-        end
-        SQOL.iLvlHolder._dbgBg = bg
     end
 
     if not SQOL.iLvlText then
         SQOL.iLvlText = SQOL.iLvlHolder:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         SQOL.iLvlText:SetPoint("CENTER", SQOL.iLvlHolder, "CENTER", 0, 0)
         SQOL.iLvlText:SetJustifyH("RIGHT")
+        SQOL.iLvlText:SetWidth(240)
+        SQOL.iLvlText:SetWordWrap(false)
+        if SQOL.iLvlText.SetMaxLines then SQOL.iLvlText:SetMaxLines(1) end
         SQOL.iLvlText:SetText("iLvl: --  Spd: --")
-    end
-
-    if not SQOL.iLvlDebugText then
-        SQOL.iLvlDebugText = SQOL.iLvlHolder:CreateFontString(nil, "OVERLAY", "GameFontDisableTiny")
-        SQOL.iLvlDebugText:SetJustifyH("RIGHT")
-        SQOL.iLvlDebugText:SetText("DBG ...")
-    end
-
-    -- Ensure layout (in case of upgrades / UI reloads).
-    SQOL.iLvlText:ClearAllPoints()
-    SQOL.iLvlText:SetPoint("TOPRIGHT", SQOL.iLvlHolder, "TOPRIGHT", 0, -1)
-    SQOL.iLvlText:SetWidth(240)
-    SQOL.iLvlText:SetJustifyH("RIGHT")
-    SQOL.iLvlText:SetWordWrap(false)
-    if SQOL.iLvlText.SetMaxLines then SQOL.iLvlText:SetMaxLines(1) end
-
-    if SQOL.iLvlDebugText then
-        SQOL.iLvlDebugText:ClearAllPoints()
-        SQOL.iLvlDebugText:SetPoint("BOTTOMRIGHT", SQOL.iLvlHolder, "BOTTOMRIGHT", 0, 1)
-        SQOL.iLvlDebugText:SetWidth(240)
-        SQOL.iLvlDebugText:SetJustifyH("RIGHT")
-        SQOL.iLvlDebugText:SetWordWrap(false)
-        if SQOL.iLvlDebugText.SetMaxLines then SQOL.iLvlDebugText:SetMaxLines(1) end
     end
 
     if not SQOL._playerFrameHooked and playerFrame.HookScript then
         SQOL._playerFrameHooked = true
         playerFrame:HookScript("OnShow", function()
             SQOL_UpdatePlayerFrameIlvlAnchor()
-            SQOL_UpdateCharacterIlvlText_Throttle()
+            SQOL_UpdateCharacterIlvlText(true)
         end)
         playerFrame:HookScript("OnHide", function()
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end)
     end
 
-    SQOL_UpdatePlayerFrameIlvlAnchor()
-    SQOL_RefreshIlvlCache(true)
-    SQOL_UpdateCharacterIlvlText_Throttle()
-
-    -- Debug/poll: Update speed regularly so we don't rely on movement events.
+    -- Poll speed periodically so we still show a meaningful value even when movement events are missed.
     if not SQOL._speedPoller then
         SQOL._speedPoller = CreateFrame("Frame", nil, SQOL.iLvlHolder)
         SQOL._speedPoller._elapsed = 0
-        SQOL._speedPoller:SetScript("OnUpdate", function(_, elapsed)
-            SQOL._speedPoller._elapsed = (SQOL._speedPoller._elapsed or 0) + (elapsed or 0)
-            if SQOL._speedPoller._elapsed < 0.15 then return end
-            SQOL._speedPoller._elapsed = 0
+        SQOL._speedPoller:SetScript("OnUpdate", function(self, elapsed)
+            self._elapsed = (self._elapsed or 0) + (elapsed or 0)
+            if self._elapsed < 0.20 then return end
+            self._elapsed = 0
 
             if SQOL.iLvlHolder and SQOL.iLvlHolder.IsShown and SQOL.iLvlHolder:IsShown() then
-                -- Cheap: uses cached iLvl.
-                SQOL_UpdateCharacterIlvlText()
+                SQOL_UpdateCharacterIlvlText(false)
             end
         end)
     end
 
+    SQOL_UpdatePlayerFrameIlvlAnchor()
+    SQOL_UpdateCharacterIlvlText(true)
     return true
 end
 
@@ -900,7 +739,6 @@ local function SQOL_Rep_BuildSnapshot()
     end
     return snap
 end
-
 
 ------------------------------------------------------------
 -- RepWatch helpers: map "faction name" -> factionID.
@@ -1254,13 +1092,6 @@ f:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
 f:RegisterEvent("UNIT_INVENTORY_CHANGED")
 f:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
 
--- Stat line refresh (movement speed can change with form, auras, mounting, etc.)
-f:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-f:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
-f:RegisterEvent("PLAYER_STARTED_MOVING")
-f:RegisterEvent("PLAYER_STOPPED_MOVING")
-f:RegisterEvent("UNIT_AURA")
-
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         SQOL.Init()
@@ -1302,8 +1133,7 @@ f:SetScript("OnEvent", function(self, event, ...)
             if not SQOL.iLvlText then
                 SQOL_TryEnsurePlayerFrameIlvlUI(0)
             end
-            SQOL_RefreshIlvlCache(true)
-            SQOL_UpdateCharacterIlvlText_Throttle()
+            SQOL_UpdateCharacterIlvlText()
         end
 
     elseif event == "EDIT_MODE_LAYOUTS_UPDATED" then
@@ -1314,26 +1144,7 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL_TryEnsurePlayerFrameIlvlUI(0)
         end
         SQOL_UpdatePlayerFrameIlvlAnchor()
-        SQOL_RefreshIlvlCache(true)
-        SQOL_UpdateCharacterIlvlText_Throttle()
-
-    elseif event == "UPDATE_SHAPESHIFT_FORM"
-        or event == "PLAYER_MOUNT_DISPLAY_CHANGED"
-        or event == "PLAYER_STARTED_MOVING"
-        or event == "PLAYER_STOPPED_MOVING" then
-        if not SQOL.iLvlText then
-            SQOL_TryEnsurePlayerFrameIlvlUI(0)
-        end
-        SQOL_UpdateCharacterIlvlText_Throttle()
-
-    elseif event == "UNIT_AURA" then
-        local unit = ...
-        if unit == "player" then
-            if not SQOL.iLvlText then
-                SQOL_TryEnsurePlayerFrameIlvlUI(0)
-            end
-            SQOL_UpdateCharacterIlvlText_Throttle()
-        end
+        SQOL_UpdateCharacterIlvlText()
 
     elseif event == "QUEST_ACCEPTED" then
         if not SQOL.DB.AutoTrack then return end

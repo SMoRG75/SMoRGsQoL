@@ -2,7 +2,7 @@
 ## Title: SMoRG's QoL
 ## Notes: Plays a sound when all quest objectives are completed. Optional auto-tracking, splash screen, progress colors (red→yellow→green), achievement filter, PlayerFrame iLvl, and auto-watching reputation gains.
 ## Author: SMoRG75
-## Version: 1.0.4-debug
+## Version: 1.0.5
 ## SavedVariables: SQOL_DB
 ## X-Curse-Project-ID: 1354943
 ## X-Interface: 110207
