@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.1 by SMoRG75
+-- SMoRGsQoL v1.0.2 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
 -- Now with throttled updates, SQOL/SQOL_DB table structure, and richer debug.
@@ -19,7 +19,8 @@ SQOL.defaults = {
     DebugTrack    = false,
     ShowSplash    = false,
     ColorProgress = false,
-    HideDoneAchievements = false
+    HideDoneAchievements = false,
+    AutoWatchReputation  = false
 }
 
 ------------------------------------------------------------
@@ -127,7 +128,8 @@ local function SQOL_GetStateStrings()
     local spState = SQOL.DB.ShowSplash    and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local coState = SQOL.DB.ColorProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local loState = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    return version, atState, spState, coState, loState
+    local rpState = SQOL.DB.AutoWatchReputation and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    return version, atState, spState, coState, loState, rpState
 end
 
 ------------------------------------------------------------
@@ -515,7 +517,7 @@ local function SQOL_TryAutoTrack(questID, retries)
     dprint("Attempting to track:", title)
 
     C_QuestLog.AddQuestWatch(questID)
-    print(string.format("|cff33ff99SQOL:|r Auto-tracked |cffffff00%s|r", title))
+    print("And |cff33ff99SQOL|r auto-tracked it")
 
 end
 
@@ -523,11 +525,11 @@ end
 -- Splash
 ------------------------------------------------------------
 local function SQOL_Splash()
-    local version, atState, spState, coState, loState, soState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, rpState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
-    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState)
+    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. rpState)
     print("|cffccccccType |cff00ff00/SQOL help|r for command list.|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
@@ -576,11 +578,191 @@ local function SQOL_CheckQuestProgress()
     end
 end
 
+
+------------------------------------------------------------
+-- Auto-watch reputation (switch watched faction when rep changes)
+------------------------------------------------------------
+SQOL._repCache = {}
+SQOL._repIndexByID = {}
+SQOL._repNameByID = {}
+SQOL._repScanPending = false
+SQOL._repCacheBuilt = false
+
+local _wipe = rawget(_G, "wipe") or function(t)
+    for k in pairs(t) do t[k] = nil end
+end
+
+local function SQOL_GetWatchedFactionID()
+    if C_Reputation and C_Reputation.GetWatchedFactionData then
+        local data = C_Reputation.GetWatchedFactionData()
+        return data and rawget(data, "factionID") or nil
+    end
+
+    local legacy = rawget(_G, "GetWatchedFactionInfo")
+    if type(legacy) == "function" then
+        local _, _, _, _, _, factionID = legacy()
+        return factionID
+    end
+
+    return nil
+end
+
+local function SQOL_GetFactionValueFromData(data)
+    if not data then return nil end
+
+    -- FactionData.reaction is the current bar value within the current standing.
+    local v = rawget(data, "reaction")
+    if type(v) == "number" then return v end
+
+    -- Fallbacks (future-proofing)
+    v = rawget(data, "barValue") or rawget(data, "currentValue")
+    if type(v) == "number" then return v end
+
+    return nil
+end
+
+local function SQOL_BuildReputationCache()
+    _wipe(SQOL._repCache)
+    _wipe(SQOL._repIndexByID)
+    _wipe(SQOL._repNameByID)
+
+    local num = (C_Reputation and C_Reputation.GetNumFactions and C_Reputation.GetNumFactions())
+             or (type(GetNumFactions) == "function" and GetNumFactions())
+             or 0
+
+    for i = 1, num do
+        local factionID, name, value
+
+        if C_Reputation and C_Reputation.GetFactionDataByIndex then
+            local data = C_Reputation.GetFactionDataByIndex(i)
+            factionID = data and rawget(data, "factionID")
+            name      = data and rawget(data, "name")
+            value     = SQOL_GetFactionValueFromData(data)
+        end
+
+        if not factionID and type(GetFactionInfo) == "function" then
+            local n, _, _, _, barValue, _, _, _, _, _, _, _, _, fid = GetFactionInfo(i)
+            factionID, name, value = fid, n, barValue
+        end
+
+        if type(factionID) == "number" then
+            SQOL._repCache[factionID] = tonumber(value) or 0
+            SQOL._repIndexByID[factionID] = i
+            SQOL._repNameByID[factionID] = name or ("FactionID:" .. factionID)
+        end
+    end
+
+    SQOL._repCacheBuilt = true
+    dprint("Reputation cache built:", tostring(num), "rows")
+end
+
+local function SQOL_SetWatchedFaction(factionID)
+    if type(factionID) ~= "number" then return false end
+
+    -- Prefer the modern API (by factionID)
+    if C_Reputation and C_Reputation.SetWatchedFactionByID then
+        return safe_pcall(function()
+            C_Reputation.SetWatchedFactionByID(factionID)
+        end)
+    end
+
+    -- Fallback: set by index
+    local idx = SQOL._repIndexByID and SQOL._repIndexByID[factionID]
+    if idx then
+        if C_Reputation and C_Reputation.SetWatchedFactionByIndex then
+            return safe_pcall(function()
+                C_Reputation.SetWatchedFactionByIndex(idx)
+            end)
+        end
+
+        local legacy = rawget(_G, "SetWatchedFactionIndex")
+        if type(legacy) == "function" then
+            return safe_pcall(function()
+                legacy(idx)
+            end)
+        end
+    end
+
+    return false
+end
+
+local function SQOL_ScanReputationChanges()
+    if not SQOL.DB or not SQOL.DB.AutoWatchReputation then return end
+
+    if not SQOL._repCacheBuilt then
+        SQOL_BuildReputationCache()
+        return
+    end
+
+    local watchedID = SQOL_GetWatchedFactionID()
+
+    local num = (C_Reputation and C_Reputation.GetNumFactions and C_Reputation.GetNumFactions())
+             or (type(GetNumFactions) == "function" and GetNumFactions())
+             or 0
+
+    local bestFactionID, bestDelta = nil, 0
+    local bestName = nil
+
+    for i = 1, num do
+        local factionID, name, value
+
+        if C_Reputation and C_Reputation.GetFactionDataByIndex then
+            local data = C_Reputation.GetFactionDataByIndex(i)
+            factionID = data and rawget(data, "factionID")
+            name      = data and rawget(data, "name")
+            value     = SQOL_GetFactionValueFromData(data)
+        end
+
+        if not factionID and type(GetFactionInfo) == "function" then
+            local n, _, _, _, barValue, _, _, _, _, _, _, _, _, fid = GetFactionInfo(i)
+            factionID, name, value = fid, n, barValue
+        end
+
+        if type(factionID) == "number" then
+            local newVal = tonumber(value) or 0
+            local oldVal = tonumber(SQOL._repCache[factionID]) or 0
+            local delta = newVal - oldVal
+
+            -- Keep the cache up-to-date and keep index mapping fresh
+            SQOL._repCache[factionID] = newVal
+            SQOL._repIndexByID[factionID] = i
+            SQOL._repNameByID[factionID] = name or SQOL._repNameByID[factionID] or ("FactionID:" .. factionID)
+
+            if delta > bestDelta then
+                bestDelta = delta
+                bestFactionID = factionID
+                bestName = name
+            end
+        end
+    end
+
+    if bestFactionID and bestDelta > 0 and bestFactionID ~= watchedID then
+        local ok = SQOL_SetWatchedFaction(bestFactionID)
+        if ok then
+            dprint("RepWatch -> now watching:", bestName or bestFactionID, "(+" .. tostring(bestDelta) .. ")")
+        else
+            dprint("RepWatch -> failed to watch:", bestName or bestFactionID)
+        end
+    end
+end
+
+local function SQOL_OnFactionUpdate()
+    if not SQOL.DB or not SQOL.DB.AutoWatchReputation then return end
+    if SQOL._repScanPending then return end
+
+    SQOL._repScanPending = true
+    C_Timer.After(0.1, function()
+        SQOL._repScanPending = false
+        SQOL_ScanReputationChanges()
+    end)
+end
+
+
 ------------------------------------------------------------
 -- Help
 ------------------------------------------------------------
 local function SQOL_Help()
-    local version, atState, spState, coState, loState, soState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, rpState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99-----------------------------------|r")
@@ -590,12 +772,14 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL col|r         |cffcccccc- Shorthand for color|r")
     print("|cff00ff00/SQOL hideach|r     |cffcccccc- Toggle hiding completed achievements|r")
     print("|cff00ff00/SQOL ha|r          |cffcccccc- Shorthand for hideach|r")
+    print("|cff00ff00/SQOL rep|r         |cffcccccc- Toggle auto-watching the last faction you gained reputation with|r")
+    print("|cff00ff00/SQOL rw|r          |cffcccccc- Shorthand for rep|r")
     print("|cff00ff00/SQOL splash|r      |cffcccccc- Toggle splash on login|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
-    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState)
+    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. rpState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
@@ -642,6 +826,13 @@ SlashCmdList["SQOL"] = function(msg)
 
         SQOL_ApplyAchievementFilter()
 
+
+    elseif msg == "rep" or msg == "rw" then
+        toggle("AutoWatchReputation", "Reputation auto-watch is")
+        if SQOL.DB.AutoWatchReputation then
+            SQOL_BuildReputationCache()
+        end
+
     elseif msg == "reset" then
         SQOL.Init(true)
 
@@ -649,8 +840,8 @@ SlashCmdList["SQOL"] = function(msg)
         SQOL_Help()
 
     else
-        local version, at, sp, co, lo = SQOL_GetStateStrings()
-        print("|cff33ff99SQOL|r v" .. version .. " — AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo)
+        local version, at, sp, co, lo, rp = SQOL_GetStateStrings()
+        print("|cff33ff99SQOL|r v" .. version .. " — AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rp)
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -664,6 +855,7 @@ f:RegisterEvent("QUEST_ACCEPTED")
 f:RegisterEvent("QUEST_LOG_UPDATE")
 f:RegisterEvent("QUEST_TURNED_IN")
 f:RegisterEvent("QUEST_REMOVED")
+f:RegisterEvent("UPDATE_FACTION")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 f:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
@@ -686,6 +878,11 @@ f:SetScript("OnEvent", function(self, event, ...)
 
         -- Ensure PlayerFrame iLvl display.
         SQOL_TryEnsurePlayerFrameIlvlUI(0)
+
+        -- Prepare reputation cache for auto-watch, if enabled.
+        if SQOL.DB.AutoWatchReputation then
+            SQOL_BuildReputationCache()
+        end
 
     elseif event == "PLAYER_ENTERING_WORLD" then
         SQOL_TryEnsurePlayerFrameIlvlUI(0)
@@ -746,6 +943,9 @@ f:SetScript("OnEvent", function(self, event, ...)
         if questID then
             SQOL.fullyCompleted[questID] = nil
         end
+
+    elseif event == "UPDATE_FACTION" then
+        SQOL_OnFactionUpdate()
 
     elseif event == "QUEST_LOG_UPDATE" then
         SQOL_CheckQuestProgress()

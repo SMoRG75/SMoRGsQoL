@@ -2,28 +2,17 @@
   "runtime.version": "Lua 5.1",
  
   "diagnostics.globals": [
-    "ObjectiveTrackerBlocksFrame",
-    "UIErrorsFrame",
-    "SlashCmdList",
-    "C_AddOns",
-    "AchievementFrame",
-    "AchievementFrame_SetFilter",
-    "AchievementFrameCategories_Update",
-    "UIDropDownMenu_SetSelectedValue",
-    "ACHIEVEMENT_FILTER_ALL",
-    "ACHIEVEMENT_FILTER_INCOMPLETE",
-    "ACHIEVEMENT_FILTER_COMPLETE",
-    "GetAddOnMetadata",
-    "FACTION_STANDING_INCREASED_GENERIC_ACCOUNT_WIDE",
-    "FACTION_STANDING_INCREASED_ACCOUNT_WIDE",
-    "FACTION_STANDING_INCREASED_ACH_BONUS",
-    "FACTION_STANDING_INCREASED_ACH_BONUS_ACCOUNT_WIDE",
-    "FACTION_STANDING_INCREASED",
-    "FACTION_STANDING_INCREASED_GENERIC",
-    "FACTION_STANDING_INCREASED_BONUS",
-    "FACTION_STANDING_INCREASED_DOUBLE_BONUS",
-    "MAX_REPUTATION_REACTION",
-    "StatusTrackingBarManager",
-    "GUILD"
-  ]
+        "AchievementFrame",
+        "UIErrorsFrame",
+        "GetNumFactions",
+        "ObjectiveTrackerBlocksFrame",
+        "GetFactionInfo",
+        "AchievementFrame_SetFilter",
+        "GetAddOnMetadata",
+        "UIDropDownMenu_SetSelectedValue",
+        "ACHIEVEMENT_FILTER_INCOMPLETE",
+        "AchievementFrameCategories_Update",
+        "SlashCmdList",
+        "ACHIEVEMENT_FILTER_ALL"
+    ]
 }
