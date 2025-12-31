@@ -20,7 +20,10 @@ SQOL.defaults = {
     ShowSplash    = false,
     ColorProgress = false,
     HideDoneAchievements = false,
-    RepWatch     = false
+    RepWatch     = false,
+
+    -- PlayerFrame line: "iLvl: xx.x  Spd: yy%"
+    ShowIlvlSpd  = true
 }
 
 ------------------------------------------------------------
@@ -129,7 +132,8 @@ local function SQOL_GetStateStrings()
     local coState = SQOL.DB.ColorProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local loState = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local repState = SQOL.DB.RepWatch and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    return version, atState, spState, coState, loState, repState
+    local statsState = SQOL.DB.ShowIlvlSpd and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    return version, atState, spState, coState, loState, repState, statsState
 end
 
 ------------------------------------------------------------
@@ -368,6 +372,10 @@ local function SQOL_GetMovementSpeedPercent()
 end
 
 local function SQOL_UpdateCharacterIlvlText(forceIlvlRefresh)
+    if SQOL.DB and SQOL.DB.ShowIlvlSpd == false then
+        if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        return
+    end
     if not SQOL.iLvlText then return end
 
     -- Keep iLvl cached so speed polling is cheap.
@@ -441,6 +449,11 @@ end
 local function SQOL_UpdatePlayerFrameIlvlAnchor()
     if not SQOL.iLvlHolder or not SQOL.iLvlText then
         return false
+    end
+
+    if SQOL.DB and SQOL.DB.ShowIlvlSpd == false then
+        SQOL.iLvlHolder:Hide()
+        return true
     end
 
     local playerFrame = rawget(_G, "PlayerFrame")
@@ -518,6 +531,12 @@ local function SQOL_EnsurePlayerFrameIlvlUI()
     local playerFrame = rawget(_G, "PlayerFrame")
     if not playerFrame then
         return false
+    end
+
+    -- If disabled via /SQOL stats, don't build or show anything.
+    if SQOL.DB and SQOL.DB.ShowIlvlSpd == false then
+        if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        return true
     end
 
     if not SQOL.iLvlHolder then
@@ -1020,7 +1039,7 @@ end
 -- Help
 ------------------------------------------------------------
 local function SQOL_Help()
-    local version, atState, spState, coState, loState, repState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, repState, statsState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99-----------------------------------|r")
@@ -1033,12 +1052,14 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL splash|r      |cffcccccc- Toggle splash on login|r")
     print("|cff00ff00/SQOL rep|r         |cffcccccc- Toggle watched reputation auto-switch on rep gain|r")
     print("|cff00ff00/SQOL rw|r          |cffcccccc- Shorthand for rep|r")
+    print("|cff00ff00/SQOL stats|r       |cffcccccc- Toggle PlayerFrame iLvl+Spd line|r")
+    print("|cff00ff00/SQOL ilvl|r        |cffcccccc- Shorthand for stats|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
     print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState)
-    print("|cff33ff99RepWatch:|r " .. repState)
+    print("|cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99StatsLine:|r " .. statsState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
@@ -1083,6 +1104,14 @@ SlashCmdList["SQOL"] = function(msg)
             end
         end
 
+    elseif msg == "stats" or msg == "ilvl" then
+        toggle("ShowIlvlSpd", "PlayerFrame iLvl+Spd line is")
+        if SQOL.DB.ShowIlvlSpd then
+            SQOL_TryEnsurePlayerFrameIlvlUI(0)
+        else
+            if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        end
+
     elseif msg == "debugtrack" or msg == "dbg" then
         toggle("DebugTrack", "Debug tracking")
 
@@ -1104,8 +1133,8 @@ SlashCmdList["SQOL"] = function(msg)
         SQOL_Help()
 
     else
-        local version, at, sp, co, lo, rep = SQOL_GetStateStrings()
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep)
+        local version, at, sp, co, lo, rep, stats = SQOL_GetStateStrings()
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " StatsLine:" .. stats)
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -1142,7 +1171,11 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL_ApplyAchievementFilter()
 
         -- Ensure PlayerFrame iLvl display.
-        SQOL_TryEnsurePlayerFrameIlvlUI(0)
+        if SQOL.DB.ShowIlvlSpd then
+            SQOL_TryEnsurePlayerFrameIlvlUI(0)
+        else
+            if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        end
 
         -- Initialize RepWatch snapshot (if enabled)
         if SQOL.DB.RepWatch and SQOL_RepWatch_ScheduleScan then
@@ -1154,7 +1187,11 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "PLAYER_ENTERING_WORLD" then
-        SQOL_TryEnsurePlayerFrameIlvlUI(0)
+        if SQOL.DB and SQOL.DB.ShowIlvlSpd then
+            SQOL_TryEnsurePlayerFrameIlvlUI(0)
+        else
+            if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        end
 
      elseif event == "ADDON_LOADED" then
         local addonName = ...
@@ -1165,21 +1202,33 @@ f:SetScript("OnEvent", function(self, event, ...)
     elseif event == "UNIT_INVENTORY_CHANGED" then
         local unit = ...
         if unit == "player" then
-            if not SQOL.iLvlText then
-                SQOL_TryEnsurePlayerFrameIlvlUI(0)
+            if SQOL.DB and SQOL.DB.ShowIlvlSpd then
+                if not SQOL.iLvlText then
+                    SQOL_TryEnsurePlayerFrameIlvlUI(0)
+                end
+                SQOL_UpdateCharacterIlvlText()
+            else
+                if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
             end
-            SQOL_UpdateCharacterIlvlText()
         end
 
     elseif event == "EDIT_MODE_LAYOUTS_UPDATED" then
-        SQOL_UpdatePlayerFrameIlvlAnchor()
+        if SQOL.DB and SQOL.DB.ShowIlvlSpd then
+            SQOL_UpdatePlayerFrameIlvlAnchor()
+        else
+            if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        end
 
     elseif event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_AVG_ITEM_LEVEL_UPDATE" then
-        if not SQOL.iLvlText then
-            SQOL_TryEnsurePlayerFrameIlvlUI(0)
+        if SQOL.DB and SQOL.DB.ShowIlvlSpd then
+            if not SQOL.iLvlText then
+                SQOL_TryEnsurePlayerFrameIlvlUI(0)
+            end
+            SQOL_UpdatePlayerFrameIlvlAnchor()
+            SQOL_UpdateCharacterIlvlText()
+        else
+            if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end
-        SQOL_UpdatePlayerFrameIlvlAnchor()
-        SQOL_UpdateCharacterIlvlText()
 
     elseif event == "QUEST_ACCEPTED" then
         if not SQOL.DB.AutoTrack then return end
