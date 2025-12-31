@@ -517,7 +517,7 @@ local function SQOL_TryAutoTrack(questID, retries)
     dprint("Attempting to track:", title)
 
     C_QuestLog.AddQuestWatch(questID)
-    print(string.format("|cff33ff99SQOL:|r Auto-tracked |cffffff00%s|r", title))
+    print("And |cff33ff99QCS|r auto-tracked it")
 
 end
 
@@ -834,7 +834,11 @@ local function SQOL_Splash()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
-    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. repState)
+    print("|cff33ff99AutoTrack:|r " .. atState)
+    print("|cff33ff99Splash:|r " .. spState)
+    print("|cff33ff99ColorProgress:|r " .. coState)
+    print("|cff33ff99HideDoneAchievements:|r " .. loState)
+    print("|cff33ff99RepWatch:|r " .. repState)
     print("|cffccccccType |cff00ff00/SQOL help|r for command list.|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
