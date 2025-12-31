@@ -1,0 +1,15 @@
+## Interface: 110207
+## Title: SMoRG's QoL
+## Notes: Quality-of-life tweaks: quest completion sound, optional auto-tracking, colored quest progress, equipped iLvl on PlayerFrame, and achievement filter.
+## Author: SMoRG75
+## Version: 1.0.1
+## SavedVariables: SQOL_DB
+## X-Curse-Project-ID: 1354943
+## X-Interface: 110207
+## X-Category: Quests & Leveling
+## X-License: MIT
+## X-Website: https://github.com/SMoRG75/SMoRGsQoL
+## X-Feedback: https://www.curseforge.com/wow/addons/questcompletesound
+## X-Localizations: enUS
+
+SMoRGsQoL.lua
