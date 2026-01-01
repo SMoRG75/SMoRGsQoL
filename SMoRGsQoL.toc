@@ -1,6 +1,6 @@
 ## Interface: 110207
 ## Title: SMoRG's QoL
-## Notes: Plays a sound when all quest objectives are completed. Optional auto-tracking, splash screen, progress colors (red→yellow→green), achievement filter, PlayerFrame iLvl, and auto-watching reputation gains.
+## Notes: Quality-of-life tweaks: auto-track newly accepted quests, colorized progress messages, optional login splash, hide completed achievements, auto-watch reputation gains, and PlayerFrame iLvl + Speed.
 ## Author: SMoRG75
 ## Version: 1.0.5
 ## SavedVariables: SQOL_DB
