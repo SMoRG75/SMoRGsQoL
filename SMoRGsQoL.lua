@@ -24,7 +24,7 @@ SQOL.defaults = {
     RepWatch     = false,
 
     -- PlayerFrame line: "iLvl: xx.x  Spd: yy%"
-    ShowIlvlSpd  = true
+    ShowIlvlSpd  = false
 }
 
 ------------------------------------------------------------
@@ -543,7 +543,7 @@ local function SQOL_EnsurePlayerFrameIlvlUI()
     if not SQOL.iLvlHolder then
         SQOL.iLvlHolder = CreateFrame("Frame", "SQOL_PlayerFrameIlvlHolder", UIParent)
         SQOL.iLvlHolder:SetSize(240, 14)
-        SQOL.iLvlHolder:SetFrameStrata("HIGH")
+        SQOL.iLvlHolder:SetFrameStrata("MEDIUM")
         SQOL.iLvlHolder:Hide()
     end
 

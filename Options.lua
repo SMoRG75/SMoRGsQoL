@@ -49,8 +49,8 @@ local function SQOL_FindDefaultsButtonUnder(root)
         return nil
     end
 
-    local defaultsLabel = _G.DEFAULTS or "Defaults"
-    local resetLabel = _G.RESET_TO_DEFAULTS or "Reset to Defaults"
+    local defaultsLabel = _G["DEFAULTS"] or "Defaults"
+    local resetLabel = _G["RESET_TO_DEFAULTS"] or "Reset to Defaults"
 
     local wanted = {
         [defaultsLabel] = true,
@@ -215,7 +215,10 @@ local function SQOL_CreateSettingsCategory()
             SQOL.RegisterSettingObject(optionKey, setting)
         end
 
-        Settings.CreateCheckBox(category, setting, tooltip)
+        local createCheckbox = Settings.CreateCheckBox or Settings.CreateCheckbox
+        if type(createCheckbox) == "function" then
+            createCheckbox(category, setting, tooltip)
+        end
 
         -- Ensure UI matches saved value without triggering re-entrant callbacks.
         if type(setting.SetValue) == "function" and SQOL.DB[optionKey] ~= nil then
