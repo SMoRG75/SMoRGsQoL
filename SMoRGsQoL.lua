@@ -95,7 +95,7 @@ function SQOL.Init(reset)
     SQOL.DB = SQOL_DB
 
     if reset then
-        print("|cff33ff99SQoL:|r All settings have been reset to defaults.")
+        print("|cff33ff99SQoL:|r Settings have been reset to defaults.")
 
         -- 🟢 Apply Achievement filter after reset
         if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
