@@ -240,12 +240,202 @@ local function SQOL_NameplateObjectives_GetQuestEntries(unit)
     if not C_QuestLog then
         return nil
     end
+
+    local entries
     if type(C_QuestLog.GetQuestsForNamePlate) == "function" then
-        return C_QuestLog.GetQuestsForNamePlate(unit)
+        entries = C_QuestLog.GetQuestsForNamePlate(unit)
+    elseif type(C_QuestLog.GetQuestsForNameplate) == "function" then
+        entries = C_QuestLog.GetQuestsForNameplate(unit)
     end
-    if type(C_QuestLog.GetQuestsForNameplate) == "function" then
-        return C_QuestLog.GetQuestsForNameplate(unit)
+
+    if SQOL.DB and SQOL.DB.DebugTrack then
+        if type(entries) == "table" then
+            local count = 0
+            for _ in pairs(entries) do
+                count = count + 1
+            end
+            dprint("NP quests for unit:", unit, "count:", count)
+        else
+            dprint("NP quests for unit:", unit, "-> none")
+        end
     end
+
+    return entries
+end
+
+local function SQOL_NameplateObjectives_ParseProgressFromText(text)
+    if type(text) ~= "string" then
+        return nil
+    end
+
+    local cur, total = text:match("(%d+)%s*/%s*(%d+)")
+    if not cur or not total then
+        return nil
+    end
+
+    cur, total = tonumber(cur), tonumber(total)
+    if not cur or not total or total <= 0 then
+        return nil
+    end
+
+    return cur, total
+end
+
+local function SQOL_NameplateObjectives_IsIgnoredTooltipLine(text)
+    if type(text) ~= "string" then
+        return true
+    end
+    local lower = text:lower()
+    if lower:find("threat", 1, true) then
+        return true
+    end
+    return false
+end
+
+local function SQOL_NameplateObjectives_GetTooltipProgress(unit)
+    if not C_TooltipInfo or type(C_TooltipInfo.GetUnit) ~= "function" then
+        return nil
+    end
+
+    local data = C_TooltipInfo.GetUnit(unit)
+    if not data or type(data.lines) ~= "table" then
+        return nil
+    end
+
+    local inQuestBlock = false
+    local questTitle = nil
+    local fallbackLine = nil
+
+    for _, line in ipairs(data.lines) do
+        local leftText = line.leftText
+        local rightText = line.rightText
+        local leftColor = line.leftColor
+
+        local isQuestTitle = false
+        if leftText and leftColor and type(leftColor.r) == "number" then
+            if leftColor.r > 0.99 and leftColor.g > 0.8 and leftColor.b < 0.1 then
+                isQuestTitle = true
+            end
+        end
+
+        if isQuestTitle then
+            inQuestBlock = true
+            questTitle = leftText
+        else
+            local texts = { leftText, rightText }
+            for _, text in ipairs(texts) do
+                if SQOL_NameplateObjectives_IsIgnoredTooltipLine(text) then
+                    if SQOL.DB and SQOL.DB.DebugTrack and type(text) == "string" and text ~= "" then
+                        dprint("NP tooltip: ignoring line:", text)
+                    end
+                else
+                    local cur, total = SQOL_NameplateObjectives_ParseProgressFromText(text)
+                    if cur then
+                        if inQuestBlock then
+                            return cur, total, text, questTitle
+                        end
+                        if not fallbackLine then
+                            fallbackLine = { cur = cur, total = total, text = text, questTitle = questTitle }
+                        end
+                    else
+                        local pct = text and text:match("(%d+)%%")
+                        if pct then
+                            cur, total = tonumber(pct), 100
+                            if inQuestBlock then
+                                return cur, total, text, questTitle
+                            end
+                            if not fallbackLine then
+                                fallbackLine = { cur = cur, total = total, text = text, questTitle = questTitle }
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if fallbackLine then
+        return fallbackLine.cur, fallbackLine.total, fallbackLine.text, fallbackLine.questTitle
+    end
+
+    return nil
+end
+
+local function SQOL_NameplateObjectives_GetObjectiveInfo(questID, objectiveIndex)
+    if type(questID) ~= "number" or type(objectiveIndex) ~= "number" then
+        return nil
+    end
+
+    local function try(fn)
+        if type(fn) ~= "function" then
+            return nil
+        end
+        local ok, a, b, c, d, e = pcall(fn, questID, objectiveIndex, false)
+        if not ok then
+            return nil
+        end
+        if type(a) == "table" then
+            return a
+        end
+        if a ~= nil then
+            return {
+                text = a,
+                objectiveType = b,
+                finished = c,
+                numFulfilled = d,
+                numRequired = e,
+            }
+        end
+        return nil
+    end
+
+    local info = try(C_QuestLog and C_QuestLog.GetQuestObjectiveInfo)
+    if not info and C_TaskQuest then
+        info = try(C_TaskQuest.GetQuestObjectiveInfoByQuestID)
+    end
+    if not info and type(GetQuestObjectiveInfo) == "function" then
+        info = try(GetQuestObjectiveInfo)
+    end
+
+    return info
+end
+
+local function SQOL_NameplateObjectives_GetProgressBarInfo(questID)
+    if type(questID) ~= "number" then
+        return nil
+    end
+
+    local function try(fn)
+        if type(fn) ~= "function" then
+            return nil
+        end
+        local ok, a, b = pcall(fn, questID)
+        if not ok then
+            return nil
+        end
+        if type(a) == "table" then
+            local cur = a.numFulfilled or a.progress or a.currentValue or a.value
+            local total = a.numRequired or a.total or a.maxValue or a.max
+            return cur, total
+        end
+        return a, b
+    end
+
+    local cur, total = try(C_TaskQuest and C_TaskQuest.GetQuestProgressBarInfo)
+    if not cur then
+        cur, total = try(C_QuestLog and C_QuestLog.GetQuestProgressBarInfo)
+    end
+    if not cur and type(GetQuestProgressBarInfo) == "function" then
+        local ok, a, b = pcall(GetQuestProgressBarInfo, questID)
+        if ok then
+            cur, total = a, b
+        end
+    end
+
+    if type(cur) == "number" and type(total) == "number" and total > 0 then
+        return cur, total
+    end
+
     return nil
 end
 
@@ -268,25 +458,54 @@ local function SQOL_NameplateObjectives_NormalizeQuestEntry(entry)
     return questID, objectiveIndex
 end
 
-local function SQOL_NameplateObjectives_ExtractProgress(obj)
-    if type(obj) ~= "table" then
-        return nil
+local function SQOL_NameplateObjectives_ExtractProgress(questID, objectiveIndex, obj)
+    local text = nil
+    if type(obj) == "table" then
+        text = rawget(obj, "text")
+
+        local numItems = rawget(obj, "numItems")
+        local numRequired = rawget(obj, "numRequired")
+        local numFulfilled = rawget(obj, "numFulfilled")
+
+        local required = (type(numRequired) == "number" and numRequired)
+                      or (type(numItems) == "number" and numItems)
+                      or 0
+
+        if required > 0 then
+            local fulfilled = (type(numFulfilled) == "number" and numFulfilled) or 0
+            return fulfilled, required, text
+        end
+
+        local cur, total = SQOL_NameplateObjectives_ParseProgressFromText(text)
+        if cur then
+            return cur, total, text
+        end
     end
 
-    local numItems = rawget(obj, "numItems")
-    local numRequired = rawget(obj, "numRequired")
-    local numFulfilled = rawget(obj, "numFulfilled")
+    local info = SQOL_NameplateObjectives_GetObjectiveInfo(questID, objectiveIndex)
+    if info then
+        text = text or rawget(info, "text")
 
-    local required = (type(numRequired) == "number" and numRequired)
-                  or (type(numItems) == "number" and numItems)
-                  or 0
+        local numItems = rawget(info, "numItems")
+        local numRequired = rawget(info, "numRequired")
+        local numFulfilled = rawget(info, "numFulfilled")
 
-    if required <= 0 then
-        return nil
+        local required = (type(numRequired) == "number" and numRequired)
+                      or (type(numItems) == "number" and numItems)
+                      or 0
+
+        if required > 0 then
+            local fulfilled = (type(numFulfilled) == "number" and numFulfilled) or 0
+            return fulfilled, required, text
+        end
+
+        local cur, total = SQOL_NameplateObjectives_ParseProgressFromText(text)
+        if cur then
+            return cur, total, text
+        end
     end
 
-    local fulfilled = (type(numFulfilled) == "number" and numFulfilled) or 0
-    return fulfilled, required
+    return nil
 end
 
 local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId, objectiveIndex)
@@ -294,6 +513,22 @@ local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId
 
     local objectives = C_QuestLog.GetQuestObjectives(questID)
     if not objectives then
+        if objectiveIndex then
+            local fulfilled, required, text = SQOL_NameplateObjectives_ExtractProgress(questID, objectiveIndex, nil)
+            if required then
+                return {
+                    questID = questID,
+                    fulfilled = fulfilled,
+                    required = required,
+                    text = text,
+                    index = objectiveIndex,
+                    priority = 3,
+                }
+            end
+        end
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP objectives missing for quest:", questID, "objectiveIndex:", tostring(objectiveIndex))
+        end
         return nil
     end
 
@@ -302,12 +537,13 @@ local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId
     local singleCandidate = nil
 
     for i, obj in ipairs(objectives) do
-        local fulfilled, required = SQOL_NameplateObjectives_ExtractProgress(obj)
+        local fulfilled, required, text = SQOL_NameplateObjectives_ExtractProgress(questID, i, obj)
         if required then
             local candidate = {
+                questID = questID,
                 fulfilled = fulfilled,
                 required = required,
-                text = rawget(obj, "text"),
+                text = text,
                 index = i,
                 priority = nil,
             }
@@ -359,11 +595,39 @@ end
 local function SQOL_NameplateObjectives_GetProgressText(unit)
     local entries = SQOL_NameplateObjectives_GetQuestEntries(unit)
     if type(entries) ~= "table" then
+        local cur, total, line, questTitle = SQOL_NameplateObjectives_GetTooltipProgress(unit)
+        if cur then
+            if SQOL.DB and SQOL.DB.DebugTrack then
+                dprint("NP tooltip:", unit, "quest", tostring(questTitle), "line", tostring(line),
+                    "progress", string.format("%d/%d", cur, total))
+            end
+            local text = string.format("%d/%d", cur, total)
+            if SQOL.DB and SQOL.DB.ColorProgress then
+                local progress = (total > 0) and (cur / total) or 0
+                local colorCode = SQOL_GetProgressColor(progress)
+                text = colorCode .. text .. "|r"
+            end
+            return text
+        end
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP tooltip:", unit, "no progress")
+        end
         return nil
     end
 
     local unitName = UnitName(unit)
     local npcId = SQOL_NameplateObjectives_GetNpcID(unit)
+    if SQOL.DB and SQOL.DB.DebugTrack then
+        local count = 0
+        local summaries = {}
+        for _, entry in pairs(entries) do
+            count = count + 1
+            local questID, objectiveIndex = SQOL_NameplateObjectives_NormalizeQuestEntry(entry)
+            table.insert(summaries, string.format("%s:%s", tostring(questID), tostring(objectiveIndex or "-")))
+        end
+        dprint("NP unit:", unit, "name:", tostring(unitName), "npcID:", tostring(npcId), "entries:", count,
+            count > 0 and table.concat(summaries, ", ") or "none")
+    end
 
     local best, bestPriority, bestRequired
     for _, entry in pairs(entries) do
@@ -381,8 +645,66 @@ local function SQOL_NameplateObjectives_GetProgressText(unit)
         end
     end
 
+    if best then
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP chosen:", "quest", tostring(best.questID), "obj", tostring(best.index),
+                "progress", string.format("%d/%d", best.fulfilled or 0, best.required or 0),
+                "priority", tostring(bestPriority), "text", tostring(best.text))
+        end
+    else
+        for _, entry in pairs(entries) do
+            local questID = SQOL_NameplateObjectives_NormalizeQuestEntry(entry)
+            if questID then
+                local barCur, barTotal = SQOL_NameplateObjectives_GetProgressBarInfo(questID)
+                if barCur then
+                    if SQOL.DB and SQOL.DB.DebugTrack then
+                        dprint("NP progress bar:", "quest", tostring(questID),
+                            "progress", string.format("%d/%d", barCur, barTotal))
+                    end
+                    best = {
+                        questID = questID,
+                        fulfilled = barCur,
+                        required = barTotal,
+                        text = nil,
+                        index = nil,
+                        priority = -1,
+                    }
+                    break
+                end
+            end
+        end
+        if not best and SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP no objective progress found for unit:", unit)
+        end
+    end
+
     if not best then
-        return nil
+        local cur, total, line, questTitle = SQOL_NameplateObjectives_GetTooltipProgress(unit)
+        if cur then
+            if SQOL.DB and SQOL.DB.DebugTrack then
+                dprint("NP tooltip:", unit, "quest", tostring(questTitle), "line", tostring(line),
+                    "progress", string.format("%d/%d", cur, total))
+            end
+            best = {
+                questID = nil,
+                fulfilled = cur,
+                required = total,
+                text = line,
+                index = nil,
+                priority = -2,
+            }
+        else
+            if SQOL.DB and SQOL.DB.DebugTrack then
+                dprint("NP tooltip:", unit, "no progress")
+            end
+            return nil
+        end
+    end
+
+    if type(best.required) == "number" and type(best.fulfilled) == "number" and best.required > 0 then
+        if best.fulfilled >= best.required then
+            return nil
+        end
     end
 
     local text = string.format("%d/%d", best.fulfilled or 0, best.required or 0)
@@ -419,6 +741,20 @@ local function SQOL_NameplateObjectives_GetAnchor(nameplate)
         return nameplate
     end
 
+    local nameText = rawget(unitFrame, "name")
+        or rawget(unitFrame, "Name")
+        or rawget(unitFrame, "nameText")
+        or rawget(unitFrame, "NameText")
+        or rawget(unitFrame, "nameplateName")
+        or rawget(unitFrame, "NamePlateName")
+        or rawget(unitFrame, "UnitName")
+        or rawget(unitFrame, "NameLabel")
+        or rawget(unitFrame, "nameLabel")
+
+    if nameText and nameText.GetStringWidth then
+        return nameText
+    end
+
     local healthBar = rawget(unitFrame, "healthBar")
         or rawget(unitFrame, "HealthBar")
         or rawget(unitFrame, "HealthBarsContainer")
@@ -437,15 +773,22 @@ local function SQOL_NameplateObjectives_GetText(unit)
 
     local text = nameplate.SQOLObjectiveText
     if not text then
+---@diagnostic disable-next-line: undefined-field
         local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
         local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
 
         text = unitFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        text:SetPoint("BOTTOM", anchor, "TOP", 0, 2)
+        text:SetPoint("BOTTOM", anchor, "TOP", 0, 4)
         text:SetJustifyH("CENTER")
         text:SetWordWrap(false)
         if text.SetMaxLines then text:SetMaxLines(1) end
+---@diagnostic disable-next-line: inject-field
         nameplate.SQOLObjectiveText = text
+    else
+        local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
+        local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
+        text:ClearAllPoints()
+        text:SetPoint("BOTTOM", anchor, "TOP", 0, 4)
     end
 
     return text, nameplate
@@ -1032,9 +1375,13 @@ local function SQOL_Rep_GetFactionDataByIndex(index)
             if type(data.currentStanding) ~= "number" then
                 data.currentStanding =
                     data.currentStanding
+---@diagnostic disable-next-line: undefined-field
                     or data.earnedValue
+---@diagnostic disable-next-line: undefined-field
                     or data.barValue
+---@diagnostic disable-next-line: undefined-field
                     or data.currentValue
+---@diagnostic disable-next-line: undefined-field
                     or data.currentReputation
             end
         end

@@ -18,6 +18,8 @@ Everything is toggleable:
   - Makes the Achievement UI default to showing incomplete achievements only.
 - **Auto-watch reputation gains**
   - Switches your watched faction to the one that changed when you gain reputation.
+- **Nameplate objective counts**
+  - Shows quest objective progress (e.g., 0/10) above relevant nameplates, with fallbacks for bonus/world quests.
 - **PlayerFrame iLvl + Speed**
   - Adds an extra line to the PlayerFrame: `iLvl: xx.x  Spd: yy%`
 
@@ -38,6 +40,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol splash`
 - `/sqol hideach` (or `/sqol ha`)
 - `/sqol rep` (or `/sqol rw`)
+- `/sqol nameplate` (or `/sqol np`)
 - `/sqol stats` (or `/sqol ilvl`)
 
 ## Saved Variables
