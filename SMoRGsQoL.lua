@@ -2279,9 +2279,16 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL_NameplateObjectives_RefreshVisibleUnits()
         end
 
-     elseif event == "ADDON_LOADED" then
+    elseif event == "ADDON_LOADED" then
         local addonName = ...
-        if addonName == "Blizzard_AchievementUI" then
+        if addonName == ADDON_NAME then
+            if not SQOL.DB then
+                SQOL.Init()
+            end
+            if SQOL.DB and SQOL.DB.DamageTextFont then
+                SQOL_ApplyDamageTextFont()
+            end
+        elseif addonName == "Blizzard_AchievementUI" then
             C_Timer.After(0.1, SQOL_ApplyAchievementFilter)
         end
 
