@@ -22,6 +22,7 @@ SQOL.defaults = {
     ColorProgress = false,
     HideDoneAchievements = false,
     RepWatch     = false,
+    ShowNameplateObjectives = false,
 
     -- PlayerFrame line: "iLvl: xx.x  Spd: yy%"
     ShowIlvlSpd  = false
@@ -134,7 +135,8 @@ local function SQOL_GetStateStrings()
     local loState = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local repState = SQOL.DB.RepWatch and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local statsState = SQOL.DB.ShowIlvlSpd and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    return version, atState, spState, coState, loState, repState, statsState
+    local npState = SQOL.DB.ShowNameplateObjectives and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    return version, atState, spState, coState, loState, repState, statsState, npState
 end
 
 ------------------------------------------------------------
@@ -212,6 +214,338 @@ local function SQOL_RecolorQuestObjectives_Throttle()
         SQOL._recolorPending = false
         SQOL._lastRecolorAt = GetTimePreciseSec()
     end)
+end
+
+------------------------------------------------------------
+-- Nameplate objective counts
+------------------------------------------------------------
+SQOL._npUnits = SQOL._npUnits or {}
+SQOL._npUpdatePending = false
+
+local function SQOL_NameplateObjectives_GetNpcID(unit)
+    if type(UnitGUID) ~= "function" then
+        return nil
+    end
+
+    local guid = UnitGUID(unit)
+    if not guid then
+        return nil
+    end
+
+    local npcId = select(6, strsplit("-", guid))
+    return tonumber(npcId)
+end
+
+local function SQOL_NameplateObjectives_GetQuestEntries(unit)
+    if not C_QuestLog then
+        return nil
+    end
+    if type(C_QuestLog.GetQuestsForNamePlate) == "function" then
+        return C_QuestLog.GetQuestsForNamePlate(unit)
+    end
+    if type(C_QuestLog.GetQuestsForNameplate) == "function" then
+        return C_QuestLog.GetQuestsForNameplate(unit)
+    end
+    return nil
+end
+
+local function SQOL_NameplateObjectives_NormalizeQuestEntry(entry)
+    local questID, objectiveIndex
+
+    if type(entry) == "number" then
+        questID = entry
+    elseif type(entry) == "table" then
+        questID = entry.questID or entry.questId
+        objectiveIndex = entry.objectiveIndex or entry.objectiveID or entry.objectiveId
+        if not questID and type(entry.questLogIndex) == "number"
+            and C_QuestLog and type(C_QuestLog.GetQuestIDForLogIndex) == "function" then
+            questID = C_QuestLog.GetQuestIDForLogIndex(entry.questLogIndex)
+        end
+    end
+
+    if type(questID) ~= "number" then questID = nil end
+    if type(objectiveIndex) ~= "number" then objectiveIndex = nil end
+    return questID, objectiveIndex
+end
+
+local function SQOL_NameplateObjectives_ExtractProgress(obj)
+    if type(obj) ~= "table" then
+        return nil
+    end
+
+    local numItems = rawget(obj, "numItems")
+    local numRequired = rawget(obj, "numRequired")
+    local numFulfilled = rawget(obj, "numFulfilled")
+
+    local required = (type(numRequired) == "number" and numRequired)
+                  or (type(numItems) == "number" and numItems)
+                  or 0
+
+    if required <= 0 then
+        return nil
+    end
+
+    local fulfilled = (type(numFulfilled) == "number" and numFulfilled) or 0
+    return fulfilled, required
+end
+
+local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId, objectiveIndex)
+    if not questID then return nil end
+
+    local objectives = C_QuestLog.GetQuestObjectives(questID)
+    if not objectives then
+        return nil
+    end
+
+    local best, bestPriority, bestRequired
+    local numericCount = 0
+    local singleCandidate = nil
+
+    for i, obj in ipairs(objectives) do
+        local fulfilled, required = SQOL_NameplateObjectives_ExtractProgress(obj)
+        if required then
+            local candidate = {
+                fulfilled = fulfilled,
+                required = required,
+                text = rawget(obj, "text"),
+                index = i,
+                priority = nil,
+            }
+
+            numericCount = numericCount + 1
+            singleCandidate = candidate
+
+            local priority
+            if objectiveIndex and i == objectiveIndex then
+                priority = 3
+            elseif npcId then
+                local objId = rawget(obj, "objectID") or rawget(obj, "objectId")
+                if type(objId) == "number" and objId == npcId then
+                    priority = 2
+                end
+            end
+
+            if not priority and unitName and type(candidate.text) == "string" then
+                local textLower = candidate.text:lower()
+                local nameLower = unitName:lower()
+                if textLower:find(nameLower, 1, true) then
+                    priority = 1
+                end
+            end
+
+            if priority then
+                candidate.priority = priority
+                if not best or priority > bestPriority or (priority == bestPriority and required > (bestRequired or 0)) then
+                    best = candidate
+                    bestPriority = priority
+                    bestRequired = required
+                end
+            end
+        end
+    end
+
+    if best then
+        return best
+    end
+
+    if numericCount == 1 and singleCandidate then
+        singleCandidate.priority = 0
+        return singleCandidate
+    end
+
+    return nil
+end
+
+local function SQOL_NameplateObjectives_GetProgressText(unit)
+    local entries = SQOL_NameplateObjectives_GetQuestEntries(unit)
+    if type(entries) ~= "table" then
+        return nil
+    end
+
+    local unitName = UnitName(unit)
+    local npcId = SQOL_NameplateObjectives_GetNpcID(unit)
+
+    local best, bestPriority, bestRequired
+    for _, entry in pairs(entries) do
+        local questID, objectiveIndex = SQOL_NameplateObjectives_NormalizeQuestEntry(entry)
+        if questID then
+            local candidate = SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId, objectiveIndex)
+            if candidate then
+                local priority = candidate.priority or 0
+                if not best or priority > bestPriority or (priority == bestPriority and candidate.required > (bestRequired or 0)) then
+                    best = candidate
+                    bestPriority = priority
+                    bestRequired = candidate.required
+                end
+            end
+        end
+    end
+
+    if not best then
+        return nil
+    end
+
+    local text = string.format("%d/%d", best.fulfilled or 0, best.required or 0)
+    if SQOL.DB and SQOL.DB.ColorProgress then
+        local progress = (best.required and best.required > 0) and (best.fulfilled / best.required) or 0
+        local colorCode = SQOL_GetProgressColor(progress)
+        text = colorCode .. text .. "|r"
+    end
+    return text
+end
+
+local function SQOL_NameplateObjectives_GetUnitToken(nameplate)
+    if not nameplate then
+        return nil
+    end
+
+    local unit = rawget(nameplate, "namePlateUnitToken")
+    if unit then
+        return unit
+    end
+
+    local unitFrame = nameplate.UnitFrame or nameplate.unitFrame
+    unit = unitFrame and unitFrame.unit
+    return unit
+end
+
+local function SQOL_NameplateObjectives_GetAnchor(nameplate)
+    if not nameplate then
+        return nil
+    end
+
+    local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
+    if not unitFrame then
+        return nameplate
+    end
+
+    local healthBar = rawget(unitFrame, "healthBar")
+        or rawget(unitFrame, "HealthBar")
+        or rawget(unitFrame, "HealthBarsContainer")
+    return healthBar or unitFrame
+end
+
+local function SQOL_NameplateObjectives_GetText(unit)
+    if not (C_NamePlate and C_NamePlate.GetNamePlateForUnit) then
+        return nil
+    end
+
+    local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+    if not nameplate then
+        return nil
+    end
+
+    local text = nameplate.SQOLObjectiveText
+    if not text then
+        local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
+        local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
+
+        text = unitFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        text:SetPoint("BOTTOM", anchor, "TOP", 0, 2)
+        text:SetJustifyH("CENTER")
+        text:SetWordWrap(false)
+        if text.SetMaxLines then text:SetMaxLines(1) end
+        nameplate.SQOLObjectiveText = text
+    end
+
+    return text, nameplate
+end
+
+local function SQOL_NameplateObjectives_UpdateUnit(unit)
+    if not SQOL.DB or not SQOL.DB.ShowNameplateObjectives then
+        return
+    end
+    if not unit or not UnitExists(unit) then
+        return
+    end
+
+    local text, nameplate = SQOL_NameplateObjectives_GetText(unit)
+    if not text then
+        return
+    end
+
+    local progressText = SQOL_NameplateObjectives_GetProgressText(unit)
+    if progressText then
+        text:SetText(progressText)
+        text:Show()
+    else
+        text:SetText("")
+        text:Hide()
+    end
+
+    SQOL._npUnits[unit] = nameplate
+end
+
+local function SQOL_NameplateObjectives_ClearUnit(unit)
+    local nameplate = SQOL._npUnits[unit]
+    if not nameplate and C_NamePlate and C_NamePlate.GetNamePlateForUnit then
+        nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+    end
+
+    if nameplate and nameplate.SQOLObjectiveText then
+        nameplate.SQOLObjectiveText:SetText("")
+        nameplate.SQOLObjectiveText:Hide()
+    end
+
+    SQOL._npUnits[unit] = nil
+end
+
+local function SQOL_NameplateObjectives_UpdateAll()
+    if not SQOL.DB or not SQOL.DB.ShowNameplateObjectives then
+        return
+    end
+
+    for unit in pairs(SQOL._npUnits) do
+        SQOL_NameplateObjectives_UpdateUnit(unit)
+    end
+end
+
+local function SQOL_NameplateObjectives_ScheduleUpdateAll()
+    if SQOL._npUpdatePending then return end
+    SQOL._npUpdatePending = true
+
+    if C_Timer and type(C_Timer.After) == "function" then
+        C_Timer.After(0.2, function()
+            SQOL._npUpdatePending = false
+            SQOL_NameplateObjectives_UpdateAll()
+        end)
+    else
+        SQOL._npUpdatePending = false
+        SQOL_NameplateObjectives_UpdateAll()
+    end
+end
+
+local function SQOL_NameplateObjectives_RefreshVisibleUnits()
+    if not (C_NamePlate and C_NamePlate.GetNamePlates) then
+        return
+    end
+
+    for unit in pairs(SQOL._npUnits) do
+        SQOL._npUnits[unit] = nil
+    end
+
+    local plates = C_NamePlate.GetNamePlates()
+    if type(plates) ~= "table" then
+        return
+    end
+
+    for _, nameplate in ipairs(plates) do
+        local unit = SQOL_NameplateObjectives_GetUnitToken(nameplate)
+        if unit then
+            SQOL._npUnits[unit] = nameplate
+            SQOL_NameplateObjectives_UpdateUnit(unit)
+        end
+    end
+end
+
+local function SQOL_NameplateObjectives_HideAll()
+    for unit, nameplate in pairs(SQOL._npUnits) do
+        if nameplate and nameplate.SQOLObjectiveText then
+            nameplate.SQOLObjectiveText:SetText("")
+            nameplate.SQOLObjectiveText:Hide()
+        end
+        SQOL._npUnits[unit] = nil
+    end
 end
 
 ------------------------------------------------------------
@@ -979,7 +1313,7 @@ end
 -- Splash
 ------------------------------------------------------------
 local function SQOL_Splash()
-    local version, atState, spState, coState, loState, repState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, repState, statsState, npState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
@@ -988,6 +1322,8 @@ local function SQOL_Splash()
     print("|cff33ff99ColorProgress:|r " .. coState)
     print("|cff33ff99HideDoneAchievements:|r " .. loState)
     print("|cff33ff99RepWatch:|r " .. repState)
+    print("|cff33ff99NameplateObjectives:|r " .. npState)
+    print("|cff33ff99StatsLine:|r " .. statsState)
     print("|cffccccccType |cff00ff00/SQOL help|r for command list.|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
@@ -1040,7 +1376,7 @@ end
 -- Help
 ------------------------------------------------------------
 local function SQOL_Help()
-    local version, atState, spState, coState, loState, repState, statsState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, repState, statsState, npState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99-----------------------------------|r")
@@ -1053,6 +1389,8 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL splash|r      |cffcccccc- Toggle splash on login|r")
     print("|cff00ff00/SQOL rep|r         |cffcccccc- Toggle watched reputation auto-switch on rep gain|r")
     print("|cff00ff00/SQOL rw|r          |cffcccccc- Shorthand for rep|r")
+    print("|cff00ff00/SQOL nameplate|r   |cffcccccc- Toggle nameplate objective counts|r")
+    print("|cff00ff00/SQOL np|r          |cffcccccc- Shorthand for nameplate|r")
     print("|cff00ff00/SQOL stats|r       |cffcccccc- Toggle PlayerFrame iLvl+Spd line|r")
     print("|cff00ff00/SQOL ilvl|r        |cffcccccc- Shorthand for stats|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
@@ -1060,7 +1398,7 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
     print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState)
-    print("|cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99StatsLine:|r " .. statsState)
+    print("|cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState .. "  |cff33ff99StatsLine:|r " .. statsState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
@@ -1125,6 +1463,13 @@ function SQOL.ApplyOption(key)
             end
         end
 
+    elseif key == "ShowNameplateObjectives" then
+        if SQOL.DB.ShowNameplateObjectives then
+            SQOL_NameplateObjectives_RefreshVisibleUnits()
+        else
+            SQOL_NameplateObjectives_HideAll()
+        end
+
     elseif key == "ShowIlvlSpd" then
         if SQOL.DB.ShowIlvlSpd then
             SQOL_TryEnsurePlayerFrameIlvlUI(0)
@@ -1172,6 +1517,9 @@ SlashCmdList["SQOL"] = function(msg)
     elseif msg == "rep" or msg == "rw" then
         toggle("RepWatch", "RepWatch is")
 
+    elseif msg == "nameplate" or msg == "np" then
+        toggle("ShowNameplateObjectives", "Nameplate objectives are")
+
     elseif msg == "stats" or msg == "ilvl" then
         toggle("ShowIlvlSpd", "PlayerFrame iLvl+Spd line is")
 
@@ -1191,8 +1539,8 @@ SlashCmdList["SQOL"] = function(msg)
         SQOL_Help()
 
     else
-        local version, at, sp, co, lo, rep, stats = SQOL_GetStateStrings()
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " StatsLine:" .. stats)
+        local version, at, sp, co, lo, rep, stats, np = SQOL_GetStateStrings()
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats)
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -1213,6 +1561,8 @@ f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 f:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
 f:RegisterEvent("UNIT_INVENTORY_CHANGED")
 f:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
+f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+f:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
@@ -1235,6 +1585,12 @@ f:SetScript("OnEvent", function(self, event, ...)
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end
 
+        if SQOL.DB.ShowNameplateObjectives then
+            SQOL_NameplateObjectives_RefreshVisibleUnits()
+        else
+            SQOL_NameplateObjectives_HideAll()
+        end
+
         -- Initialize RepWatch snapshot (if enabled)
         if SQOL.DB.RepWatch and SQOL_RepWatch_ScheduleScan then
             SQOL._repLastStanding = nil
@@ -1249,6 +1605,10 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL_TryEnsurePlayerFrameIlvlUI(0)
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        end
+
+        if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
+            SQOL_NameplateObjectives_RefreshVisibleUnits()
         end
 
      elseif event == "ADDON_LOADED" then
@@ -1276,6 +1636,16 @@ f:SetScript("OnEvent", function(self, event, ...)
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end
+
+    elseif event == "NAME_PLATE_UNIT_ADDED" then
+        if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
+            local unit = ...
+            SQOL_NameplateObjectives_UpdateUnit(unit)
+        end
+
+    elseif event == "NAME_PLATE_UNIT_REMOVED" then
+        local unit = ...
+        SQOL_NameplateObjectives_ClearUnit(unit)
 
     elseif event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_AVG_ITEM_LEVEL_UPDATE" then
         if SQOL.DB and SQOL.DB.ShowIlvlSpd then
@@ -1343,6 +1713,9 @@ f:SetScript("OnEvent", function(self, event, ...)
     elseif event == "QUEST_LOG_UPDATE" then
         SQOL_CheckQuestProgress()
         SQOL_RecolorQuestObjectives_Throttle()
+        if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
+            SQOL_NameplateObjectives_ScheduleUpdateAll()
+        end
     end
 end)
 

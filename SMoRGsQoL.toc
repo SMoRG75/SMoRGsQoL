@@ -1,11 +1,11 @@
-## Interface: 110207
+## Interface: 120000
 ## Title: SMoRG's QoL
 ## Notes: Quality-of-life tweaks: auto-track newly accepted quests, colorized progress messages, optional login splash, hide completed achievements, auto-watch reputation gains, and PlayerFrame iLvl + Speed.
 ## Author: SMoRG75
 ## Version: 1.0.5
 ## SavedVariables: SQOL_DB
 ## X-Curse-Project-ID: 1354943
-## X-Interface: 110207
+## X-Interface: 120000
 ## X-Category: Quests & Leveling
 ## X-License: MIT
 ## X-Website: https://github.com/SMoRG75/SMoRGsQoL

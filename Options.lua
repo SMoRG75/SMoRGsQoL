@@ -247,6 +247,7 @@ local function SQOL_CreateSettingsCategory()
     AddCheckbox("ColorProgress", "Color progress messages", "Colorize objective count messages (e.g., 3/10) and quest objective progress (red → yellow → green).")
     AddCheckbox("HideDoneAchievements", "Hide completed achievements", "Achievement UI will default to showing incomplete achievements only.")
     AddCheckbox("RepWatch", "Auto-watch reputation gains", "When a faction reputation changes, automatically switch your watched faction to the one that changed.")
+    AddCheckbox("ShowNameplateObjectives", "Show objective counts on nameplates", "Show quest objective counts (e.g., 0/10) above relevant nameplates.")
     AddCheckbox("ShowIlvlSpd", "Show iLvl + Speed on PlayerFrame", "Adds an iLvl and movement speed line to your PlayerFrame.")
     AddCheckbox("DebugTrack", "Debug tracking", "Print verbose debug information (for troubleshooting).")
 
