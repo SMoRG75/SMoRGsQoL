@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.7] - 2026-01-02
+
+### Added
+- Optional cursor shake highlight to help locate the mouse cursor during combat.
+- Debug command to flash the cursor ring on demand (`/sqol cursorflash`).
+
 ## [1.0.6] - 2026-01-02
 
 ### Added

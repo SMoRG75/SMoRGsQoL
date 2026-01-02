@@ -24,6 +24,8 @@ Everything is toggleable:
   - Adds an extra line to the PlayerFrame: `iLvl: xx.x  Spd: yy%`
 - **Custom damage text font**
   - Replaces floating combat text damage numbers with a custom font.
+- **Cursor shake highlight**
+  - Highlights the cursor when you shake the mouse.
 
 ## Configuration
 
@@ -45,6 +47,8 @@ Type `/sqol` to see current status, or use:
 - `/sqol nameplate` (or `/sqol np`)
 - `/sqol stats` (or `/sqol ilvl`)
 - `/sqol damagefont` (or `/sqol df`)
+- `/sqol cursor` (or `/sqol cs`)
+- `/sqol cursorflash` (or `/sqol cf`)
 
 ## Saved Variables
 

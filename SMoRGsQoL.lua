@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.5 by SMoRG75
+-- SMoRGsQoL v1.0.7 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
 -- Now with throttled updates and a stable PlayerFrame iLvl+Speed line.
@@ -28,7 +28,10 @@ SQOL.defaults = {
     ShowIlvlSpd  = false,
 
     -- Floating combat text damage numbers font.
-    DamageTextFont = false
+    DamageTextFont = false,
+
+    -- Highlight the cursor when shaking the mouse.
+    CursorShakeHighlight = false
 }
 
 ------------------------------------------------------------
@@ -75,6 +78,259 @@ local function SQOL_RestoreDamageTextFont()
     if not SQOL._damageFontOriginal then return end
     _G.damage_text_font = SQOL._damageFontOriginal.damage_text_font
     _G.DAMAGE_TEXT_FONT = SQOL._damageFontOriginal.DAMAGE_TEXT_FONT
+end
+
+------------------------------------------------------------
+-- Cursor shake highlight
+------------------------------------------------------------
+local SQOL_CURSOR_SHAKE_TEXTURE = "Interface\\Minimap\\Ping\\ping4"
+
+local function SQOL_CursorShake_CreateFrame()
+    if SQOL.CursorShakeFrame then return end
+
+    local frame = CreateFrame("Frame", "SQOL_CursorShakeFrame", UIParent)
+    frame:SetSize(120, 120)
+    frame:SetFrameStrata("TOOLTIP")
+    frame:EnableMouse(false)
+    frame:Hide()
+
+    local tex = frame:CreateTexture(nil, "OVERLAY")
+    tex:SetAllPoints(frame)
+    tex:SetTexture(SQOL_CURSOR_SHAKE_TEXTURE)
+    tex:SetBlendMode("ADD")
+    tex:SetVertexColor(1, 0.9, 0.2)
+    tex:SetAlpha(0.95)
+    frame.texture = tex
+
+    frame._samples = {}
+    frame._elapsed = 0
+    frame._flashTime = 0
+    frame._flashDuration = 0.45
+    frame._cooldown = 0
+
+    SQOL.CursorShakeFrame = frame
+end
+
+local function SQOL_CursorShake_ResetState(frame)
+    if not frame then return end
+    frame._samples = {}
+    frame._lastX = nil
+    frame._lastY = nil
+    frame._lastT = nil
+    frame._elapsed = 0
+    frame._flashTime = 0
+    frame._cooldown = 0
+    frame._debugNextPrint = nil
+    frame._debugNoCursorAt = nil
+    frame:Hide()
+end
+
+local function SQOL_CursorShake_GetStats(samples)
+    local total = 0
+    local maxSpeed = 0
+    local dirChangesX = 0
+    local dirChangesY = 0
+    local lastDx, lastDy
+    for i = 1, #samples do
+        local sample = samples[i]
+        total = total + (sample.dist or 0)
+        if sample.speed and sample.speed > maxSpeed then
+            maxSpeed = sample.speed
+        end
+        if sample.dx and lastDx and (sample.dx * lastDx) < 0 then
+            if math.abs(sample.dx) > 2 and math.abs(lastDx) > 2 then
+                dirChangesX = dirChangesX + 1
+            end
+        end
+        if sample.dy and lastDy and (sample.dy * lastDy) < 0 then
+            if math.abs(sample.dy) > 2 and math.abs(lastDy) > 2 then
+                dirChangesY = dirChangesY + 1
+            end
+        end
+        lastDx = sample.dx or lastDx
+        lastDy = sample.dy or lastDy
+    end
+
+    if #samples >= 2 then
+        local first = samples[1]
+        local last = samples[#samples]
+        local netDx = last.x - first.x
+        local netDy = last.y - first.y
+        local net = math.sqrt(netDx * netDx + netDy * netDy)
+        return total, net, maxSpeed, dirChangesX, dirChangesY
+    end
+
+    return total, 0, maxSpeed, dirChangesX, dirChangesY
+end
+
+local function SQOL_CursorShake_OnUpdate(self, elapsed)
+    if not SQOL.DB or not SQOL.DB.CursorShakeHighlight then
+        self:SetScript("OnUpdate", nil)
+        SQOL_CursorShake_ResetState(self)
+        return
+    end
+
+    self._elapsed = (self._elapsed or 0) + (elapsed or 0)
+    if self._elapsed < 0.02 then return end
+    local dt = self._elapsed
+    self._elapsed = 0
+
+    local now = (type(GetTimePreciseSec) == "function") and GetTimePreciseSec() or GetTime()
+    local x, y = GetCursorPosition()
+    if not x or not y then
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            if (not self._debugNoCursorAt) or now >= self._debugNoCursorAt then
+                self._debugNoCursorAt = now + 1.0
+                dprint("CursorShake: GetCursorPosition returned nil.")
+            end
+        end
+        return
+    end
+
+    local scale = (UIParent and UIParent.GetEffectiveScale) and UIParent:GetEffectiveScale() or 1
+    x, y = x / scale, y / scale
+
+    if not self._lastX then
+        self._lastX, self._lastY, self._lastT = x, y, now
+    else
+        local dx, dy = x - self._lastX, y - self._lastY
+        local dist = math.sqrt(dx * dx + dy * dy)
+        local dtSample = now - (self._lastT or now)
+        local speed = (dtSample and dtSample > 0) and (dist / dtSample) or 0
+        if dist > 0 then
+            table.insert(self._samples, { x = x, y = y, t = now, dist = dist, dx = dx, dy = dy, speed = speed })
+        end
+        self._lastX, self._lastY, self._lastT = x, y, now
+    end
+
+    -- Keep a short window and look for quick back-and-forth movement.
+    local window = 0.22
+    local samples = self._samples
+    while #samples > 0 and (now - samples[1].t) > window do
+        table.remove(samples, 1)
+    end
+
+    if self._flashTime and self._flashTime > 0 then
+        self._flashTime = self._flashTime - dt
+        local alpha = (self._flashDuration and self._flashDuration > 0)
+            and clamp01(self._flashTime / self._flashDuration)
+            or 0
+        if self.texture then
+            self.texture:SetAlpha(0.9 * alpha)
+        end
+        self:ClearAllPoints()
+        self:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
+        if self._flashTime <= 0 then
+            self._flashTime = 0
+            if self.texture then
+                self.texture:SetAlpha(0)
+            end
+            if self:GetAlpha() ~= 0 then
+                self:SetAlpha(0)
+            end
+        else
+            if self:GetAlpha() ~= 1 then
+                self:SetAlpha(1)
+            end
+        end
+    end
+
+    if self._cooldown and self._cooldown > 0 then
+        self._cooldown = self._cooldown - dt
+    end
+
+    local total, net, maxSpeed, dirChangesX, dirChangesY = 0, 0, 0, 0, 0
+    local needStats = (self._cooldown and self._cooldown <= 0 and #samples >= 3)
+        or (SQOL.DB and SQOL.DB.DebugTrack)
+    if needStats then
+        total, net, maxSpeed, dirChangesX, dirChangesY = SQOL_CursorShake_GetStats(samples)
+    end
+
+    if SQOL.DB and SQOL.DB.DebugTrack then
+        if (not self._debugNextPrint) or now >= self._debugNextPrint then
+            self._debugNextPrint = now + 0.6
+            dprint(string.format(
+                "CursorShake: samples=%d total=%.1f net=%.1f speed=%.0f dirX=%d dirY=%d cooldown=%.2f flash=%.2f",
+                #samples, total, net, maxSpeed, dirChangesX, dirChangesY, self._cooldown or 0, self._flashTime or 0
+            ))
+        end
+    end
+
+    if self._cooldown and self._cooldown <= 0 and #samples >= 5 then
+
+        local threshold = 220
+        local netRatio = 0.50
+        local minDirChanges = 2
+        local hasBackAndForth = (dirChangesX >= minDirChanges or dirChangesY >= minDirChanges)
+        local hasShake = (total >= threshold) and hasBackAndForth and (net <= (total * netRatio))
+
+        if hasShake then
+            self._cooldown = 0.40
+            self._flashDuration = 0.45
+            self:SetSize(120, 120)
+            self.texture:SetAlpha(0.9)
+            self:ClearAllPoints()
+            self:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
+            self._flashTime = self._flashDuration
+            self:Show()
+            if SQOL.DB and SQOL.DB.DebugTrack then
+                dprint(string.format(
+                    "CursorShake: TRIGGER total=%.1f net=%.1f speed=%.0f dirX=%d dirY=%d",
+                    total, net, maxSpeed, dirChangesX, dirChangesY
+                ))
+            end
+        end
+    end
+end
+
+local function SQOL_CursorShake_Enable()
+    SQOL_CursorShake_CreateFrame()
+    local frame = SQOL.CursorShakeFrame
+    if not frame then return end
+    frame:SetAlpha(0)
+    if frame.texture then
+        frame.texture:SetAlpha(0)
+    end
+    frame:Show()
+    frame:SetScript("OnUpdate", SQOL_CursorShake_OnUpdate)
+end
+
+local function SQOL_CursorShake_Disable()
+    if not SQOL.CursorShakeFrame then return end
+    SQOL.CursorShakeFrame:SetScript("OnUpdate", nil)
+    SQOL_CursorShake_ResetState(SQOL.CursorShakeFrame)
+end
+
+local function SQOL_CursorShake_FlashNow(duration)
+    if not SQOL.DB or not SQOL.DB.CursorShakeHighlight then
+        print("|cff33ff99SQoL:|r Cursor shake highlight is OFF. Enable it with /sqol cursor.")
+        return
+    end
+
+    SQOL_CursorShake_Enable()
+    local frame = SQOL.CursorShakeFrame
+    if not frame then return end
+
+    local x, y = GetCursorPosition()
+    if not x or not y then return end
+
+    local scale = (UIParent and UIParent.GetEffectiveScale) and UIParent:GetEffectiveScale() or 1
+    x, y = x / scale, y / scale
+
+    frame._flashDuration = duration or 0.8
+    frame._flashTime = frame._flashDuration
+    frame._cooldown = 0.15
+    frame:SetSize(120, 120)
+    if frame.texture then
+        frame.texture:SetAlpha(0.95)
+    end
+    frame:ClearAllPoints()
+    frame:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
+    frame:Show()
+
+    if SQOL.DB and SQOL.DB.DebugTrack then
+        dprint("CursorShake: manual flash.")
+    end
 end
 
 ------------------------------------------------------------
@@ -162,7 +418,8 @@ local function SQOL_GetStateStrings()
     local statsState = SQOL.DB.ShowIlvlSpd and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local npState = SQOL.DB.ShowNameplateObjectives and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local dmgState = SQOL.DB.DamageTextFont and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    return version, atState, spState, coState, loState, repState, statsState, npState, dmgState
+    local cursorState = SQOL.DB.CursorShakeHighlight and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    return version, atState, spState, coState, loState, repState, statsState, npState, dmgState, cursorState
 end
 
 ------------------------------------------------------------
@@ -1687,7 +1944,7 @@ end
 -- Splash
 ------------------------------------------------------------
 local function SQOL_Splash()
-    local version, atState, spState, coState, loState, repState, statsState, npState, dmgState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
@@ -1699,6 +1956,7 @@ local function SQOL_Splash()
     print("|cff33ff99NameplateObjectives:|r " .. npState)
     print("|cff33ff99StatsLine:|r " .. statsState)
     print("|cff33ff99DamageTextFont:|r " .. dmgState)
+    print("|cff33ff99CursorShake:|r " .. cursorState)
     print("|cffccccccType |cff00ff00/SQOL help|r for command list.|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
@@ -1751,7 +2009,7 @@ end
 -- Help
 ------------------------------------------------------------
 local function SQOL_Help()
-    local version, atState, spState, coState, loState, repState, statsState, npState, dmgState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99-----------------------------------|r")
@@ -1770,13 +2028,17 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL ilvl|r        |cffcccccc- Shorthand for stats|r")
     print("|cff00ff00/SQOL damagefont|r  |cffcccccc- Toggle custom damage text font|r")
     print("|cff00ff00/SQOL df|r          |cffcccccc- Shorthand for damagefont|r")
+    print("|cff00ff00/SQOL cursor|r      |cffcccccc- Highlight cursor when you shake the mouse|r")
+    print("|cff00ff00/SQOL cs|r          |cffcccccc- Shorthand for cursor|r")
+    print("|cff00ff00/SQOL cursorflash|r |cffcccccc- Flash cursor ring once (debug)|r")
+    print("|cff00ff00/SQOL cf|r          |cffcccccc- Shorthand for cursorflash|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
     print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState)
     print("|cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState .. "  |cff33ff99StatsLine:|r " .. statsState)
-    print("|cff33ff99DamageTextFont:|r " .. dmgState)
+    print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
@@ -1861,6 +2123,13 @@ function SQOL.ApplyOption(key)
         else
             SQOL_RestoreDamageTextFont()
         end
+
+    elseif key == "CursorShakeHighlight" then
+        if SQOL.DB.CursorShakeHighlight then
+            SQOL_CursorShake_Enable()
+        else
+            SQOL_CursorShake_Disable()
+        end
     end
 
     SQOL.SyncSettingObject(key)
@@ -1911,6 +2180,12 @@ SlashCmdList["SQOL"] = function(msg)
     elseif msg == "damagefont" or msg == "df" then
         toggle("DamageTextFont", "Damage text font is")
 
+    elseif msg == "cursor" or msg == "cs" then
+        toggle("CursorShakeHighlight", "Cursor shake highlight is")
+
+    elseif msg == "cursorflash" or msg == "cf" then
+        SQOL_CursorShake_FlashNow(0.8)
+
     elseif msg == "debugtrack" or msg == "dbg" then
         toggle("DebugTrack", "Debug tracking")
 
@@ -1927,8 +2202,8 @@ SlashCmdList["SQOL"] = function(msg)
         SQOL_Help()
 
     else
-        local version, at, sp, co, lo, rep, stats, np, dmg = SQOL_GetStateStrings()
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg)
+        local version, at, sp, co, lo, rep, stats, np, dmg, cursor = SQOL_GetStateStrings()
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor)
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -1968,6 +2243,12 @@ f:SetScript("OnEvent", function(self, event, ...)
 
         if SQOL.DB.DamageTextFont then
             SQOL_ApplyDamageTextFont()
+        end
+
+        if SQOL.DB.CursorShakeHighlight then
+            SQOL_CursorShake_Enable()
+        else
+            SQOL_CursorShake_Disable()
         end
 
         -- Ensure PlayerFrame iLvl display.
@@ -2110,4 +2391,3 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
     end
 end)
-
