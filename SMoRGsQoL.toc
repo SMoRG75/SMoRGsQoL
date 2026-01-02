@@ -1,15 +1,16 @@
-## Interface: 120000
+## Interface: 110207, 120000, 120001
 ## Title: SMoRG's QoL
-## Notes: Quality-of-life tweaks: auto-track newly accepted quests, colorized progress messages, optional login splash, hide completed achievements, auto-watch reputation gains, and PlayerFrame iLvl + Speed.
+## Notes: Quality-of-life tweaks: auto-track newly accepted quests, colorized progress messages, optional login splash, hide completed achievements, auto-watch reputation gains, custom damage text font, and PlayerFrame iLvl + Speed.
 ## Author: SMoRG75
 ## Version: 1.0.6
+## IconTexture: Interface\AddOns\SMoRGsQoL\smorgsqol.png
 ## SavedVariables: SQOL_DB
-## X-Curse-Project-ID: 1354943
+## X-Curse-Project-ID: 
 ## X-Interface: 120000
 ## X-Category: Quests & Leveling
 ## X-License: MIT
 ## X-Website: https://github.com/SMoRG75/SMoRGsQoL
-## X-Feedback: https://www.curseforge.com/wow/addons/questcompletesound
+## X-Feedback: https://www.curseforge.com/wow/addons/smorgsqol
 ## X-Localizations: enUS
 
 SMoRGsQoL.lua

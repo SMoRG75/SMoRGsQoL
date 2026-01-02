@@ -22,6 +22,8 @@ Everything is toggleable:
   - Shows quest objective progress (e.g., 0/10) above relevant nameplates, with fallbacks for bonus/world quests.
 - **PlayerFrame iLvl + Speed**
   - Adds an extra line to the PlayerFrame: `iLvl: xx.x  Spd: yy%`
+- **Custom damage text font**
+  - Replaces floating combat text damage numbers with a custom font.
 
 ## Configuration
 
@@ -42,6 +44,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol rep` (or `/sqol rw`)
 - `/sqol nameplate` (or `/sqol np`)
 - `/sqol stats` (or `/sqol ilvl`)
+- `/sqol damagefont` (or `/sqol df`)
 
 ## Saved Variables
 

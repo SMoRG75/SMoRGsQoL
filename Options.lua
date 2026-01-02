@@ -249,6 +249,7 @@ local function SQOL_CreateSettingsCategory()
     AddCheckbox("RepWatch", "Auto-watch reputation gains", "When a faction reputation changes, automatically switch your watched faction to the one that changed.")
     AddCheckbox("ShowNameplateObjectives", "Show objective counts on nameplates", "Show quest objective counts (e.g., 0/10) above relevant nameplates.")
     AddCheckbox("ShowIlvlSpd", "Show iLvl + Speed on PlayerFrame", "Adds an iLvl and movement speed line to your PlayerFrame.")
+    AddCheckbox("DamageTextFont", "Custom damage text font", "Use the SMoRGsQoL damage text font for floating combat text.")
     AddCheckbox("DebugTrack", "Debug tracking", "Print verbose debug information (for troubleshooting).")
 
     SQOL_ScheduleDefaultsButtonReplacement()

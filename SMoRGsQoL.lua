@@ -25,7 +25,10 @@ SQOL.defaults = {
     ShowNameplateObjectives = false,
 
     -- PlayerFrame line: "iLvl: xx.x  Spd: yy%"
-    ShowIlvlSpd  = false
+    ShowIlvlSpd  = false,
+
+    -- Floating combat text damage numbers font.
+    DamageTextFont = false
 }
 
 ------------------------------------------------------------
@@ -50,6 +53,28 @@ local function clamp01(x)
     if x < 0 then return 0 end
     if x > 1 then return 1 end
     return x
+end
+
+------------------------------------------------------------
+-- Damage text font
+------------------------------------------------------------
+local SQOL_DAMAGE_TEXT_FONT = "Interface\\AddOns\\SMoRGsQoL\\trashhand.ttf"
+
+local function SQOL_ApplyDamageTextFont()
+    if not SQOL._damageFontOriginal then
+        SQOL._damageFontOriginal = {
+            damage_text_font = _G.damage_text_font,
+            DAMAGE_TEXT_FONT = _G.DAMAGE_TEXT_FONT,
+        }
+    end
+    _G.damage_text_font = SQOL_DAMAGE_TEXT_FONT
+    _G.DAMAGE_TEXT_FONT = SQOL_DAMAGE_TEXT_FONT
+end
+
+local function SQOL_RestoreDamageTextFont()
+    if not SQOL._damageFontOriginal then return end
+    _G.damage_text_font = SQOL._damageFontOriginal.damage_text_font
+    _G.DAMAGE_TEXT_FONT = SQOL._damageFontOriginal.DAMAGE_TEXT_FONT
 end
 
 ------------------------------------------------------------
@@ -136,7 +161,8 @@ local function SQOL_GetStateStrings()
     local repState = SQOL.DB.RepWatch and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local statsState = SQOL.DB.ShowIlvlSpd and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local npState = SQOL.DB.ShowNameplateObjectives and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    return version, atState, spState, coState, loState, repState, statsState, npState
+    local dmgState = SQOL.DB.DamageTextFont and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    return version, atState, spState, coState, loState, repState, statsState, npState, dmgState
 end
 
 ------------------------------------------------------------
@@ -785,6 +811,7 @@ local function SQOL_NameplateObjectives_GetText(unit)
 ---@diagnostic disable-next-line: inject-field
         nameplate.SQOLObjectiveText = text
     else
+---@diagnostic disable-next-line: undefined-field
         local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
         local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
         text:ClearAllPoints()
@@ -1660,7 +1687,7 @@ end
 -- Splash
 ------------------------------------------------------------
 local function SQOL_Splash()
-    local version, atState, spState, coState, loState, repState, statsState, npState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, repState, statsState, npState, dmgState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
@@ -1671,6 +1698,7 @@ local function SQOL_Splash()
     print("|cff33ff99RepWatch:|r " .. repState)
     print("|cff33ff99NameplateObjectives:|r " .. npState)
     print("|cff33ff99StatsLine:|r " .. statsState)
+    print("|cff33ff99DamageTextFont:|r " .. dmgState)
     print("|cffccccccType |cff00ff00/SQOL help|r for command list.|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
@@ -1723,7 +1751,7 @@ end
 -- Help
 ------------------------------------------------------------
 local function SQOL_Help()
-    local version, atState, spState, coState, loState, repState, statsState, npState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, loState, repState, statsState, npState, dmgState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99-----------------------------------|r")
@@ -1740,12 +1768,15 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL np|r          |cffcccccc- Shorthand for nameplate|r")
     print("|cff00ff00/SQOL stats|r       |cffcccccc- Toggle PlayerFrame iLvl+Spd line|r")
     print("|cff00ff00/SQOL ilvl|r        |cffcccccc- Shorthand for stats|r")
+    print("|cff00ff00/SQOL damagefont|r  |cffcccccc- Toggle custom damage text font|r")
+    print("|cff00ff00/SQOL df|r          |cffcccccc- Shorthand for damagefont|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
     print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState)
     print("|cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState .. "  |cff33ff99StatsLine:|r " .. statsState)
+    print("|cff33ff99DamageTextFont:|r " .. dmgState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
@@ -1823,6 +1854,13 @@ function SQOL.ApplyOption(key)
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end
+
+    elseif key == "DamageTextFont" then
+        if SQOL.DB.DamageTextFont then
+            SQOL_ApplyDamageTextFont()
+        else
+            SQOL_RestoreDamageTextFont()
+        end
     end
 
     SQOL.SyncSettingObject(key)
@@ -1870,6 +1908,9 @@ SlashCmdList["SQOL"] = function(msg)
     elseif msg == "stats" or msg == "ilvl" then
         toggle("ShowIlvlSpd", "PlayerFrame iLvl+Spd line is")
 
+    elseif msg == "damagefont" or msg == "df" then
+        toggle("DamageTextFont", "Damage text font is")
+
     elseif msg == "debugtrack" or msg == "dbg" then
         toggle("DebugTrack", "Debug tracking")
 
@@ -1886,8 +1927,8 @@ SlashCmdList["SQOL"] = function(msg)
         SQOL_Help()
 
     else
-        local version, at, sp, co, lo, rep, stats, np = SQOL_GetStateStrings()
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats)
+        local version, at, sp, co, lo, rep, stats, np, dmg = SQOL_GetStateStrings()
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg)
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -1924,6 +1965,10 @@ f:SetScript("OnEvent", function(self, event, ...)
 
         -- Apply saved preference when logging in (only if already loaded)
         SQOL_ApplyAchievementFilter()
+
+        if SQOL.DB.DamageTextFont then
+            SQOL_ApplyDamageTextFont()
+        end
 
         -- Ensure PlayerFrame iLvl display.
         if SQOL.DB.ShowIlvlSpd then
