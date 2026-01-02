@@ -21,6 +21,7 @@
         "StaticPopup_Show",
         "YES",
         "NO",
-        "GetQuestProgressBarInfo"
+        "GetQuestProgressBarInfo",
+        "CombatText_UpdateSettings"
     ]
 }

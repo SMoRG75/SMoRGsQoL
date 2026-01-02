@@ -12,6 +12,7 @@ SQOL = SQOL or {}        -- addon namespace table (shared across files)
 SQOL.ADDON_NAME = ADDON_NAME
 local f = CreateFrame("Frame")
 
+
 ------------------------------------------------------------
 -- Defaults
 ------------------------------------------------------------
@@ -62,22 +63,16 @@ end
 -- Damage text font
 ------------------------------------------------------------
 local SQOL_DAMAGE_TEXT_FONT = "Interface\\AddOns\\SMoRGsQoL\\trashhand.ttf"
+local defaultDamageFont = "Fonts\\FRIZQT__.TTF"
 
 local function SQOL_ApplyDamageTextFont()
-    if not SQOL._damageFontOriginal then
-        SQOL._damageFontOriginal = {
-            damage_text_font = _G.damage_text_font,
-            DAMAGE_TEXT_FONT = _G.DAMAGE_TEXT_FONT,
-        }
-    end
-    _G.damage_text_font = SQOL_DAMAGE_TEXT_FONT
-    _G.DAMAGE_TEXT_FONT = SQOL_DAMAGE_TEXT_FONT
+    dprint("Set new damage font")
+    DAMAGE_TEXT_FONT = SQOL_DAMAGE_TEXT_FONT
 end
 
 local function SQOL_RestoreDamageTextFont()
-    if not SQOL._damageFontOriginal then return end
-    _G.damage_text_font = SQOL._damageFontOriginal.damage_text_font
-    _G.DAMAGE_TEXT_FONT = SQOL._damageFontOriginal.DAMAGE_TEXT_FONT
+    dprint("Restore damage font")
+    DAMAGE_TEXT_FONT = defaultDamageFont
 end
 
 ------------------------------------------------------------
@@ -249,10 +244,10 @@ local function SQOL_CursorShake_OnUpdate(self, elapsed)
     if SQOL.DB and SQOL.DB.DebugTrack then
         if (not self._debugNextPrint) or now >= self._debugNextPrint then
             self._debugNextPrint = now + 0.6
-            dprint(string.format(
-                "CursorShake: samples=%d total=%.1f net=%.1f speed=%.0f dirX=%d dirY=%d cooldown=%.2f flash=%.2f",
-                #samples, total, net, maxSpeed, dirChangesX, dirChangesY, self._cooldown or 0, self._flashTime or 0
-            ))
+            -- dprint(string.format(
+            --     "CursorShake: samples=%d total=%.1f net=%.1f speed=%.0f dirX=%d dirY=%d cooldown=%.2f flash=%.2f",
+            --     #samples, total, net, maxSpeed, dirChangesX, dirChangesY, self._cooldown or 0, self._flashTime or 0
+            -- ))
         end
     end
 
