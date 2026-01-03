@@ -5,8 +5,8 @@
 ## Version: 1.0.7
 ## IconTexture: Interface\AddOns\SMoRGsQoL\smorgsqol.png
 ## SavedVariables: SQOL_DB
-## X-Curse-Project-ID: 
-## X-Interface: 120000
+## X-Curse-Project-ID: 1418599
+## X-Interface: 120001
 ## X-Category: Quests & Leveling
 ## X-License: MIT
 ## X-Website: https://github.com/SMoRG75/SMoRGsQoL
