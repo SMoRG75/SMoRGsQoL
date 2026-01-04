@@ -380,7 +380,6 @@ function SQOL.Init(reset)
         end
         C_Timer.After(0.1, function()
             SQOL_ApplyAchievementFilter()
-            print("|cff33ff99SQoL:|r Achievement filter reset to show all achievements.")
         end)
     end
 end
