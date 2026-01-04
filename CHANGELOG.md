@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.8] - 2026-01-04
+
+### Changed
+- Progress for 100-based objectives now displays as a percent (e.g., 45% instead of 45/100).
+
+### Added
+- Quest completion alert with sound + chat message when a quest is ready to turn in (or done for bonus/world quests).
+- Debug tracking toggle and reset command (`/sqol debugtrack`, `/sqol reset`).
+
 ## [1.0.7] - 2026-01-02
 
 ### Added

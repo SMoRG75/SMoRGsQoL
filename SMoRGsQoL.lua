@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.7 by SMoRG75
+-- SMoRGsQoL v1.0.8 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
 -- Now with throttled updates and a stable PlayerFrame iLvl+Speed line.
@@ -438,6 +438,16 @@ local function SQOL_GetProgressColor(progress)
     return string.format("|cff%02x%02x%02x", R, G, 0)
 end
 
+local function SQOL_FormatProgressText(cur, total)
+    if type(cur) ~= "number" or type(total) ~= "number" or total <= 0 then
+        return nil
+    end
+    if total == 100 then
+        return string.format("%d%%", cur)
+    end
+    return string.format("%d/%d", cur, total)
+end
+
 ------------------------------------------------------------
 -- Colorize tracker objective lines (Retail tracker)
 -- Throttled to avoid excess work during rapid updates.
@@ -467,7 +477,9 @@ local function SQOL_RecolorQuestObjectives_Impl()
                         local fulfilled = (type(numFulfilled) == "number" and numFulfilled) or 0
                         local progress = (required > 0) and (fulfilled / required) or 0
                         local color = SQOL_GetProgressColor(progress)
-                        local text = string.format("%s%d/%d|r %s", color, fulfilled, required, objText or "")
+                        local progressText = SQOL_FormatProgressText(fulfilled, required) or string.format("%d/%d",
+                            fulfilled, required)
+                        local text = string.format("%s%s|r %s", color, progressText, objText or "")
                         local block = ObjectiveTrackerBlocksFrame and ObjectiveTrackerBlocksFrame:GetBlock(info.questID)
                         if block and block.lines then
                             for _, line in pairs(block.lines) do
@@ -879,7 +891,7 @@ local function SQOL_NameplateObjectives_GetProgressText(unit)
                 dprint("NP tooltip:", unit, "quest", tostring(questTitle), "line", tostring(line),
                     "progress", string.format("%d/%d", cur, total))
             end
-            local text = string.format("%d/%d", cur, total)
+            local text = SQOL_FormatProgressText(cur, total) or string.format("%d/%d", cur, total)
             if SQOL.DB and SQOL.DB.ColorProgress then
                 local progress = (total > 0) and (cur / total) or 0
                 local colorCode = SQOL_GetProgressColor(progress)
@@ -985,7 +997,8 @@ local function SQOL_NameplateObjectives_GetProgressText(unit)
         end
     end
 
-    local text = string.format("%d/%d", best.fulfilled or 0, best.required or 0)
+    local text = SQOL_FormatProgressText(best.fulfilled or 0, best.required or 0)
+        or string.format("%d/%d", best.fulfilled or 0, best.required or 0)
     if SQOL.DB and SQOL.DB.ColorProgress then
         local progress = (best.required and best.required > 0) and (best.fulfilled / best.required) or 0
         local colorCode = SQOL_GetProgressColor(progress)
@@ -1223,8 +1236,10 @@ local function SQOL_EnableCustomInfoMessages()
             cur, total = tonumber(cur), tonumber(total)
             local progress = (total and total > 0) and clamp01(cur / total) or 0
             local colorCode = SQOL_GetProgressColor(progress)
+            local progressText = SQOL_FormatProgressText(cur, total)
+            local displayMessage = progressText and string.format("%s: %s", label, progressText) or message
 
-            SQOL.MessageFrame:AddMessage(colorCode .. message .. "|r")
+            SQOL.MessageFrame:AddMessage(colorCode .. displayMessage .. "|r")
 
             dprint(string.format("Custom UI_INFO_MESSAGE: %s (%d/%d, %.2f)",
                 label, cur or -1, total or -1, progress))
