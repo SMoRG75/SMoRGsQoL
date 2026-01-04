@@ -1777,16 +1777,20 @@ local function SQOL_Rep_WithLegacyShown(fn)
 end
 
 local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID)
-    if C_Reputation and type(C_Reputation.SetWatchedFactionByID) == "function" and type(factionID) == "number" then
-        return safe_pcall(C_Reputation.SetWatchedFactionByID, factionID)
-    end
+    local result = SQOL_Rep_WithLegacyShown(function()
+        if C_Reputation and type(C_Reputation.SetWatchedFactionByID) == "function" and type(factionID) == "number" then
+            return safe_pcall(C_Reputation.SetWatchedFactionByID, factionID)
+        end
 
-    local legacy = rawget(_G, "SetWatchedFactionIndex")
-    if type(legacy) == "function" and type(index) == "number" then
-        return safe_pcall(legacy, index)
-    end
+        local legacy = rawget(_G, "SetWatchedFactionIndex")
+        if type(legacy) == "function" and type(index) == "number" then
+            return safe_pcall(legacy, index)
+        end
 
-    return false
+        return false
+    end)
+
+    return result or false
 end
 
 local function SQOL_Rep_BuildSnapshot()
@@ -1973,6 +1977,9 @@ local function SQOL_RepWatch_HandleFactionChangeMessage(msg)
 
     local id, name = SQOL_Rep_FindFactionIDFromMessage(msg)
     if not id and not name then
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("RepWatch -> Could not parse faction from message:", tostring(msg))
+        end
         return false
     end
 
@@ -2086,7 +2093,7 @@ local function SQOL_RepWatch_ScanAndSwitch()
     end)
 end
 
-function SQOL_RepWatch_ScheduleScan()
+function SQOL_RepWatch_ScheduleScan(reason)
     if SQOL._repWatchPending then
         return
     end
@@ -2109,6 +2116,14 @@ function SQOL_RepWatch_ScheduleScan()
             SQOL._repWatchRetryPending = false
         end
         return
+    end
+    if reason == "update_faction" and SQOL.DB and SQOL.DB.DebugTrack then
+        local now = (type(GetTime) == "function") and GetTime() or 0
+        local last = SQOL._repWatchLastUpdateDebug or 0
+        if (now - last) > 1.0 then
+            SQOL._repWatchLastUpdateDebug = now
+            dprint("RepWatch -> UPDATE_FACTION (queued)")
+        end
     end
     SQOL._repWatchPending = true
     C_Timer.After(0.20, function()
@@ -2550,7 +2565,7 @@ f:SetScript("OnEvent", function(self, event, ...)
 
     elseif event == "UPDATE_FACTION" then
         if SQOL.DB and SQOL.DB.RepWatch and SQOL_RepWatch_ScheduleScan then
-            SQOL_RepWatch_ScheduleScan()
+            SQOL_RepWatch_ScheduleScan("update_faction")
         end
 
     elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
@@ -2558,13 +2573,16 @@ f:SetScript("OnEvent", function(self, event, ...)
             local msg = ...
             local handled = false
 
-            if SQOL_RepWatch_HandleFactionChangeMessage then
-                handled = SQOL_RepWatch_HandleFactionChangeMessage(msg)
-            end
+        if SQOL.DB.DebugTrack then
+            dprint("RepWatch -> CHAT_MSG_COMBAT_FACTION_CHANGE:", tostring(msg))
+        end
+        if SQOL_RepWatch_HandleFactionChangeMessage then
+            handled = SQOL_RepWatch_HandleFactionChangeMessage(msg)
+        end
 
             -- Fallback: if we couldn't parse/resolve the faction, do a delta-based scan.
             if not handled and SQOL_RepWatch_ScheduleScan then
-                SQOL_RepWatch_ScheduleScan()
+                SQOL_RepWatch_ScheduleScan("chat_fallback")
             end
         end
 
