@@ -1187,6 +1187,13 @@ local function SQOL_EnableCustomInfoMessages()
         SQOL.MessageFrame:SetFading(true)
         SQOL.MessageFrame:SetFadeDuration(1.5)
         SQOL.MessageFrame:SetTimeVisible(2.5)
+        -- Ensure this overlay never blocks clicks on nearby UI (e.g., Transmog paging).
+        if SQOL.MessageFrame.EnableMouse then
+            SQOL.MessageFrame:EnableMouse(false)
+        end
+        if SQOL.MessageFrame.EnableMouseWheel then
+            SQOL.MessageFrame:EnableMouseWheel(false)
+        end
         -- Use explicit font to avoid dependency on UI object availability
         SQOL.MessageFrame:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
     end
@@ -1842,8 +1849,29 @@ local function SQOL_Rep_ParseFactionNameFromMessage(msg)
     return name
 end
 
+-- Avoid switching watched reputation while Collections/Transmog is open.
+local function SQOL_RepWatch_CollectionsOpen()
+    local wardrobe = rawget(_G, "WardrobeFrame")
+    if wardrobe and wardrobe.IsShown and wardrobe:IsShown() then
+        return true
+    end
+    local collection = rawget(_G, "WardrobeCollectionFrame")
+    if collection and collection.IsShown and collection:IsShown() then
+        return true
+    end
+    local journal = rawget(_G, "CollectionsJournal")
+    if journal and journal.IsShown and journal:IsShown() then
+        return true
+    end
+    return false
+end
+
 local function SQOL_RepWatch_HandleFactionChangeMessage(msg)
     if not SQOL.DB or not SQOL.DB.RepWatch then
+        return false
+    end
+    if SQOL_RepWatch_CollectionsOpen() then
+        SQOL._repWatchDeferred = true
         return false
     end
 
@@ -1854,8 +1882,13 @@ local function SQOL_RepWatch_HandleFactionChangeMessage(msg)
 
     local id = SQOL_Rep_FindFactionIDByName(name)
     if type(id) ~= "number" then
-        dprint("RepWatch -> Could not resolve factionID for:", name)
-        return false
+        SQOL._repPendingName = name
+        SQOL._repPendingAt = (type(GetTime) == "function") and GetTime() or 0
+        dprint("RepWatch -> Deferring watch until faction appears:", name)
+        if SQOL_RepWatch_ScheduleScan then
+            SQOL_RepWatch_ScheduleScan()
+        end
+        return true
     end
 
     local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, id)
@@ -1871,6 +1904,32 @@ end
 local function SQOL_RepWatch_ScanAndSwitch()
     if not SQOL.DB or not SQOL.DB.RepWatch then
         return
+    end
+
+    local skipSwitch = false
+    if type(SQOL._repPendingName) == "string" and SQOL._repPendingName ~= "" then
+        local pendingName = SQOL._repPendingName
+        local pendingId = SQOL_Rep_FindFactionIDByName(pendingName)
+        if type(pendingId) == "number" then
+            local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, pendingId)
+            if ok then
+                dprint("RepWatch -> Now watching (pending):", pendingName)
+            else
+                dprint("RepWatch -> Failed to set watched faction (pending):", pendingName)
+            end
+            SQOL._repPendingName = nil
+            SQOL._repPendingAt = nil
+            return
+        end
+
+        local now = (type(GetTime) == "function") and GetTime() or 0
+        if SQOL._repPendingAt and (now - SQOL._repPendingAt) < 5 then
+            skipSwitch = true
+            dprint("RepWatch -> Pending faction not in list yet:", pendingName)
+        else
+            SQOL._repPendingName = nil
+            SQOL._repPendingAt = nil
+        end
     end
 
     local num = SQOL_Rep_GetNumFactions()
@@ -1908,13 +1967,19 @@ local function SQOL_RepWatch_ScanAndSwitch()
                     bestFactionID = id
                     bestName = data.name
                 end
+            elseif type(cur) == "number" and cur > 0 and bestDelta <= 0 then
+                -- New faction discovered after the snapshot: treat current standing as the delta.
+                bestDelta = cur
+                bestIndex = i
+                bestFactionID = id
+                bestName = data.name
             end
 
             SQOL._repLastStanding[id] = cur
         end
     end
 
-    if bestDelta > 0 and (bestFactionID or bestIndex) then
+    if not skipSwitch and bestDelta > 0 and (bestFactionID or bestIndex) then
         local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(bestIndex, bestFactionID)
         if ok then
             dprint(string.format("RepWatch -> Now watching: %s (+%d)", tostring(bestName or bestFactionID), bestDelta))
@@ -1928,9 +1993,30 @@ function SQOL_RepWatch_ScheduleScan()
     if SQOL._repWatchPending then
         return
     end
+    if SQOL_RepWatch_CollectionsOpen() then
+        SQOL._repWatchDeferred = true
+        if SQOL._repWatchRetryPending then
+            return
+        end
+        SQOL._repWatchRetryPending = true
+        if C_Timer and type(C_Timer.After) == "function" then
+            C_Timer.After(0.5, function()
+                SQOL._repWatchRetryPending = false
+                if SQOL.DB and SQOL.DB.RepWatch then
+                    SQOL_RepWatch_ScheduleScan()
+                else
+                    SQOL._repWatchDeferred = false
+                end
+            end)
+        else
+            SQOL._repWatchRetryPending = false
+        end
+        return
+    end
     SQOL._repWatchPending = true
     C_Timer.After(0.20, function()
         SQOL._repWatchPending = false
+        SQOL._repWatchDeferred = false
         SQOL_RepWatch_ScanAndSwitch()
     end)
 end
