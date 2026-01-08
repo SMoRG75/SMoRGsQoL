@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.9] - 2026-01-07
+
+### Fixed
+- RepWatch now refreshes faction counts after expanding headers, so watched reputation switches reliably on gains.
+
 ## [1.0.8] - 2026-01-04
 
 ### Changed

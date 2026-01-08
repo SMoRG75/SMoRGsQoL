@@ -1735,14 +1735,102 @@ local function SQOL_Rep_ExpandAllHeaders()
         return false
     end
 
-    for i = 1, num do
+    local i = 1
+    while i <= num do
         local data = SQOL_Rep_GetFactionDataByIndex(i)
         if data and data.isHeader and data.isCollapsed then
             safe_pcall(legacy, i)
+            local updated = SQOL_Rep_GetNumFactions()
+            if type(updated) == "number" then
+                num = updated
+            end
         end
+        i = i + 1
     end
 
     return true
+end
+
+local function SQOL_Rep_CollapseHeader(index)
+    if C_Reputation and type(C_Reputation.CollapseFactionHeader) == "function" then
+        return safe_pcall(C_Reputation.CollapseFactionHeader, index)
+    end
+
+    local legacy = rawget(_G, "CollapseFactionHeader")
+    if type(legacy) == "function" then
+        return safe_pcall(legacy, index)
+    end
+
+    return false
+end
+
+local function SQOL_Rep_SnapshotCollapsedHeaders()
+    local num = SQOL_Rep_GetNumFactions()
+    if not num then
+        return nil
+    end
+
+    local counts = {}
+    local collapsed = {}
+    for i = 1, num do
+        local data = SQOL_Rep_GetFactionDataByIndex(i)
+        if data and data.isHeader and type(data.name) == "string" and data.name ~= "" then
+            counts[data.name] = (counts[data.name] or 0) + 1
+            if data.isCollapsed then
+                local key = data.name .. "|" .. counts[data.name]
+                collapsed[key] = true
+            end
+        end
+    end
+
+    return collapsed
+end
+
+local function SQOL_Rep_RestoreCollapsedHeaders(collapsed)
+    if type(collapsed) ~= "table" then
+        return
+    end
+
+    local num = SQOL_Rep_GetNumFactions()
+    if not num then
+        return
+    end
+
+    local counts = {}
+    for i = 1, num do
+        local data = SQOL_Rep_GetFactionDataByIndex(i)
+        if data and data.isHeader and type(data.name) == "string" and data.name ~= "" then
+            counts[data.name] = (counts[data.name] or 0) + 1
+            local key = data.name .. "|" .. counts[data.name]
+            if collapsed[key] then
+                SQOL_Rep_CollapseHeader(i)
+            end
+        end
+    end
+end
+
+local function SQOL_Rep_WithExpandedHeaders(fn)
+    if type(fn) ~= "function" then
+        return nil
+    end
+
+    local collapsed = SQOL_Rep_SnapshotCollapsedHeaders()
+    SQOL_Rep_ExpandAllHeaders()
+
+    local ok, result = pcall(fn)
+
+    if collapsed then
+        SQOL_Rep_RestoreCollapsedHeaders(collapsed)
+    end
+
+    if not ok then
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("RepWatch -> header expand error:", result)
+        end
+        return nil
+    end
+
+    return result
 end
 
 local function SQOL_Rep_WithLegacyShown(fn)
@@ -1776,18 +1864,92 @@ local function SQOL_Rep_WithLegacyShown(fn)
     return result
 end
 
-local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID)
+local function SQOL_Rep_GetWatchedFaction()
+    if C_Reputation and type(C_Reputation.GetWatchedFactionData) == "function" then
+        local data = C_Reputation.GetWatchedFactionData()
+        if data and type(data.factionID) == "number" then
+            return data.factionID, data.name
+        end
+        if data and type(data.name) == "string" and data.name ~= "" then
+            return nil, data.name
+        end
+    end
+
+    local legacy = rawget(_G, "GetWatchedFactionInfo")
+    if type(legacy) == "function" then
+        local name = legacy()
+        if type(name) == "string" and name ~= "" then
+            return nil, name
+        end
+    end
+
+    return nil, nil
+end
+
+local function SQOL_Rep_WatchedMatches(factionID, factionName)
+    local watchedID, watchedName = SQOL_Rep_GetWatchedFaction()
+    if type(factionID) == "number" and type(watchedID) == "number" and watchedID == factionID then
+        return true
+    end
+    if type(factionName) == "string" and factionName ~= "" and type(watchedName) == "string" then
+        return watchedName == factionName
+    end
+    return false
+end
+
+local function SQOL_Rep_FindFactionIndexByID(factionID)
+    if type(factionID) ~= "number" then
+        return nil
+    end
+
+    local num = SQOL_Rep_GetNumFactions()
+    if not num then
+        return nil
+    end
+
+    for i = 1, num do
+        local data = SQOL_Rep_GetFactionDataByIndex(i)
+        if data and data.factionID == factionID then
+            return i, data.name
+        end
+    end
+
+    return nil
+end
+
+local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID, factionName)
     local result = SQOL_Rep_WithLegacyShown(function()
+        local ok = false
         if C_Reputation and type(C_Reputation.SetWatchedFactionByID) == "function" and type(factionID) == "number" then
-            return safe_pcall(C_Reputation.SetWatchedFactionByID, factionID)
+            ok = safe_pcall(C_Reputation.SetWatchedFactionByID, factionID)
+            if ok and SQOL_Rep_WatchedMatches(factionID, factionName) then
+                return true
+            end
+            ok = false
         end
 
         local legacy = rawget(_G, "SetWatchedFactionIndex")
-        if type(legacy) == "function" and type(index) == "number" then
-            return safe_pcall(legacy, index)
+        if type(legacy) == "function" then
+            local legacyResult = SQOL_Rep_WithExpandedHeaders(function()
+                local useIndex = index
+                if type(useIndex) ~= "number" and type(factionID) == "number" then
+                    useIndex = SQOL_Rep_FindFactionIndexByID(factionID)
+                end
+                if type(useIndex) == "number" then
+                    local legacyOk = safe_pcall(legacy, useIndex)
+                    if legacyOk and SQOL_Rep_WatchedMatches(factionID, factionName) then
+                        return true
+                    end
+                    return false
+                end
+                return false
+            end)
+            if legacyResult ~= nil then
+                return legacyResult
+            end
         end
 
-        return false
+        return ok
     end)
 
     return result or false
@@ -1795,21 +1957,21 @@ end
 
 local function SQOL_Rep_BuildSnapshot()
     return SQOL_Rep_WithLegacyShown(function()
-        local num = SQOL_Rep_GetNumFactions()
-        if not num then
-            return nil
-        end
-
-        SQOL_Rep_ExpandAllHeaders()
-
-        local snap = {}
-        for i = 1, num do
-            local data = SQOL_Rep_GetFactionDataByIndex(i)
-            if data and type(data.factionID) == "number" and type(data.currentStanding) == "number" then
-                snap[data.factionID] = data.currentStanding
+        return SQOL_Rep_WithExpandedHeaders(function()
+            local num = SQOL_Rep_GetNumFactions()
+            if not num then
+                return nil
             end
-        end
-        return snap
+
+            local snap = {}
+            for i = 1, num do
+                local data = SQOL_Rep_GetFactionDataByIndex(i)
+                if data and type(data.factionID) == "number" and type(data.currentStanding) == "number" then
+                    snap[data.factionID] = data.currentStanding
+                end
+            end
+            return snap
+        end)
     end)
 end
 
@@ -1836,20 +1998,20 @@ local function SQOL_Rep_RebuildNameMap()
     SQOL_TableWipe(SQOL._repNameToID)
 
     local ok = SQOL_Rep_WithLegacyShown(function()
-        local num = SQOL_Rep_GetNumFactions()
-        if not num then
-            return false
-        end
-
-        SQOL_Rep_ExpandAllHeaders()
-
-        for i = 1, num do
-            local data = SQOL_Rep_GetFactionDataByIndex(i)
-            if data and type(data.factionID) == "number" and type(data.name) == "string" and data.name ~= "" then
-                SQOL._repNameToID[data.name] = data.factionID
+        return SQOL_Rep_WithExpandedHeaders(function()
+            local num = SQOL_Rep_GetNumFactions()
+            if not num then
+                return false
             end
-        end
-        return true
+
+            for i = 1, num do
+                local data = SQOL_Rep_GetFactionDataByIndex(i)
+                if data and type(data.factionID) == "number" and type(data.name) == "string" and data.name ~= "" then
+                    SQOL._repNameToID[data.name] = data.factionID
+                end
+            end
+            return true
+        end)
     end)
 
     return ok or false
@@ -1993,7 +2155,7 @@ local function SQOL_RepWatch_HandleFactionChangeMessage(msg)
         return true
     end
 
-    local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, id)
+    local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, id, name)
     if ok then
         dprint("RepWatch -> Now watching:", name)
         return true
@@ -2013,7 +2175,7 @@ local function SQOL_RepWatch_ScanAndSwitch()
         local pendingName = SQOL._repPendingName
         local pendingId = SQOL_Rep_FindFactionIDByName(pendingName)
         if type(pendingId) == "number" then
-            local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, pendingId)
+            local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, pendingId, pendingName)
             if ok then
                 dprint("RepWatch -> Now watching (pending):", pendingName)
             else
@@ -2035,61 +2197,63 @@ local function SQOL_RepWatch_ScanAndSwitch()
     end
 
     SQOL_Rep_WithLegacyShown(function()
-        local num = SQOL_Rep_GetNumFactions()
-        if not num then
-            if SQOL.DB.DebugTrack and not SQOL._repApiWarned then
-                SQOL._repApiWarned = true
-                dprint("RepWatch -> Reputation APIs not available in this client build.")
+        return SQOL_Rep_WithExpandedHeaders(function()
+            local num = SQOL_Rep_GetNumFactions()
+            if not num then
+                if SQOL.DB.DebugTrack and not SQOL._repApiWarned then
+                    SQOL._repApiWarned = true
+                    dprint("RepWatch -> Reputation APIs not available in this client build.")
+                end
+                return nil
             end
-            return
-        end
 
-        SQOL_Rep_ExpandAllHeaders()
+            if type(SQOL._repLastStanding) ~= "table" then
+                SQOL._repLastStanding = SQOL_Rep_BuildSnapshot()
+                dprint("RepWatch -> Snapshot initialized.")
+                return nil
+            end
 
-        if type(SQOL._repLastStanding) ~= "table" then
-            SQOL._repLastStanding = SQOL_Rep_BuildSnapshot()
-            dprint("RepWatch -> Snapshot initialized.")
-            return
-        end
+            local bestDelta = 0
+            local bestIndex, bestFactionID, bestName = nil, nil, nil
 
-        local bestDelta = 0
-        local bestIndex, bestFactionID, bestName = nil, nil, nil
+            for i = 1, num do
+                local data = SQOL_Rep_GetFactionDataByIndex(i)
+                if data and type(data.factionID) == "number" and type(data.currentStanding) == "number" then
+                    local id = data.factionID
+                    local prev = SQOL._repLastStanding[id]
+                    local cur = data.currentStanding
 
-        for i = 1, num do
-            local data = SQOL_Rep_GetFactionDataByIndex(i)
-            if data and type(data.factionID) == "number" and type(data.currentStanding) == "number" then
-                local id = data.factionID
-                local prev = SQOL._repLastStanding[id]
-                local cur = data.currentStanding
-
-                if type(prev) == "number" then
-                    local delta = cur - prev
-                    if delta > bestDelta then
-                        bestDelta = delta
+                    if type(prev) == "number" then
+                        local delta = cur - prev
+                        if delta > bestDelta then
+                            bestDelta = delta
+                            bestIndex = i
+                            bestFactionID = id
+                            bestName = data.name
+                        end
+                    elseif type(cur) == "number" and cur > 0 and bestDelta <= 0 then
+                        -- New faction discovered after the snapshot: treat current standing as the delta.
+                        bestDelta = cur
                         bestIndex = i
                         bestFactionID = id
                         bestName = data.name
                     end
-                elseif type(cur) == "number" and cur > 0 and bestDelta <= 0 then
-                    -- New faction discovered after the snapshot: treat current standing as the delta.
-                    bestDelta = cur
-                    bestIndex = i
-                    bestFactionID = id
-                    bestName = data.name
+
+                    SQOL._repLastStanding[id] = cur
                 end
-
-                SQOL._repLastStanding[id] = cur
             end
-        end
 
-        if not skipSwitch and bestDelta > 0 and (bestFactionID or bestIndex) then
-            local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(bestIndex, bestFactionID)
-            if ok then
-                dprint(string.format("RepWatch -> Now watching: %s (+%d)", tostring(bestName or bestFactionID), bestDelta))
-            else
-                dprint("RepWatch -> Could not set watched faction.")
+            if not skipSwitch and bestDelta > 0 and (bestFactionID or bestIndex) then
+                local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(bestIndex, bestFactionID, bestName)
+                if ok then
+                    dprint(string.format("RepWatch -> Now watching: %s (+%d)", tostring(bestName or bestFactionID), bestDelta))
+                else
+                    dprint("RepWatch -> Could not set watched faction.")
+                end
             end
-        end
+
+            return nil
+        end)
     end)
 end
 
