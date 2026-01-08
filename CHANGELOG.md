@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.10] - 2026-01-08
+
+### Fixed
+- RepWatch preserves collapsed reputation headers instead of forcing the list open.
+- RepWatch verifies the watched faction actually changed and falls back to legacy index switching when needed.
+
 ## [1.0.9] - 2026-01-07
 
 ### Fixed
