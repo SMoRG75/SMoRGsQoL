@@ -1917,6 +1917,26 @@ local function SQOL_Rep_FindFactionIndexByID(factionID)
     return nil
 end
 
+local function SQOL_Rep_FindFactionIndexByName(name)
+    if type(name) ~= "string" or name == "" then
+        return nil
+    end
+
+    local num = SQOL_Rep_GetNumFactions()
+    if not num then
+        return nil
+    end
+
+    for i = 1, num do
+        local data = SQOL_Rep_GetFactionDataByIndex(i)
+        if data and data.name == name then
+            return i, data.factionID
+        end
+    end
+
+    return nil
+end
+
 local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID, factionName)
     local result = SQOL_Rep_WithLegacyShown(function()
         local ok = false
@@ -1932,8 +1952,12 @@ local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID, factionNa
         if type(legacy) == "function" then
             local legacyResult = SQOL_Rep_WithExpandedHeaders(function()
                 local useIndex = index
-                if type(useIndex) ~= "number" and type(factionID) == "number" then
-                    useIndex = SQOL_Rep_FindFactionIndexByID(factionID)
+                if type(useIndex) ~= "number" then
+                    if type(factionID) == "number" then
+                        useIndex = SQOL_Rep_FindFactionIndexByID(factionID)
+                    elseif type(factionName) == "string" and factionName ~= "" then
+                        useIndex = SQOL_Rep_FindFactionIndexByName(factionName)
+                    end
                 end
                 if type(useIndex) == "number" then
                     local legacyOk = safe_pcall(legacy, useIndex)
@@ -2146,6 +2170,12 @@ local function SQOL_RepWatch_HandleFactionChangeMessage(msg)
     end
 
     if type(id) ~= "number" then
+        local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, nil, name)
+        if ok then
+            dprint("RepWatch -> Now watching (name):", name)
+            return true
+        end
+
         SQOL._repPendingName = name
         SQOL._repPendingAt = (type(GetTime) == "function") and GetTime() or 0
         dprint("RepWatch -> Deferring watch until faction appears:", name)
@@ -2181,6 +2211,14 @@ local function SQOL_RepWatch_ScanAndSwitch()
             else
                 dprint("RepWatch -> Failed to set watched faction (pending):", pendingName)
             end
+            SQOL._repPendingName = nil
+            SQOL._repPendingAt = nil
+            return
+        end
+
+        local ok = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, nil, pendingName)
+        if ok then
+            dprint("RepWatch -> Now watching (pending name):", pendingName)
             SQOL._repPendingName = nil
             SQOL._repPendingAt = nil
             return
