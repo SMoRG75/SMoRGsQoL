@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.8 by SMoRG75
+-- SMoRGsQoL v1.0.10 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
 -- Now with throttled updates and a stable PlayerFrame iLvl+Speed line.

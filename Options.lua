@@ -100,7 +100,6 @@ end
 
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
-eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:SetScript("OnEvent", function(_, event, addonName)
     if event == "PLAYER_LOGIN" then
         SQOL_CreateSettingsCategory()
