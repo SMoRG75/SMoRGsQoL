@@ -21,6 +21,7 @@ SQOL.defaults = {
     DebugTrack    = false,
     ShowSplash    = false,
     ColorProgress = false,
+    QuestCompleteSound = true,
     HideDoneAchievements = false,
     RepWatch     = false,
     ShowNameplateObjectives = false,
@@ -407,13 +408,14 @@ local function SQOL_GetStateStrings()
     local atState = SQOL.DB.AutoTrack     and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local spState = SQOL.DB.ShowSplash    and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local coState = SQOL.DB.ColorProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    local qsState = SQOL.DB.QuestCompleteSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local loState = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local repState = SQOL.DB.RepWatch and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local statsState = SQOL.DB.ShowIlvlSpd and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local npState = SQOL.DB.ShowNameplateObjectives and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local dmgState = SQOL.DB.DamageTextFont and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local cursorState = SQOL.DB.CursorShakeHighlight and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    return version, atState, spState, coState, loState, repState, statsState, npState, dmgState, cursorState
+    return version, atState, spState, coState, qsState, loState, repState, statsState, npState, dmgState, cursorState
 end
 
 ------------------------------------------------------------
@@ -2339,13 +2341,14 @@ end
 -- Splash
 ------------------------------------------------------------
 local function SQOL_Splash()
-    local version, atState, spState, coState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, qsState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
     print("|cff33ff99AutoTrack:|r " .. atState)
     print("|cff33ff99Splash:|r " .. spState)
     print("|cff33ff99ColorProgress:|r " .. coState)
+    print("|cff33ff99QuestSound:|r " .. qsState)
     print("|cff33ff99HideDoneAchievements:|r " .. loState)
     print("|cff33ff99RepWatch:|r " .. repState)
     print("|cff33ff99NameplateObjectives:|r " .. npState)
@@ -2379,7 +2382,9 @@ local function SQOL_CheckQuestProgress()
                 -- If all objectives done and not previously marked complete
                 if allDone and not SQOL.fullyCompleted[info.questID] then
                     SQOL.fullyCompleted[info.questID] = true
-                    PlaySound(6199, "Master")
+                    if SQOL.DB and SQOL.DB.QuestCompleteSound then
+                        PlaySound(6199, "Master")
+                    end
 
                     -- Determine quest type
                     local isTask = C_QuestLog.IsQuestTask(info.questID)
@@ -2404,7 +2409,7 @@ end
 -- Help
 ------------------------------------------------------------
 local function SQOL_Help()
-    local version, atState, spState, coState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
+    local version, atState, spState, coState, qsState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99-----------------------------------|r")
@@ -2412,6 +2417,8 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL at|r          |cffcccccc- Shorthand for autotrack|r")
     print("|cff00ff00/SQOL color|r       |cffcccccc- Toggle progress colorization|r")
     print("|cff00ff00/SQOL col|r         |cffcccccc- Shorthand for color|r")
+    print("|cff00ff00/SQOL questsound|r  |cffcccccc- Toggle quest completion sound|r")
+    print("|cff00ff00/SQOL qs|r          |cffcccccc- Shorthand for questsound|r")
     print("|cff00ff00/SQOL hideach|r     |cffcccccc- Toggle hiding completed achievements|r")
     print("|cff00ff00/SQOL ha|r          |cffcccccc- Shorthand for hideach|r")
     print("|cff00ff00/SQOL splash|r      |cffcccccc- Toggle splash on login|r")
@@ -2431,8 +2438,9 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
-    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99HideDoneAchievements:|r " .. loState)
-    print("|cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState .. "  |cff33ff99StatsLine:|r " .. statsState)
+    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99QuestSound:|r " .. qsState)
+    print("|cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState)
+    print("|cff33ff99StatsLine:|r " .. statsState)
     print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
@@ -2560,6 +2568,9 @@ SlashCmdList["SQOL"] = function(msg)
     elseif msg == "color" or msg == "col" then
         toggle("ColorProgress", "Progress colorization is")
 
+    elseif msg == "questsound" or msg == "qs" then
+        toggle("QuestCompleteSound", "Quest completion sound is")
+
     elseif msg == "splash" then
         toggle("ShowSplash", "Splash is")
 
@@ -2597,8 +2608,8 @@ SlashCmdList["SQOL"] = function(msg)
         SQOL_Help()
 
     else
-        local version, at, sp, co, lo, rep, stats, np, dmg, cursor = SQOL_GetStateStrings()
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor)
+        local version, at, sp, co, qs, lo, rep, stats, np, dmg, cursor = SQOL_GetStateStrings()
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor)
         print("|cffccccccCommands:|r help for more info")
     end
 end

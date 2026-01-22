@@ -11,7 +11,7 @@ Everything is toggleable:
 - 🧭 **Auto-track newly accepted quests**
   - Automatically tracks new quests in the Objective Tracker (with sanity checks to avoid unsupported edge cases).
 - 🔔 **Quest completion alert**
-  - Plays a sound and prints a chat message when a quest is ready to turn in (or done for bonus/world quests).
+  - Plays a sound (toggleable) and prints a chat message when a quest is ready to turn in (or done for bonus/world quests).
 - 🎨 **Colorized progress messages**
   - Colorizes common progress patterns like `3/10` or `45%` and quest objective progress (red → yellow → green).
 - 🚪 **Login splash**
@@ -45,6 +45,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol help`
 - `/sqol autotrack` (or `/sqol at`)
 - `/sqol color` (or `/sqol col`)
+- `/sqol questsound` (or `/sqol qs`)
 - `/sqol splash`
 - `/sqol hideach` (or `/sqol ha`)
 - `/sqol rep` (or `/sqol rw`)
