@@ -513,6 +513,20 @@ end
 SQOL._npUnits = SQOL._npUnits or {}
 SQOL._npUpdatePending = false
 
+local function SQOL_NameplateObjectives_SafeCall(fn, ...)
+    if type(fn) ~= "function" then
+        return false
+    end
+    local ok, a, b, c, d, e = pcall(fn, ...)
+    if not ok then
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP safety:", a)
+        end
+        return false
+    end
+    return true, a, b, c, d, e
+end
+
 local function SQOL_NameplateObjectives_GetNpcID(unit)
     if type(UnitGUID) ~= "function" then
         return nil
@@ -534,9 +548,19 @@ local function SQOL_NameplateObjectives_GetQuestEntries(unit)
 
     local entries
     if type(C_QuestLog.GetQuestsForNamePlate) == "function" then
-        entries = C_QuestLog.GetQuestsForNamePlate(unit)
+        local ok, result = pcall(C_QuestLog.GetQuestsForNamePlate, unit)
+        if ok then
+            entries = result
+        elseif SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP GetQuestsForNamePlate error:", result)
+        end
     elseif type(C_QuestLog.GetQuestsForNameplate) == "function" then
-        entries = C_QuestLog.GetQuestsForNameplate(unit)
+        local ok, result = pcall(C_QuestLog.GetQuestsForNameplate, unit)
+        if ok then
+            entries = result
+        elseif SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP GetQuestsForNameplate error:", result)
+        end
     end
 
     if SQOL.DB and SQOL.DB.DebugTrack then
@@ -588,7 +612,13 @@ local function SQOL_NameplateObjectives_GetTooltipProgress(unit)
         return nil
     end
 
-    local data = C_TooltipInfo.GetUnit(unit)
+    local ok, data = pcall(C_TooltipInfo.GetUnit, unit)
+    if not ok then
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP tooltip error:", data)
+        end
+        return nil
+    end
     if not data or type(data.lines) ~= "table" then
         return nil
     end
@@ -1033,6 +1063,13 @@ local function SQOL_NameplateObjectives_GetAnchor(nameplate)
         return nameplate
     end
 
+    local healthBar = rawget(unitFrame, "healthBar")
+        or rawget(unitFrame, "HealthBar")
+        or rawget(unitFrame, "HealthBarsContainer")
+    if healthBar then
+        return healthBar
+    end
+
     local nameText = rawget(unitFrame, "name")
         or rawget(unitFrame, "Name")
         or rawget(unitFrame, "nameText")
@@ -1047,10 +1084,7 @@ local function SQOL_NameplateObjectives_GetAnchor(nameplate)
         return nameText
     end
 
-    local healthBar = rawget(unitFrame, "healthBar")
-        or rawget(unitFrame, "HealthBar")
-        or rawget(unitFrame, "HealthBarsContainer")
-    return healthBar or unitFrame
+    return unitFrame
 end
 
 local function SQOL_NameplateObjectives_GetText(unit)
@@ -1058,7 +1092,13 @@ local function SQOL_NameplateObjectives_GetText(unit)
         return nil
     end
 
-    local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+    local ok, nameplate = pcall(C_NamePlate.GetNamePlateForUnit, unit)
+    if not ok then
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP GetNamePlateForUnit error:", nameplate)
+        end
+        return nil
+    end
     if not nameplate then
         return nil
     end
@@ -1070,7 +1110,7 @@ local function SQOL_NameplateObjectives_GetText(unit)
         local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
 
         text = unitFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        text:SetPoint("BOTTOM", anchor, "TOP", 0, 4)
+        text:SetPoint("BOTTOM", anchor, "TOP", 0, 15)
         text:SetJustifyH("CENTER")
         text:SetWordWrap(false)
         if text.SetMaxLines then text:SetMaxLines(1) end
@@ -1081,7 +1121,7 @@ local function SQOL_NameplateObjectives_GetText(unit)
         local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
         local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
         text:ClearAllPoints()
-        text:SetPoint("BOTTOM", anchor, "TOP", 0, 4)
+        text:SetPoint("BOTTOM", anchor, "TOP", 0, 15)
     end
 
     return text, nameplate
@@ -1095,12 +1135,15 @@ local function SQOL_NameplateObjectives_UpdateUnit(unit)
         return
     end
 
-    local text, nameplate = SQOL_NameplateObjectives_GetText(unit)
-    if not text then
+    local okText, text, nameplate = SQOL_NameplateObjectives_SafeCall(SQOL_NameplateObjectives_GetText, unit)
+    if not okText or not text then
         return
     end
 
-    local progressText = SQOL_NameplateObjectives_GetProgressText(unit)
+    local okProgress, progressText = SQOL_NameplateObjectives_SafeCall(SQOL_NameplateObjectives_GetProgressText, unit)
+    if not okProgress then
+        return
+    end
     if progressText then
         text:SetText(progressText)
         text:Show()
@@ -1160,7 +1203,13 @@ local function SQOL_NameplateObjectives_RefreshVisibleUnits()
         SQOL._npUnits[unit] = nil
     end
 
-    local plates = C_NamePlate.GetNamePlates()
+    local ok, plates = pcall(C_NamePlate.GetNamePlates)
+    if not ok then
+        if SQOL.DB and SQOL.DB.DebugTrack then
+            dprint("NP GetNamePlates error:", plates)
+        end
+        return
+    end
     if type(plates) ~= "table" then
         return
     end
