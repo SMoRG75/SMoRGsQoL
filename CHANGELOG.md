@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.11] - 2026-01-29
+
+### Fixed
+- Better nameplate objective handling
+
 ## [1.0.10] - 2026-01-08
 
 ### Fixed
