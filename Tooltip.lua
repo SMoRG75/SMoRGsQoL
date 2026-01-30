@@ -33,6 +33,12 @@ local function IsEnabled()
     return true
 end
 
+---@class SQOL_GameTooltip : GameTooltip
+---@field RefreshData? fun(self: GameTooltip)
+
+---@class SQOL_MouseFocus
+---@field unit? string
+
 function SQOL.TooltipTinyTooltip_SetEnabled(isEnabled)
     -- Do not mutate the DB here; SMoRGsQoL.SetOption already did that.
     local enabled = isEnabled and true or false
@@ -46,12 +52,14 @@ function SQOL.TooltipTinyTooltip_SetEnabled(isEnabled)
     end
 
     -- Refresh currently visible tooltip to immediately apply/remove styling.
-    if GameTooltip and GameTooltip.IsShown and GameTooltip:IsShown() then
-        if GameTooltip.RefreshData then
-            pcall(GameTooltip.RefreshData, GameTooltip)
+    local tooltip = GameTooltip
+    ---@cast tooltip SQOL_GameTooltip
+    if tooltip and tooltip.IsShown and tooltip:IsShown() then
+        if tooltip.RefreshData then
+            pcall(tooltip.RefreshData, tooltip)
         else
             -- Fallback: hide to clear modified lines.
-            GameTooltip:Hide()
+            tooltip:Hide()
         end
     end
 end
@@ -76,6 +84,7 @@ local function GetTooltipUnit(tip)
     -- Fallback: emulate TinyTooltip's approach (Retail v12 has GetMouseFoci()).
     if type(GetMouseFoci) == "function" then
         local focus = GetMouseFoci()
+        ---@cast focus SQOL_MouseFocus
         if focus and focus.unit then
             return focus.unit
         end
@@ -118,10 +127,10 @@ local function TryGetHealthFromUnit(unit)
     local okMax, maxhp = pcall(UnitHealthMax, unit)
 
     if okHp and okMax then
-        hp = ToSafeNumber(hp)
-        maxhp = ToSafeNumber(maxhp)
-        if hp and maxhp and maxhp > 0 then
-            return hp, maxhp
+        local safeHp = ToSafeNumber(hp)
+        local safeMax = ToSafeNumber(maxhp)
+        if safeHp and safeMax and safeMax > 0 then
+            return safeHp, safeMax
         end
     end
 
@@ -135,9 +144,9 @@ local function TryGetHealthPercent(unit)
 
     local ok, pct = pcall(UnitHealthPercent, unit, true, CurveConstants and CurveConstants.ScaleTo100 or nil)
     if ok then
-        pct = ToSafeNumber(pct)
-        if pct then
-            return pct
+        local safePct = ToSafeNumber(pct)
+        if safePct then
+            return safePct
         end
     end
 
