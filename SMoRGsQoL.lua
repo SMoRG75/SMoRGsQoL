@@ -33,7 +33,10 @@ SQOL.defaults = {
     DamageTextFont = false,
 
     -- Highlight the cursor when shaking the mouse.
-    CursorShakeHighlight = false
+    CursorShakeHighlight = false,
+
+    -- TinyTooltip-style unit tooltip enhancements (health text + player styling).
+    TooltipTinyTooltip = false
 }
 
 ------------------------------------------------------------
@@ -2581,6 +2584,11 @@ function SQOL.ApplyOption(key)
             SQOL_CursorShake_Enable()
         else
             SQOL_CursorShake_Disable()
+        end
+
+    elseif key == "TooltipTinyTooltip" then
+        if SQOL.TooltipTinyTooltip_SetEnabled then
+            SQOL.TooltipTinyTooltip_SetEnabled(SQOL.DB.TooltipTinyTooltip)
         end
     end
 
