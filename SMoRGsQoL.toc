@@ -1,6 +1,6 @@
 ## Interface: 110207, 120000, 120001
 ## Title: SMoRG's QoL
-## Notes: Quality-of-life tweaks: auto-track newly accepted quests, colorized progress messages, optional login splash, hide completed achievements, auto-watch reputation gains, TinyTooltip-inspired unit tooltips (optional, Retail v12+), custom damage text font, PlayerFrame iLvl + Speed, and cursor shake highlight.
+## Notes: Quality-of-life tweaks: auto-track newly accepted quests, colorized progress messages, optional login splash, hide completed achievements, auto-watch reputation gains, custom damage text font, PlayerFrame iLvl + Speed, and cursor shake highlight.
 ## Author: SMoRG75
 ## Version: 1.0.12
 ## IconTexture: Interface\AddOns\SMoRGsQoL\smorgsqol.png
@@ -14,5 +14,4 @@
 ## X-Localizations: enUS
 
 SMoRGsQoL.lua
-Tooltip.lua
 Options.lua

@@ -24,9 +24,6 @@ Everything is toggleable:
   - Shows quest objective progress (e.g., 0/10 or 45%) above relevant nameplates, with fallbacks for bonus/world quests.
 - 🧾 **PlayerFrame iLvl + Speed**
   - Adds an extra line to the PlayerFrame: `iLvl: xx.x  Spd: yy%`
-- 🧷 **Unit tooltips (TinyTooltip-inspired)**
-  - Optional player/unit tooltip styling (Retail v12+ only). Disabled by default.
-
 - 🖋️ **Custom damage text font**
   - Replaces floating combat text damage numbers with a custom font.
 - 🖱️ **Cursor shake highlight**
@@ -66,5 +63,3 @@ Settings are stored per account in:
 - 💾 `SQOL_DB`
 
 ## Credits
-
-- Tooltips are inspired by **TinyTooltip**.

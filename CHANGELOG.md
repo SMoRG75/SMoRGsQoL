@@ -1,10 +1,5 @@
 # Changelog
 
-## [1.0.12] - 2026-01-30
-
-### Added
-- Optional TinyTooltip-inspired unit tooltip styling (Retail v12+). Disabled by default.
-
 ## [1.0.11] - 2026-01-29
 
 ### Fixed
