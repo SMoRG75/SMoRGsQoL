@@ -76,16 +76,105 @@ local function ToSafeNumber(v)
     return nil
 end
 
+-- NOTE: Retail can return "secret" unit tokens during tooltip processing.
+-- Guard all unit API calls to avoid taint errors on restricted values.
+local function SafeUnitCall(fn, ...)
+    if type(fn) ~= "function" then
+        return nil
+    end
+    local unit = ...
+    if unit ~= nil and type(unit) ~= "string" then
+        return nil
+    end
+    local ok, a, b, c, d, e = pcall(fn, ...)
+    if ok then
+        return a, b, c, d, e
+    end
+    return nil
+end
+
+local function SafeUnitExists(unit)
+    if not unit then return false end
+    local result = SafeUnitCall(UnitExists, unit)
+    return result and true or false
+end
+
+local function SafeUnitIsPlayer(unit)
+    if not unit then return false end
+    local result = SafeUnitCall(UnitIsPlayer, unit)
+    return result and true or false
+end
+
+local function SafeUnitIsDeadOrGhost(unit)
+    if not unit then return false end
+    local result = SafeUnitCall(UnitIsDeadOrGhost, unit)
+    return result and true or false
+end
+
+local function SafeUnitIsGhost(unit)
+    if not unit then return false end
+    local result = SafeUnitCall(UnitIsGhost, unit)
+    return result and true or false
+end
+
+local function SafeUnitIsUnit(unit, other)
+    if not unit or not other then return false end
+    local result = SafeUnitCall(UnitIsUnit, unit, other)
+    return result and true or false
+end
+
+local function SafeUnitName(unit)
+    if not unit then return nil, nil end
+    local name, realm = SafeUnitCall(UnitName, unit)
+    return name, realm
+end
+
+local function SafeUnitPVPName(unit)
+    if not unit then return nil end
+    local pvpName = SafeUnitCall(UnitPVPName, unit)
+    return pvpName
+end
+
+local function SafeUnitLevel(unit)
+    if not unit then return nil end
+    local level = SafeUnitCall(UnitLevel, unit)
+    return level
+end
+
+local function SafeUnitClass(unit)
+    if not unit then return nil, nil end
+    local className, classToken = SafeUnitCall(UnitClass, unit)
+    return className, classToken
+end
+
+local function SafeGetGuildInfo(unit)
+    if not unit then return nil, nil end
+    local guildName, guildRank = SafeUnitCall(GetGuildInfo, unit)
+    return guildName, guildRank
+end
+
+local function SafeUnitFactionGroup(unit)
+    if not unit then return nil, nil end
+    local factionGroup, factionName = SafeUnitCall(UnitFactionGroup, unit)
+    return factionGroup, factionName
+end
+
+local function SafeUnitRace(unit)
+    if not unit then return nil, nil, nil end
+    local raceName, raceFile, raceID = SafeUnitCall(UnitRace, unit)
+    return raceName, raceFile, raceID
+end
+
 local function GetTooltipUnit(tip)
     if not tip or not tip.GetUnit then return nil end
     local _, unit = tip:GetUnit()
-    if unit then return unit end
+    if unit and type(unit) == "string" then return unit end
 
     -- Fallback: emulate TinyTooltip's approach (Retail v12 has GetMouseFoci()).
     if type(GetMouseFoci) == "function" then
         local focus = GetMouseFoci()
         ---@cast focus SQOL_MouseFocus
-        if focus and focus.unit then
+        if focus and focus.unit and type(focus.unit) == "string" then
             return focus.unit
         end
     end
@@ -96,8 +185,8 @@ end
 local function GetUnitColor(unit)
     if not unit then return 1, 1, 1 end
 
-    if UnitIsPlayer(unit) then
-        local classToken = select(2, UnitClass(unit))
+    if SafeUnitIsPlayer(unit) then
+        local _, classToken = SafeUnitClass(unit)
         if classToken then
             if CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[classToken] then
                 local c = CUSTOM_CLASS_COLORS[classToken]
@@ -111,7 +200,10 @@ local function GetUnitColor(unit)
         return 1, 1, 1
     end
 
-    local r, g, b = GameTooltip_UnitColor(unit)
+    local r, g, b = SafeUnitCall(GameTooltip_UnitColor, unit)
+    if r == nil or g == nil or b == nil then
+        return 1, 1, 1
+    end
     -- TinyTooltip does a small tweak to make neutral mobs pop a bit more.
     if g == 0.6 then g = 0.9 end
     if r == 1 and g == 1 and b == 1 then
@@ -123,10 +215,10 @@ end
 local function TryGetHealthFromUnit(unit)
     -- IMPORTANT: In Retail, these may return "secret" values in some contexts.
     -- We only accept plain numbers.
-    local okHp, hp = pcall(UnitHealth, unit)
-    local okMax, maxhp = pcall(UnitHealthMax, unit)
+    local hp = SafeUnitCall(UnitHealth, unit)
+    local maxhp = SafeUnitCall(UnitHealthMax, unit)
 
-    if okHp and okMax then
+    if hp ~= nil and maxhp ~= nil then
         local safeHp = ToSafeNumber(hp)
         local safeMax = ToSafeNumber(maxhp)
         if safeHp and safeMax and safeMax > 0 then
@@ -142,8 +234,8 @@ local function TryGetHealthPercent(unit)
         return nil
     end
 
-    local ok, pct = pcall(UnitHealthPercent, unit, true, CurveConstants and CurveConstants.ScaleTo100 or nil)
-    if ok then
+    local pct = SafeUnitCall(UnitHealthPercent, unit, true, CurveConstants and CurveConstants.ScaleTo100 or nil)
+    if pct ~= nil then
         local safePct = ToSafeNumber(pct)
         if safePct then
             return safePct
@@ -174,14 +266,14 @@ local function TryGetHealthFromBar(bar)
 end
 
 local function FormatHealthText(unit, bar)
-    if unit and (UnitIsDeadOrGhost(unit) or UnitIsGhost(unit)) then
+    if unit and (SafeUnitIsDeadOrGhost(unit) or SafeUnitIsGhost(unit)) then
         -- We do not trust maxhp in all contexts; keep it simple.
         return string.format("<%s>", DEAD)
     end
 
     -- Prefer unit health when it's a plain number (best match to screenshot).
     local hp, maxhp = nil, nil
-    if unit and UnitExists(unit) then
+    if unit and SafeUnitExists(unit) then
         hp, maxhp = TryGetHealthFromUnit(unit)
     end
 
@@ -196,7 +288,7 @@ local function FormatHealthText(unit, bar)
     end
 
     -- If everything is "secret" (often out of range), try percent-only.
-    if unit and UnitExists(unit) then
+    if unit and SafeUnitExists(unit) then
         local pct = TryGetHealthPercent(unit)
         if pct then
             return string.format("?? / ?? (%.2f%%)", pct)
@@ -239,7 +331,7 @@ local function EnsureStatusBarOverlay()
         end
 
         local unit = self.SQOL_unit
-        if not unit or not UnitExists(unit) then
+        if not unit or not SafeUnitExists(unit) then
             if self.TextString then
                 self.TextString:Hide()
             end
@@ -270,16 +362,16 @@ local function EnsureStatusBarOverlay()
 end
 
 local function AddOrUpdateTargetLine(tip, unit)
-    if not tip or not unit or not UnitExists(unit) then return end
+    if not tip or not unit or not SafeUnitExists(unit) then return end
 
     local targetUnit = unit .. "target"
-    if not UnitExists(targetUnit) then return end
+    if not SafeUnitExists(targetUnit) then return end
 
-    local targetName = UnitName(targetUnit)
+    local targetName = SafeUnitName(targetUnit)
     if not targetName then return end
 
     local displayName = targetName
-    if UnitIsUnit(targetUnit, "player") then
+    if SafeUnitIsUnit(targetUnit, "player") then
         displayName = "YOU"
     end
 
@@ -322,14 +414,14 @@ local function Colorize(text, r, g, b)
 end
 
 local function StylePlayerTooltip(tip, unit)
-    if not tip or not unit or not UnitExists(unit) or not UnitIsPlayer(unit) then return end
+    if not tip or not unit or not SafeUnitExists(unit) or not SafeUnitIsPlayer(unit) then return end
 
     local tipName = tip:GetName()
     if not tipName then return end
 
     -- Line 1: Name (with title) + realm, colored by class.
-    local name, realm = UnitName(unit)
-    local pvpName = UnitPVPName(unit)
+    local name, realm = SafeUnitName(unit)
+    local pvpName = SafeUnitPVPName(unit)
     local displayName = (pvpName and pvpName ~= "") and pvpName or name
     if realm and realm ~= "" then
         displayName = string.format("%s %s", displayName, realm)
@@ -343,7 +435,7 @@ local function StylePlayerTooltip(tip, unit)
     end
 
     -- Line 2: Guild + rank (if any), magenta + grey.
-    local guildName, guildRank = GetGuildInfo(unit)
+    local guildName, guildRank = SafeGetGuildInfo(unit)
     local levelLineIndex = 2
     if guildName and guildName ~= "" then
         local guildText = string.format("%s %s", Colorize("<" .. guildName .. ">", 1, 0, 1), Colorize("(" .. (guildRank or "") .. ")", 0.75, 0.75, 0.75))
@@ -356,12 +448,12 @@ local function StylePlayerTooltip(tip, unit)
     end
 
     -- Level line: "80 Alliance Night Elf Druid" with colors similar to TinyTooltip.
-    local level = UnitLevel(unit)
+    local level = SafeUnitLevel(unit)
     local levelText = (level and level > 0) and tostring(level) or "??"
     local diffColor = (level and level > 0) and GetQuestDifficultyColor(level) or { r = 1, g = 1, b = 0 }
     local levelColored = Colorize(levelText, diffColor.r, diffColor.g, diffColor.b)
 
-    local factionGroup, factionName = UnitFactionGroup(unit)
+    local factionGroup, factionName = SafeUnitFactionGroup(unit)
     local fR, fG, fB = 1, 1, 1
     if factionGroup == "Alliance" then
         fR, fG, fB = 0.35, 0.55, 1
@@ -370,9 +462,8 @@ local function StylePlayerTooltip(tip, unit)
     end
     local factionColored = factionName and factionName ~= "" and Colorize(factionName, fR, fG, fB) or ""
 
-    local raceName = select(1, UnitRace(unit))
-    local _, classToken = UnitClass(unit)
-    local className = select(1, UnitClass(unit))
+    local raceName = SafeUnitRace(unit)
+    local className, classToken = SafeUnitClass(unit)
     local cR, cG, cB = rClass, gClass, bClass
     if classToken then
         if CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[classToken] then
@@ -419,13 +510,13 @@ local function OnUnitTooltip(tip)
     EnsureStatusBarOverlay()
 
     local unit = GetTooltipUnit(tip)
-    if unit and UnitExists(unit) and UnitIsPlayer(unit) then
+    if unit and SafeUnitExists(unit) and SafeUnitIsPlayer(unit) then
         StylePlayerTooltip(tip, unit)
     end
 
     -- Only bind statusbar updates to actual unit tooltips.
     if GameTooltipStatusBar then
-        if unit and UnitExists(unit) then
+        if unit and SafeUnitExists(unit) then
             GameTooltipStatusBar.SQOL_unit = unit
         else
             GameTooltipStatusBar.SQOL_unit = nil
@@ -438,7 +529,7 @@ local function OnUnitTooltip(tip)
     AddOrUpdateTargetLine(tip, unit)
 
     -- Refresh immediately.
-    if GameTooltipStatusBar and GameTooltipStatusBar.TextString and unit and UnitExists(unit) then
+    if GameTooltipStatusBar and GameTooltipStatusBar.TextString and unit and SafeUnitExists(unit) then
         local text = FormatHealthText(unit, GameTooltipStatusBar)
         if text then
             GameTooltipStatusBar.TextString:SetText(text)
