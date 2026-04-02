@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.13] - 2026-04-02
+
+### Fixed
+- Fixed 'msg' a secret string value tainted
+
 ## [1.0.11] - 2026-01-29
 
 ### Fixed

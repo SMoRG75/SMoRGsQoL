@@ -2118,11 +2118,12 @@ local function SQOL_Rep_StripChatCodes(msg)
     if type(msg) ~= "string" then
         return msg
     end
-    msg = msg:gsub("|c%x%x%x%x%x%x%x%x", "")
-    msg = msg:gsub("|r", "")
-    msg = msg:gsub("|T.-|t", "")
-    msg = msg:gsub("|A.-|a", "")
-    msg = msg:gsub("|H.-|h(.-)|h", "%1")
+    -- Some chat event payloads are "secret strings"; avoid msg:method() on them.
+    msg = string.gsub(msg, "|c%x%x%x%x%x%x%x%x", "")
+    msg = string.gsub(msg, "|r", "")
+    msg = string.gsub(msg, "|T.-|t", "")
+    msg = string.gsub(msg, "|A.-|a", "")
+    msg = string.gsub(msg, "|H.-|h(.-)|h", "%1")
     return msg
 end
 
@@ -2136,17 +2137,17 @@ local function SQOL_Rep_ParseFactionNameFromMessage(msg)
     -- enUS patterns (Retail default). If you ever play another locale,
     -- we can switch this over to use global string templates instead.
     local name =
-        msg:match("^Reputation with (.-) increased") or
-        msg:match("^Reputation with (.-) decreased") or
-        msg:match("^Your reputation with (.-) has increased") or
-        msg:match("^Your reputation with (.-) has decreased")
+        string.match(msg, "^Reputation with (.-) increased") or
+        string.match(msg, "^Reputation with (.-) decreased") or
+        string.match(msg, "^Your reputation with (.-) has increased") or
+        string.match(msg, "^Your reputation with (.-) has decreased")
 
     if type(name) ~= "string" then
         return nil
     end
 
-    name = name:gsub("%.$", "")
-    name = name:match("^%s*(.-)%s*$")
+    name = string.gsub(name, "%.$", "")
+    name = string.match(name, "^%s*(.-)%s*$")
 
     if name == "" then
         return nil
@@ -2176,7 +2177,7 @@ local function SQOL_Rep_FindFactionIDFromMessage(msg)
 
     local bestName, bestID
     for factionName, factionID in pairs(SQOL._repNameToID) do
-        if msg:find(factionName, 1, true) then
+        if string.find(msg, factionName, 1, true) then
             if not bestName or #factionName > #bestName then
                 bestName = factionName
                 bestID = factionID

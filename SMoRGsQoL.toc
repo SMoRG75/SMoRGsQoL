@@ -1,12 +1,12 @@
-## Interface: 110207, 120000, 120001
+## Interface: 120001, 120005
 ## Title: SMoRG's QoL
 ## Notes: Quality-of-life tweaks: auto-track newly accepted quests, colorized progress messages, optional login splash, hide completed achievements, auto-watch reputation gains, custom damage text font, PlayerFrame iLvl + Speed, and cursor shake highlight.
 ## Author: SMoRG75
-## Version: 1.0.12
+## Version: 1.0.13
 ## IconTexture: Interface\AddOns\SMoRGsQoL\smorgsqol.png
 ## SavedVariables: SQOL_DB
 ## X-Curse-Project-ID: 1418599
-## X-Interface: 120001
+## X-Interface: 120005
 ## X-Category: Quests & Leveling
 ## X-License: MIT
 ## X-Website: https://github.com/SMoRG75/SMoRGsQoL
