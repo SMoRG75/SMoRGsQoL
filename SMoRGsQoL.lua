@@ -219,9 +219,9 @@ local function SQOL_CursorShake_OnUpdate(self, elapsed)
 
     local now = SQOL_GetSafePreciseTime()
     local x, y = GetCursorPosition()
-    x = SQOL_SafeNumberValue(x)
-    y = SQOL_SafeNumberValue(y)
-    if not x or not y then
+    x = SQOL_SafeNumberValue(x) or 0
+    y = SQOL_SafeNumberValue(y) or 0
+    if x == 0 or y == 0 then
         if SQOL.DB and SQOL.DB.DebugTrack then
             if (not self._debugNoCursorAt) or now >= self._debugNoCursorAt then
                 self._debugNoCursorAt = now + 1.0
@@ -355,9 +355,9 @@ local function SQOL_CursorShake_FlashNow(duration)
     local frame = SQOL.CursorShakeFrame
     if not frame then return end
 
-    local x, y = GetCursorPosition()
-    x = SQOL_SafeNumberValue(x)
-    y = SQOL_SafeNumberValue(y)
+    local rawX, rawY = GetCursorPosition()
+    local x = SQOL_SafeNumberValue(rawX)
+    local y = SQOL_SafeNumberValue(rawY)
     if not x or not y then return end
 
     local scale = (UIParent and UIParent.GetEffectiveScale) and SQOL_SafeNumberValue(UIParent:GetEffectiveScale()) or 1
@@ -939,7 +939,7 @@ local function SQOL_NameplateObjectives_ExtractProgress(questID, objectiveIndex,
     return nil
 end
 
-local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId, objectiveIndex)
+local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId, objectiveIndex, allowQuestWideFallback)
     if not questID then return nil end
 
     unitName = SQOL_SafeStringValue(unitName)
@@ -968,8 +968,12 @@ local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId
     local best, bestPriority, bestRequired
     local numericCount = 0
     local singleCandidate = nil
+    local incompleteNumericCount = 0
+    local singleIncompleteCandidate = nil
     local incompleteMonsterCount = 0
     local singleIncompleteMonsterCandidate = nil
+    local fallbackIncompleteCandidate = nil
+    local fallbackIncompleteRequired = nil
 
     for i, obj in ipairs(objectives) do
         local fulfilled, required, text = SQOL_NameplateObjectives_ExtractProgress(questID, i, obj)
@@ -985,6 +989,16 @@ local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId
 
             numericCount = numericCount + 1
             singleCandidate = candidate
+            if SQOL_SafeNumberValue(candidate.fulfilled)
+                and SQOL_SafeNumberValue(candidate.required)
+                and candidate.fulfilled < candidate.required then
+                incompleteNumericCount = incompleteNumericCount + 1
+                singleIncompleteCandidate = candidate
+                if not fallbackIncompleteCandidate or candidate.required > (fallbackIncompleteRequired or 0) then
+                    fallbackIncompleteCandidate = candidate
+                    fallbackIncompleteRequired = candidate.required
+                end
+            end
             if SQOL_NameplateObjectives_IsMonsterObjective(obj, candidate.text)
                 and SQOL_SafeNumberValue(candidate.fulfilled)
                 and SQOL_SafeNumberValue(candidate.required)
@@ -1028,9 +1042,19 @@ local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId
         return singleIncompleteMonsterCandidate
     end
 
+    if incompleteNumericCount == 1 and singleIncompleteCandidate then
+        singleIncompleteCandidate.priority = 0
+        return singleIncompleteCandidate
+    end
+
     if numericCount == 1 and singleCandidate then
         singleCandidate.priority = 0
         return singleCandidate
+    end
+
+    if allowQuestWideFallback and fallbackIncompleteCandidate then
+        fallbackIncompleteCandidate.priority = -1
+        return fallbackIncompleteCandidate
     end
 
     return nil
@@ -1108,7 +1132,7 @@ local function SQOL_NameplateObjectives_GetProgressText(unit)
             count > 0 and table.concat(summaries, ", ") or "none")
     end
 
-    local function SQOL_NameplateObjectives_FindBest(entriesToCheck)
+    local function SQOL_NameplateObjectives_FindBest(entriesToCheck, allowQuestWideFallback)
         if type(entriesToCheck) ~= "table" then
             return nil, nil, nil
         end
@@ -1117,7 +1141,7 @@ local function SQOL_NameplateObjectives_GetProgressText(unit)
         for entryKey, entry in pairs(entriesToCheck) do
             local questID, objectiveIndex = SQOL_NameplateObjectives_NormalizeQuestEntry(entry, entryKey)
             if questID then
-                local candidate = SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId, objectiveIndex)
+                local candidate = SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId, objectiveIndex, allowQuestWideFallback)
                 if candidate then
                     local priority = candidate.priority or 0
                     if not best or priority > bestPriority or (priority == bestPriority and candidate.required > (bestRequired or 0)) then
@@ -1132,7 +1156,7 @@ local function SQOL_NameplateObjectives_GetProgressText(unit)
         return best, bestPriority, bestRequired
     end
 
-    local best, bestPriority, bestRequired = SQOL_NameplateObjectives_FindBest(entries)
+    local best, bestPriority, bestRequired = SQOL_NameplateObjectives_FindBest(entries, true)
 
     if best then
         if SQOL.DB and SQOL.DB.DebugTrack then
@@ -1172,13 +1196,13 @@ local function SQOL_NameplateObjectives_GetProgressText(unit)
         if isUnitEntries and SQOL.DB and SQOL.DB.DebugTrack then
             dprint("NP quests for unit:", unit, "using IsUnitOnQuest fallback")
         end
-        best, bestPriority, bestRequired = SQOL_NameplateObjectives_FindBest(isUnitEntries)
+        best, bestPriority, bestRequired = SQOL_NameplateObjectives_FindBest(isUnitEntries, false)
     end
 
     if not best then
         local fallbackEntries = SQOL_NameplateObjectives_GetNameMatchedQuestEntries(unit, unitName, npcId)
         if fallbackEntries then
-            best, bestPriority, bestRequired = SQOL_NameplateObjectives_FindBest(fallbackEntries)
+            best, bestPriority, bestRequired = SQOL_NameplateObjectives_FindBest(fallbackEntries, false)
         end
     end
 
@@ -1272,6 +1296,31 @@ local function SQOL_NameplateObjectives_GetAnchor(nameplate)
     return unitFrame
 end
 
+local function SQOL_NameplateObjectives_GetParent(nameplate)
+    if not nameplate then
+        return nil
+    end
+
+    local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
+    if not unitFrame then
+        return nameplate
+    end
+
+    local widgetContainer = rawget(unitFrame, "WidgetContainer")
+        or rawget(unitFrame, "widgetContainer")
+        or rawget(unitFrame, "BuffFrame")
+        or rawget(unitFrame, "buffFrame")
+    if widgetContainer and widgetContainer.CreateFontString then
+        return widgetContainer
+    end
+
+    if unitFrame.CreateFontString then
+        return unitFrame
+    end
+
+    return nameplate
+end
+
 local function SQOL_NameplateObjectives_GetText(unit)
     if not (C_NamePlate and C_NamePlate.GetNamePlateForUnit) then
         return nil
@@ -1293,10 +1342,22 @@ local function SQOL_NameplateObjectives_GetText(unit)
 ---@diagnostic disable-next-line: undefined-field
         local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
         local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
-        local parent = (nameplate.CreateFontString and nameplate) or unitFrame
+        local parent = SQOL_NameplateObjectives_GetParent(nameplate) or unitFrame
 
         text = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         text:SetPoint("BOTTOM", anchor, "TOP", 0, 15)
+        if text.SetDrawLayer then
+            text:SetDrawLayer("OVERLAY", 7)
+        end
+        if text.SetTextColor then
+            text:SetTextColor(1, 0.82, 0.15)
+        end
+        if text.SetShadowColor then
+            text:SetShadowColor(0, 0, 0, 0.95)
+        end
+        if text.SetShadowOffset then
+            text:SetShadowOffset(1, -1)
+        end
         text:SetJustifyH("CENTER")
         text:SetWordWrap(false)
         if text.SetMaxLines then text:SetMaxLines(1) end
@@ -1306,8 +1367,9 @@ local function SQOL_NameplateObjectives_GetText(unit)
 ---@diagnostic disable-next-line: undefined-field
         local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
         local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
-        if text.SetParent and nameplate.CreateFontString then
-            text:SetParent(nameplate)
+        local parent = SQOL_NameplateObjectives_GetParent(nameplate) or unitFrame
+        if text.SetParent and parent then
+            text:SetParent(parent)
         end
         text:ClearAllPoints()
         text:SetPoint("BOTTOM", anchor, "TOP", 0, 15)
@@ -1463,10 +1525,10 @@ local function SQOL_EnableCustomInfoMessages()
                 -- Keep Blizzard's standard UI_INFO_MESSAGE colors (e.g. discoveries are yellow).
                 local r, g, b = 1, 0.82, 0
                 if type(GetGameMessageInfo) == "function" then
-                    local rr, gg, bb = GetGameMessageInfo(messageType)
-                    rr = SQOL_SafeNumberValue(rr)
-                    gg = SQOL_SafeNumberValue(gg)
-                    bb = SQOL_SafeNumberValue(bb)
+                    local rawR, rawG, rawB = GetGameMessageInfo(messageType)
+                    local rr = SQOL_SafeNumberValue(rawR)
+                    local gg = SQOL_SafeNumberValue(rawG)
+                    local bb = SQOL_SafeNumberValue(rawB)
                     if rr and gg and bb then
                         r, g, b = rr, gg, bb
                     end
@@ -1508,13 +1570,13 @@ SQOL._lastStatLineText = nil
 local function SQOL_GetEquippedItemLevel()
     if type(GetAverageItemLevel) == "function" then
         local avg, equipped = GetAverageItemLevel()
-        avg = SQOL_SafeNumberValue(avg)
-        equipped = SQOL_SafeNumberValue(equipped)
-        if equipped and equipped > 0 then
-            return equipped
+        local safeAvg = SQOL_SafeNumberValue(avg)
+        local safeEquipped = SQOL_SafeNumberValue(equipped)
+        if safeEquipped and safeEquipped > 0 then
+            return safeEquipped
         end
-        if avg and avg > 0 then
-            return avg
+        if safeAvg and safeAvg > 0 then
+            return safeAvg
         end
     end
 
@@ -1922,8 +1984,13 @@ local function SQOL_Rep_GetFactionDataByIndex(index)
     if C_Reputation and type(C_Reputation.GetFactionDataByIndex) == "function" then
         local data = C_Reputation.GetFactionDataByIndex(index)
         if data and type(data) == "table" then
-            -- Field names have shifted a bit over time; normalize to "currentStanding" when possible.
-            data.currentStanding =
+            -- Field names have shifted a bit over time; normalize to a plain Lua table.
+            local normalizedData = {}
+            for k, v in pairs(data) do
+                normalizedData[k] = v
+            end
+
+            normalizedData.currentStanding =
                 SQOL_SafeNumberValue(data.currentStanding)
 ---@diagnostic disable-next-line: undefined-field
                 or SQOL_SafeNumberValue(data.earnedValue)
@@ -1933,8 +2000,9 @@ local function SQOL_Rep_GetFactionDataByIndex(index)
                 or SQOL_SafeNumberValue(data.currentValue)
 ---@diagnostic disable-next-line: undefined-field
                 or SQOL_SafeNumberValue(data.currentReputation)
-            data.factionID = SQOL_SafeNumberValue(data.factionID)
-            data.name = SQOL_SafeStringValue(data.name)
+            normalizedData.factionID = SQOL_SafeNumberValue(data.factionID)
+            normalizedData.name = SQOL_SafeStringValue(data.name)
+            return normalizedData
         end
         return data
     end
