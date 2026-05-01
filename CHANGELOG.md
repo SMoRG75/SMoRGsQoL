@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.14] - 2026-04-24
+
+### Fixed
+- Fixed PlayerFrame speed display errors caused by WoW 12.0 secret movement speed values.
+
 ## [1.0.13] - 2026-04-02
 
 ### Fixed
