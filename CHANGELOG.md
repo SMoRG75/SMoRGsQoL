@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.15] - 2026-05-02
+
+### Fixed
+- Kept quest completion sound and chat alerts limited to when a quest becomes ready to turn in.
+
 ## [1.0.14] - 2026-04-24
 
 ### Fixed

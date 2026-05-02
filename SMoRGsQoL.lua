@@ -2448,6 +2448,43 @@ end
 ------------------------------------------------------------
 SQOL.fullyCompleted = {}
 
+local function SQOL_GetQuestCompletionDetails(questID)
+    if not questID or not C_QuestLog then
+        return nil, false, false
+    end
+
+    local title, isTask, isWorld
+    if type(C_QuestLog.GetTitleForQuestID) == "function" then
+        local ok, result = pcall(C_QuestLog.GetTitleForQuestID, questID)
+        if ok then title = result end
+    end
+    if type(C_QuestLog.IsQuestTask) == "function" then
+        local ok, result = pcall(C_QuestLog.IsQuestTask, questID)
+        if ok then isTask = result end
+    end
+    if type(C_QuestLog.IsWorldQuest) == "function" then
+        local ok, result = pcall(C_QuestLog.IsWorldQuest, questID)
+        if ok then isWorld = result end
+    end
+
+    return title, isTask, isWorld
+end
+
+local function SQOL_NotifyQuestCompletion(questID, title, isTask, isWorld)
+    if SQOL.DB and SQOL.DB.QuestCompleteSound then
+        PlaySound(6199, "Master")
+    end
+
+    local displayTitle = title or questID
+    if isTask or isWorld then
+        print("|cff33ff99SQoL:|r |cffffff00" ..
+            displayTitle .. "|r |cff00ff00is done!|r")
+    else
+        print("|cff33ff99SQoL:|r |cffffff00" ..
+            displayTitle .. "|r |cff00ff00is ready to turn in!|r")
+    end
+end
+
 local function SQOL_CheckQuestProgress()
     local numEntries = C_QuestLog.GetNumQuestLogEntries()
     for i = 1, numEntries do
@@ -2465,24 +2502,15 @@ local function SQOL_CheckQuestProgress()
 
                 -- If all objectives done and not previously marked complete
                 if allDone and not SQOL.fullyCompleted[info.questID] then
-                    SQOL.fullyCompleted[info.questID] = true
-                    if SQOL.DB and SQOL.DB.QuestCompleteSound then
-                        PlaySound(6199, "Master")
-                    end
+                    local title, isTask, isWorld = SQOL_GetQuestCompletionDetails(info.questID)
+                    title = info.title or title
 
-                    -- Determine quest type
-                    local isTask = C_QuestLog.IsQuestTask(info.questID)
-                    local isWorld = C_QuestLog.IsWorldQuest(info.questID)
-
-                    if isTask or isWorld then
-                        -- Bonus or world quest
-                        print("|cff33ff99SQoL:|r |cffffff00" ..
-                            (info.title or info.questID) .. "|r |cff00ff00is done!|r")
-                    else
-                        -- Normal quest
-                        print("|cff33ff99SQoL:|r |cffffff00" ..
-                            (info.title or info.questID) .. "|r |cff00ff00is ready to turn in!|r")
-                    end
+                    SQOL.fullyCompleted[info.questID] = {
+                        title = title,
+                        isTask = isTask,
+                        isWorld = isWorld,
+                    }
+                    SQOL_NotifyQuestCompletion(info.questID, title, isTask, isWorld)
                 end
             end
         end
