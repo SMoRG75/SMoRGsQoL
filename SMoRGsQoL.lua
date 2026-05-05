@@ -2880,13 +2880,16 @@ f:SetScript("OnEvent", function(self, event, ...)
     elseif event == "QUEST_TURNED_IN" then
         local questID = ...
         if questID then
-            SQOL.fullyCompleted[questID] = nil
+            -- Keep the quest marked as handled so delayed QUEST_LOG_UPDATE events
+            -- during turn-in do not fire the completion alert again.
+            SQOL.fullyCompleted[questID] = SQOL.fullyCompleted[questID] or true
         end
 
     elseif event == "QUEST_REMOVED" then
         local questID = ...
         if questID then
-            SQOL.fullyCompleted[questID] = nil
+            -- QUEST_ACCEPTED clears this when the quest is picked up again.
+            SQOL.fullyCompleted[questID] = SQOL.fullyCompleted[questID] or true
         end
 
     elseif event == "UPDATE_FACTION" then
