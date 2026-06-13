@@ -450,6 +450,83 @@ local function SQOL_FormatProgressText(cur, total)
     return string.format("%d/%d", cur, total)
 end
 
+local function SQOL_ParseProgressMessage(message)
+    if type(message) ~= "string" then
+        return nil
+    end
+
+    local label, cur, total = message:match("^(.+):%s*(%d+)%s*/%s*(%d+)$")
+    if label and cur and total then
+        return label, tonumber(cur), tonumber(total)
+    end
+
+    label, cur = message:match("^(.+):%s*(%d+)%%$")
+    if label and cur then
+        return label, tonumber(cur), 100
+    end
+
+    label, cur = message:match("^(.+)%s+%((%d+)%%%)$")
+    if label and cur then
+        return label, tonumber(cur), 100
+    end
+
+    cur = message:match("^(%d+)%%$")
+    if cur then
+        return nil, tonumber(cur), 100
+    end
+
+    return nil
+end
+
+local function SQOL_EnsureProgressMessageFrame()
+    if SQOL.MessageFrame then
+        return
+    end
+
+    SQOL.MessageFrame = CreateFrame("MessageFrame", "SQOL_MessageFrame", UIParent)
+    SQOL.MessageFrame:SetPoint("TOP", UIParent, "TOP", 0, -150)
+    SQOL.MessageFrame:SetSize(512, 60)
+    SQOL.MessageFrame:SetInsertMode("TOP")
+    SQOL.MessageFrame:SetFading(true)
+    SQOL.MessageFrame:SetFadeDuration(1.5)
+    SQOL.MessageFrame:SetTimeVisible(2.5)
+    -- Ensure this overlay never blocks clicks on nearby UI (e.g., Transmog paging).
+    if SQOL.MessageFrame.EnableMouse then
+        SQOL.MessageFrame:EnableMouse(false)
+    end
+    if SQOL.MessageFrame.EnableMouseWheel then
+        SQOL.MessageFrame:EnableMouseWheel(false)
+    end
+    -- Use explicit font to avoid dependency on UI object availability
+    SQOL.MessageFrame:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
+end
+
+local function SQOL_ShowProgressMessage(label, cur, total)
+    if not SQOL.DB or not SQOL.DB.ColorProgress then return end
+    if type(cur) ~= "number" or type(total) ~= "number" or total <= 0 then return end
+
+    local key = string.format("%s:%d:%d", tostring(label or ""), cur, total)
+    local now = type(GetTimePreciseSec) == "function" and GetTimePreciseSec() or 0
+    if SQOL._lastProgressMessageKey == key and now > 0
+        and SQOL._lastProgressMessageAt and (now - SQOL._lastProgressMessageAt) < 0.75 then
+        return clamp01(cur / total)
+    end
+    SQOL._lastProgressMessageKey = key
+    SQOL._lastProgressMessageAt = now
+
+    SQOL_EnsureProgressMessageFrame()
+
+    local progress = clamp01(cur / total)
+    local colorCode = SQOL_GetProgressColor(progress)
+    local progressText = SQOL_FormatProgressText(cur, total)
+    local displayMessage = progressText and label and string.format("%s: %s", label, progressText)
+        or progressText
+        or string.format("%d/%d", cur, total)
+
+    SQOL.MessageFrame:AddMessage(colorCode .. displayMessage .. "|r")
+    return progress
+end
+
 ------------------------------------------------------------
 -- Colorize tracker objective lines (Retail tracker)
 -- Throttled to avoid excess work during rapid updates.
@@ -761,6 +838,182 @@ local function SQOL_NameplateObjectives_GetProgressBarInfo(questID)
     return nil
 end
 
+local function SQOL_NameplateObjectives_GetProgressBarCandidate(questID)
+    local cur, total = SQOL_NameplateObjectives_GetProgressBarInfo(questID)
+    if type(cur) == "number" and type(total) == "number" and total > 0 then
+        return {
+            questID = questID,
+            fulfilled = cur,
+            required = total,
+            text = nil,
+            index = nil,
+            priority = 4,
+        }
+    end
+
+    return nil
+end
+
+SQOL._questProgressBarState = SQOL._questProgressBarState or {}
+SQOL._questProgressBarScanPending = false
+
+local function SQOL_GetQuestProgressBarLabel(questID)
+    if C_QuestLog and type(C_QuestLog.GetQuestObjectives) == "function" then
+        local ok, objectives = pcall(C_QuestLog.GetQuestObjectives, questID)
+        if ok and type(objectives) == "table" then
+            for _, obj in ipairs(objectives) do
+                local text = type(obj) == "table" and rawget(obj, "text")
+                if type(text) == "string" and text ~= "" then
+                    return text
+                end
+            end
+        end
+    end
+
+    if C_QuestLog and type(C_QuestLog.GetTitleForQuestID) == "function" then
+        local ok, title = pcall(C_QuestLog.GetTitleForQuestID, questID)
+        if ok and type(title) == "string" and title ~= "" then
+            return title
+        end
+    end
+
+    return nil
+end
+
+local function SQOL_CollectProgressBarQuestIDs()
+    local questIDs = {}
+
+    local function addQuestID(questID)
+        if type(questID) == "number" and questID > 0 then
+            questIDs[questID] = true
+        end
+    end
+
+    if C_QuestLog and type(C_QuestLog.GetNumQuestLogEntries) == "function"
+        and type(C_QuestLog.GetInfo) == "function" then
+        local ok, numEntries = pcall(C_QuestLog.GetNumQuestLogEntries)
+        if ok and type(numEntries) == "number" then
+            for i = 1, numEntries do
+                local infoOk, info = pcall(C_QuestLog.GetInfo, i)
+                if infoOk and info and not info.isHeader then
+                    addQuestID(info.questID)
+                end
+            end
+        end
+    end
+
+    if C_QuestLog and type(C_QuestLog.GetNumQuestWatches) == "function" then
+        local ok, numWatches = pcall(C_QuestLog.GetNumQuestWatches)
+        if ok and type(numWatches) == "number" then
+            for i = 1, numWatches do
+                if type(C_QuestLog.GetQuestIDForQuestWatchIndex) == "function" then
+                    local idOk, questID = pcall(C_QuestLog.GetQuestIDForQuestWatchIndex, i)
+                    if idOk then
+                        addQuestID(questID)
+                    end
+                elseif type(C_QuestLog.GetQuestWatchInfo) == "function" then
+                    local infoOk, a = pcall(C_QuestLog.GetQuestWatchInfo, i)
+                    if infoOk then
+                        if type(a) == "table" then
+                            addQuestID(a.questID or a.questId)
+                        else
+                            addQuestID(a)
+                        end
+                    end
+                end
+            end
+        end
+    elseif type(GetNumQuestWatches) == "function" and type(GetQuestIndexForWatch) == "function"
+        and C_QuestLog and type(C_QuestLog.GetInfo) == "function" then
+        local ok, numWatches = pcall(GetNumQuestWatches)
+        if ok and type(numWatches) == "number" then
+            for i = 1, numWatches do
+                local indexOk, questLogIndex = pcall(GetQuestIndexForWatch, i)
+                if indexOk and type(questLogIndex) == "number" then
+                    local infoOk, info = pcall(C_QuestLog.GetInfo, questLogIndex)
+                    if infoOk and info then
+                        addQuestID(info.questID)
+                    end
+                end
+            end
+        end
+    end
+
+    if C_Map and type(C_Map.GetBestMapForUnit) == "function"
+        and C_TaskQuest and type(C_TaskQuest.GetQuestsForPlayerByMapID) == "function" then
+        local mapOk, mapID = pcall(C_Map.GetBestMapForUnit, "player")
+        if mapOk and type(mapID) == "number" then
+            local tasksOk, tasks = pcall(C_TaskQuest.GetQuestsForPlayerByMapID, mapID)
+            if tasksOk and type(tasks) == "table" then
+                for _, task in ipairs(tasks) do
+                    if type(task) == "table" then
+                        addQuestID(task.questID or task.questId)
+                    else
+                        addQuestID(task)
+                    end
+                end
+            end
+        end
+    end
+
+    return questIDs
+end
+
+local function SQOL_ScanQuestProgressBars(showChanges)
+    if not SQOL.DB or not SQOL.DB.ColorProgress or not C_QuestLog then
+        return
+    end
+
+    local seen = {}
+    for questID in pairs(SQOL_CollectProgressBarQuestIDs()) do
+        local cur, total = SQOL_NameplateObjectives_GetProgressBarInfo(questID)
+        if type(cur) == "number" and type(total) == "number" and total > 0 then
+            seen[questID] = true
+
+            local previous = SQOL._questProgressBarState[questID]
+            local changed = previous and (previous.cur ~= cur or previous.total ~= total)
+            local firstVisibleProgress = (not previous) and cur > 0 and cur < total
+            local label = SQOL_GetQuestProgressBarLabel(questID)
+
+            if showChanges and (changed or firstVisibleProgress) then
+                local progress = SQOL_ShowProgressMessage(label, cur, total)
+                if SQOL.DB.DebugTrack then
+                    dprint(string.format("Progress bar message: quest %d %s (%d/%d, %.2f)",
+                        questID, label or "-", cur, total, progress or 0))
+                end
+            end
+
+            SQOL._questProgressBarState[questID] = {
+                cur = cur,
+                total = total,
+                label = label,
+            }
+        end
+    end
+
+    for questID in pairs(SQOL._questProgressBarState) do
+        if not seen[questID] then
+            SQOL._questProgressBarState[questID] = nil
+        end
+    end
+end
+
+local function SQOL_ScheduleQuestProgressBarScan(showChanges)
+    if SQOL._questProgressBarScanPending then return end
+    SQOL._questProgressBarScanPending = true
+
+    local function scan()
+        SQOL._questProgressBarScanPending = false
+        SQOL_ScanQuestProgressBars(showChanges)
+    end
+
+    if C_Timer and type(C_Timer.After) == "function" then
+        C_Timer.After(0.2, scan)
+    else
+        scan()
+    end
+end
+
 local function SQOL_NameplateObjectives_NormalizeQuestEntry(entry)
     local questID, objectiveIndex
 
@@ -833,8 +1086,12 @@ end
 local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId, objectiveIndex)
     if not questID then return nil end
 
+    local progressBarCandidate = SQOL_NameplateObjectives_GetProgressBarCandidate(questID)
     local objectives = C_QuestLog.GetQuestObjectives(questID)
     if not objectives then
+        if progressBarCandidate then
+            return progressBarCandidate
+        end
         if objectiveIndex then
             local fulfilled, required, text = SQOL_NameplateObjectives_ExtractProgress(questID, objectiveIndex, nil)
             if required then
@@ -900,6 +1157,10 @@ local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId
                 end
             end
         end
+    end
+
+    if progressBarCandidate then
+        return progressBarCandidate
     end
 
     if best then
@@ -977,20 +1238,14 @@ local function SQOL_NameplateObjectives_GetProgressText(unit)
         for _, entry in pairs(entries) do
             local questID = SQOL_NameplateObjectives_NormalizeQuestEntry(entry)
             if questID then
-                local barCur, barTotal = SQOL_NameplateObjectives_GetProgressBarInfo(questID)
-                if barCur then
+                local progressBarCandidate = SQOL_NameplateObjectives_GetProgressBarCandidate(questID)
+                if progressBarCandidate then
                     if SQOL.DB and SQOL.DB.DebugTrack then
                         dprint("NP progress bar:", "quest", tostring(questID),
-                            "progress", string.format("%d/%d", barCur, barTotal))
+                            "progress", string.format("%d/%d",
+                                progressBarCandidate.fulfilled, progressBarCandidate.required))
                     end
-                    best = {
-                        questID = questID,
-                        fulfilled = barCur,
-                        required = barTotal,
-                        text = nil,
-                        index = nil,
-                        priority = -1,
-                    }
+                    best = progressBarCandidate
                     break
                 end
             end
@@ -1243,24 +1498,7 @@ local function SQOL_EnableCustomInfoMessages()
         dprint("Disabled Blizzard UI_INFO_MESSAGE display.")
     end
 
-    if not SQOL.MessageFrame then
-        SQOL.MessageFrame = CreateFrame("MessageFrame", "SQOL_MessageFrame", UIParent)
-        SQOL.MessageFrame:SetPoint("TOP", UIParent, "TOP", 0, -150)
-        SQOL.MessageFrame:SetSize(512, 60)
-        SQOL.MessageFrame:SetInsertMode("TOP")
-        SQOL.MessageFrame:SetFading(true)
-        SQOL.MessageFrame:SetFadeDuration(1.5)
-        SQOL.MessageFrame:SetTimeVisible(2.5)
-        -- Ensure this overlay never blocks clicks on nearby UI (e.g., Transmog paging).
-        if SQOL.MessageFrame.EnableMouse then
-            SQOL.MessageFrame:EnableMouse(false)
-        end
-        if SQOL.MessageFrame.EnableMouseWheel then
-            SQOL.MessageFrame:EnableMouseWheel(false)
-        end
-        -- Use explicit font to avoid dependency on UI object availability
-        SQOL.MessageFrame:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
-    end
+    SQOL_EnsureProgressMessageFrame()
 
     if not SQOL.InfoEventFrame then
         SQOL.InfoEventFrame = CreateFrame("Frame", "SQOL_InfoEventFrame")
@@ -1269,8 +1507,8 @@ local function SQOL_EnableCustomInfoMessages()
             if event ~= "UI_INFO_MESSAGE" or not SQOL.DB.ColorProgress then return end
             if type(message) ~= "string" then return end
 
-            local label, cur, total = message:match("^(.+):%s*(%d+)%s*/%s*(%d+)$")
-            if not (label and cur and total) then
+            local label, cur, total = SQOL_ParseProgressMessage(message)
+            if not (cur and total) then
                 -- Keep Blizzard's standard UI_INFO_MESSAGE colors (e.g. discoveries are yellow).
                 local r, g, b = 1, 0.82, 0
                 if type(GetGameMessageInfo) == "function" then
@@ -1284,16 +1522,10 @@ local function SQOL_EnableCustomInfoMessages()
                 return
             end
 
-            cur, total = tonumber(cur), tonumber(total)
-            local progress = (total and total > 0) and clamp01(cur / total) or 0
-            local colorCode = SQOL_GetProgressColor(progress)
-            local progressText = SQOL_FormatProgressText(cur, total)
-            local displayMessage = progressText and string.format("%s: %s", label, progressText) or message
-
-            SQOL.MessageFrame:AddMessage(colorCode .. displayMessage .. "|r")
+            local progress = SQOL_ShowProgressMessage(label, cur, total)
 
             dprint(string.format("Custom UI_INFO_MESSAGE: %s (%d/%d, %.2f)",
-                label, cur or -1, total or -1, progress))
+                label or "-", cur or -1, total or -1, progress))
         end)
     end
 end
@@ -2595,6 +2827,7 @@ function SQOL.ApplyOption(key)
     if key == "ColorProgress" then
         if SQOL.DB.ColorProgress then
             SQOL_EnableCustomInfoMessages()
+            SQOL_ScheduleQuestProgressBarScan(false)
         else
             if UIErrorsFrame and UIErrorsFrame.RegisterEvent then
                 UIErrorsFrame:RegisterEvent("UI_INFO_MESSAGE")
@@ -2730,10 +2963,21 @@ end
 ------------------------------------------------------------
 -- Events
 ------------------------------------------------------------
+local function SQOL_RegisterOptionalEvent(event)
+    local ok, err = pcall(f.RegisterEvent, f, event)
+    if not ok and SQOL.DB and SQOL.DB.DebugTrack then
+        dprint("Could not register optional event:", tostring(event), tostring(err))
+    end
+end
+
 f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:RegisterEvent("QUEST_ACCEPTED")
 f:RegisterEvent("QUEST_LOG_UPDATE")
+SQOL_RegisterOptionalEvent("QUEST_WATCH_UPDATE")
+SQOL_RegisterOptionalEvent("QUEST_POI_UPDATE")
+SQOL_RegisterOptionalEvent("QUEST_CRITERIA_UPDATE")
+SQOL_RegisterOptionalEvent("SCENARIO_CRITERIA_UPDATE")
 f:RegisterEvent("UPDATE_FACTION")
 f:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
 f:RegisterEvent("QUEST_TURNED_IN")
@@ -2755,6 +2999,7 @@ f:SetScript("OnEvent", function(self, event, ...)
 
         if SQOL.DB.ColorProgress then
             SQOL_EnableCustomInfoMessages()
+            SQOL_ScheduleQuestProgressBarScan(false)
         end
 
         -- Apply saved preference when logging in (only if already loaded)
@@ -2797,6 +3042,10 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL_TryEnsurePlayerFrameIlvlUI(0)
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        end
+
+        if SQOL.DB and SQOL.DB.ColorProgress then
+            SQOL_ScheduleQuestProgressBarScan(false)
         end
 
         if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
@@ -2918,6 +3167,16 @@ f:SetScript("OnEvent", function(self, event, ...)
     elseif event == "QUEST_LOG_UPDATE" then
         SQOL_CheckQuestProgress()
         SQOL_RecolorQuestObjectives_Throttle()
+        SQOL_ScheduleQuestProgressBarScan(true)
+        if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
+            SQOL_NameplateObjectives_ScheduleUpdateAll()
+        end
+
+    elseif event == "QUEST_WATCH_UPDATE" or event == "QUEST_POI_UPDATE"
+        or event == "QUEST_CRITERIA_UPDATE" or event == "SCENARIO_CRITERIA_UPDATE" then
+        SQOL_CheckQuestProgress()
+        SQOL_RecolorQuestObjectives_Throttle()
+        SQOL_ScheduleQuestProgressBarScan(true)
         if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
             SQOL_NameplateObjectives_ScheduleUpdateAll()
         end
