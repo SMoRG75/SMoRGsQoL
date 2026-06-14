@@ -12,6 +12,8 @@ Everything is toggleable:
   - Automatically tracks new quests in the Objective Tracker (with sanity checks to avoid unsupported edge cases).
 - 🔔 **Quest completion alert**
   - Plays a sound (toggleable) and prints a chat message when a quest is ready to turn in (or done for bonus/world quests).
+  - Optionally plays a separate worker voice line when an individual objective is completed.
+  - Supports selectable Horde (Peon) and Alliance (Human worker) sound profiles.
 - 🎨 **Colorized progress messages**
   - Colorizes common progress patterns like `3/10` or `45%` and quest objective progress (red → yellow → green).
 - 🚪 **Login splash**
@@ -46,6 +48,8 @@ Type `/sqol` to see current status, or use:
 - `/sqol autotrack` (or `/sqol at`)
 - `/sqol color` (or `/sqol col`)
 - `/sqol questsound` (or `/sqol qs`)
+- `/sqol objectivesound` (or `/sqol os`)
+- `/sqol soundprofile`
 - `/sqol splash`
 - `/sqol hideach` (or `/sqol ha`)
 - `/sqol rep` (or `/sqol rw`)
@@ -63,3 +67,5 @@ Settings are stored per account in:
 - 💾 `SQOL_DB`
 
 ## Credits
+
+- Alliance "Job's done" sound clip from [QuestSoundBits](https://github.com/Road-block/QuestSoundBits).

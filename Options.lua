@@ -85,10 +85,64 @@ local function SQOL_CreateSettingsCategory()
         end
     end
 
+    local function AddDropdown(optionKey, optionLabel, tooltip, optionValues)
+        local defaultValue = SQOL.defaults[optionKey]
+        local variable = ("%s_%s"):format(ADDON_NAME, optionKey)
+        local setting = Settings.RegisterAddOnSetting(
+            category,
+            variable,
+            optionKey,
+            SQOL.DB,
+            type(defaultValue),
+            optionLabel,
+            defaultValue
+        )
+
+        if SQOL.RegisterSettingObject then
+            SQOL.RegisterSettingObject(optionKey, setting)
+        end
+
+        if type(Settings.CreateDropdown) == "function"
+            and type(Settings.CreateControlTextContainer) == "function" then
+            local function GetOptions()
+                local container = Settings.CreateControlTextContainer()
+                for _, option in ipairs(optionValues) do
+                    container:Add(option.value, option.label)
+                end
+                return container:GetData()
+            end
+            Settings.CreateDropdown(category, setting, GetOptions, tooltip)
+        end
+
+        if type(setting.SetValue) == "function" and SQOL.DB[optionKey] ~= nil then
+            SQOL._settingsSync = true
+            pcall(setting.SetValue, setting, SQOL.DB[optionKey])
+            SQOL._settingsSync = false
+        end
+
+        if type(Settings.SetOnValueChangedCallback) == "function" then
+            Settings.SetOnValueChangedCallback(variable, function(...)
+                if SQOL._settingsSync then return end
+                local args = { ... }
+                local value = args[#args]
+                if SQOL.SetOption then
+                    SQOL.SetOption(optionKey, value)
+                else
+                    SQOL.DB[optionKey] = value
+                end
+            end)
+        end
+    end
+
     AddCheckbox("AutoTrack", "Auto-track newly accepted quests", "Automatically track newly accepted quests in the objective tracker.")
     AddCheckbox("ShowSplash", "Show splash on login", "Show the status splash message when you log in.")
     AddCheckbox("ColorProgress", "Color progress messages", "Colorize objective count messages (e.g., 3/10) and quest objective progress (red → yellow → green).")
     AddCheckbox("QuestCompleteSound", "Quest completion sound", "Play a sound when a quest is ready to turn in (or done for bonus/world quests).")
+    AddCheckbox("QuestObjectiveSound", "Quest objective completion sound", "Play a worker voice line when one objective is completed but the quest is not yet done.")
+    AddDropdown("QuestSoundProfile", "Quest sound profile", "Choose the worker voice used for objective and full quest completion.", {
+        { value = "Horde", label = SQOL.QuestSoundProfiles.Horde.label },
+        { value = "Alliance", label = SQOL.QuestSoundProfiles.Alliance.label },
+    })
     AddCheckbox("HideDoneAchievements", "Hide completed achievements", "Achievement UI will default to showing incomplete achievements only.")
     AddCheckbox("RepWatch", "Auto-watch reputation gains", "When a faction reputation changes, automatically switch your watched faction to the one that changed.")
     AddCheckbox("ShowNameplateObjectives", "Show objective counts on nameplates", "Show quest objective counts (e.g., 0/10) above relevant nameplates.")

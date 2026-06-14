@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.10 by SMoRG75
+-- SMoRGsQoL v1.0.16 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
 -- Now with throttled updates and a stable PlayerFrame iLvl+Speed line.
@@ -12,6 +12,18 @@ SQOL = SQOL or {}        -- addon namespace table (shared across files)
 SQOL.ADDON_NAME = ADDON_NAME
 local f = CreateFrame("Frame")
 
+SQOL.QuestSoundProfiles = {
+    Horde = {
+        label = "Horde (Peon)",
+        objective = 6197, -- B_PeonYes3: "Work, work."
+        complete = 6199,  -- B_PeonBuildingComplete1: "Work complete."
+    },
+    Alliance = {
+        label = "Alliance (Human worker)",
+        objective = 6288, -- B_PeasantWhat3: "More work?"
+        complete = "Interface\\AddOns\\SMoRGsQoL\\Sounds\\Peasant_job_done.mp3",
+    },
+}
 
 ------------------------------------------------------------
 -- Defaults
@@ -22,6 +34,8 @@ SQOL.defaults = {
     ShowSplash    = false,
     ColorProgress = false,
     QuestCompleteSound = true,
+    QuestObjectiveSound = true,
+    QuestSoundProfile = "Horde",
     HideDoneAchievements = false,
     RepWatch     = false,
     ShowNameplateObjectives = false,
@@ -368,6 +382,10 @@ function SQOL.Init(reset)
         if SQOL_DB[k] == nil then
             SQOL_DB[k] = v
         end
+    end
+
+    if not SQOL.QuestSoundProfiles[SQOL_DB.QuestSoundProfile] then
+        SQOL_DB.QuestSoundProfile = SQOL.defaults.QuestSoundProfile
     end
 
     -- Bind runtime DB reference
@@ -2658,6 +2676,8 @@ end
 ------------------------------------------------------------
 local function SQOL_Splash()
     local version, atState, spState, coState, qsState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
+    local qoState = SQOL.DB.QuestObjectiveSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    local questSoundProfile = SQOL.DB.QuestSoundProfile or SQOL.defaults.QuestSoundProfile
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
@@ -2665,6 +2685,8 @@ local function SQOL_Splash()
     print("|cff33ff99Splash:|r " .. spState)
     print("|cff33ff99ColorProgress:|r " .. coState)
     print("|cff33ff99QuestSound:|r " .. qsState)
+    print("|cff33ff99ObjectiveSound:|r " .. qoState)
+    print("|cff33ff99QuestSoundProfile:|r " .. questSoundProfile)
     print("|cff33ff99HideDoneAchievements:|r " .. loState)
     print("|cff33ff99RepWatch:|r " .. repState)
     print("|cff33ff99NameplateObjectives:|r " .. npState)
@@ -2676,9 +2698,24 @@ local function SQOL_Splash()
 end
 
 ------------------------------------------------------------
--- Event: QUEST_LOG_UPDATE (play sound when quest ready)
+-- Event: QUEST_LOG_UPDATE (play sounds for objective and quest completion)
 ------------------------------------------------------------
 SQOL.fullyCompleted = {}
+SQOL.questObjectiveStates = {}
+
+local function SQOL_PlayQuestSound(soundType)
+    if not SQOL.DB then return end
+
+    local profile = SQOL.QuestSoundProfiles[SQOL.DB.QuestSoundProfile]
+        or SQOL.QuestSoundProfiles.Horde
+    local sound = profile and profile[soundType]
+
+    if type(sound) == "number" then
+        PlaySound(sound, "Master")
+    elseif type(sound) == "string" then
+        PlaySoundFile(sound, "Master")
+    end
+end
 
 local function SQOL_GetQuestCompletionDetails(questID)
     if not questID or not C_QuestLog then
@@ -2704,7 +2741,7 @@ end
 
 local function SQOL_NotifyQuestCompletion(questID, title, isTask, isWorld)
     if SQOL.DB and SQOL.DB.QuestCompleteSound then
-        PlaySound(6199, "Master")
+        SQOL_PlayQuestSound("complete")
     end
 
     local displayTitle = title or questID
@@ -2719,18 +2756,35 @@ end
 
 local function SQOL_CheckQuestProgress()
     local numEntries = C_QuestLog.GetNumQuestLogEntries()
+    local seenQuests = {}
+
     for i = 1, numEntries do
         local info = C_QuestLog.GetInfo(i)
         if info and not info.isHeader and info.questID then
+            seenQuests[info.questID] = true
             local objectives = C_QuestLog.GetQuestObjectives(info.questID)
             if objectives and #objectives > 0 then
                 local allDone = true
-                for _, obj in ipairs(objectives) do
+                local objectiveCompleted = false
+                local previousObjectives = SQOL.questObjectiveStates[info.questID]
+                local currentObjectives = {}
+
+                for objectiveIndex, obj in ipairs(objectives) do
+                    local finished = not not obj.finished
+                    currentObjectives[objectiveIndex] = finished
+
+                    if previousObjectives
+                        and previousObjectives[objectiveIndex] == false
+                        and finished then
+                        objectiveCompleted = true
+                    end
+
                     if not obj.finished then
                         allDone = false
-                        break
                     end
                 end
+
+                SQOL.questObjectiveStates[info.questID] = currentObjectives
 
                 -- If all objectives done and not previously marked complete
                 if allDone and not SQOL.fullyCompleted[info.questID] then
@@ -2743,8 +2797,19 @@ local function SQOL_CheckQuestProgress()
                         isWorld = isWorld,
                     }
                     SQOL_NotifyQuestCompletion(info.questID, title, isTask, isWorld)
+                elseif not allDone
+                    and objectiveCompleted
+                    and SQOL.DB
+                    and SQOL.DB.QuestObjectiveSound then
+                    SQOL_PlayQuestSound("objective")
                 end
             end
+        end
+    end
+
+    for questID in pairs(SQOL.questObjectiveStates) do
+        if not seenQuests[questID] then
+            SQOL.questObjectiveStates[questID] = nil
         end
     end
 end
@@ -2754,6 +2819,8 @@ end
 ------------------------------------------------------------
 local function SQOL_Help()
     local version, atState, spState, coState, qsState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
+    local qoState = SQOL.DB.QuestObjectiveSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    local questSoundProfile = SQOL.DB.QuestSoundProfile or SQOL.defaults.QuestSoundProfile
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99-----------------------------------|r")
@@ -2763,6 +2830,9 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL col|r         |cffcccccc- Shorthand for color|r")
     print("|cff00ff00/SQOL questsound|r  |cffcccccc- Toggle quest completion sound|r")
     print("|cff00ff00/SQOL qs|r          |cffcccccc- Shorthand for questsound|r")
+    print("|cff00ff00/SQOL objectivesound|r |cffcccccc- Toggle objective completion sound|r")
+    print("|cff00ff00/SQOL os|r          |cffcccccc- Shorthand for objectivesound|r")
+    print("|cff00ff00/SQOL soundprofile|r |cffcccccc- Switch Horde/Alliance quest sounds|r")
     print("|cff00ff00/SQOL hideach|r     |cffcccccc- Toggle hiding completed achievements|r")
     print("|cff00ff00/SQOL ha|r          |cffcccccc- Shorthand for hideach|r")
     print("|cff00ff00/SQOL splash|r      |cffcccccc- Toggle splash on login|r")
@@ -2783,6 +2853,7 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
     print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99QuestSound:|r " .. qsState)
+    print("|cff33ff99ObjectiveSound:|r " .. qoState .. "  |cff33ff99QuestSoundProfile:|r " .. questSoundProfile)
     print("|cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState)
     print("|cff33ff99StatsLine:|r " .. statsState)
     print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState)
@@ -2917,6 +2988,14 @@ SlashCmdList["SQOL"] = function(msg)
     elseif msg == "questsound" or msg == "qs" then
         toggle("QuestCompleteSound", "Quest completion sound is")
 
+    elseif msg == "objectivesound" or msg == "os" then
+        toggle("QuestObjectiveSound", "Objective completion sound is")
+
+    elseif msg == "soundprofile" or msg == "soundset" then
+        local profile = SQOL.DB.QuestSoundProfile == "Alliance" and "Horde" or "Alliance"
+        SQOL.SetOption("QuestSoundProfile", profile)
+        print("|cff33ff99SQoL:|r Quest sound profile is now |cffffff00" .. profile .. "|r")
+
     elseif msg == "splash" then
         toggle("ShowSplash", "Splash is")
 
@@ -2955,7 +3034,9 @@ SlashCmdList["SQOL"] = function(msg)
 
     else
         local version, at, sp, co, qs, lo, rep, stats, np, dmg, cursor = SQOL_GetStateStrings()
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor)
+        local qo = SQOL.DB.QuestObjectiveSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+        local profile = SQOL.DB.QuestSoundProfile or SQOL.defaults.QuestSoundProfile
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " ObjectiveSound:" .. qo .. " QuestSoundProfile:" .. profile .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor)
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -3107,7 +3188,6 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "QUEST_ACCEPTED" then
-        if not SQOL.DB.AutoTrack then return end
         local a1, a2 = ...
         local questIndex, questID
         if a2 then questIndex, questID = a1, a2 else questID = a1 end
@@ -3121,8 +3201,11 @@ f:SetScript("OnEvent", function(self, event, ...)
 
         if questID then
             SQOL.fullyCompleted[questID] = nil
-            SQOL_TryAutoTrack(questID)
-        else
+            SQOL.questObjectiveStates[questID] = nil
+            if SQOL.DB.AutoTrack then
+                SQOL_TryAutoTrack(questID)
+            end
+        elseif SQOL.DB.AutoTrack then
             dprint("Could not resolve questID on QUEST_ACCEPTED:", tostring(a1), tostring(a2))
         end
 
@@ -3132,6 +3215,7 @@ f:SetScript("OnEvent", function(self, event, ...)
             -- Keep the quest marked as handled so delayed QUEST_LOG_UPDATE events
             -- during turn-in do not fire the completion alert again.
             SQOL.fullyCompleted[questID] = SQOL.fullyCompleted[questID] or true
+            SQOL.questObjectiveStates[questID] = nil
         end
 
     elseif event == "QUEST_REMOVED" then
@@ -3139,6 +3223,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         if questID then
             -- QUEST_ACCEPTED clears this when the quest is picked up again.
             SQOL.fullyCompleted[questID] = SQOL.fullyCompleted[questID] or true
+            SQOL.questObjectiveStates[questID] = nil
         end
 
     elseif event == "UPDATE_FACTION" then

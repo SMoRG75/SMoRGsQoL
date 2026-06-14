@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.16] - 2026-06-14
+
+### Added
+- Added a separate sound when an individual quest objective is completed.
+- Added selectable Horde (Peon) and Alliance (Human worker) quest sound profiles.
+
+### Fixed
+- Reset quest completion tracking when a quest is accepted even if auto-track is disabled.
+
 ## [1.0.15] - 2026-05-05
 
 ### Fixed
