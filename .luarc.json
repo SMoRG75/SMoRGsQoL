@@ -29,6 +29,8 @@
         "GetQuestDifficultyColor",
         "CurveConstants",
         "DEAD",
-        "GameTooltip_UnitColor"
+        "GameTooltip_UnitColor",
+        "GetNumQuestWatches",
+        "GetQuestIndexForWatch"
     ]
 }

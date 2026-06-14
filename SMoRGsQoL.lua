@@ -958,10 +958,10 @@ local function SQOL_CollectProgressBarQuestIDs()
     end
 
     if C_Map and type(C_Map.GetBestMapForUnit) == "function"
-        and C_TaskQuest and type(C_TaskQuest.GetQuestsForPlayerByMapID) == "function" then
+        and C_TaskQuest and type(C_TaskQuest.C_TaskQuest.GetQuestsOnMap) == "function" then
         local mapOk, mapID = pcall(C_Map.GetBestMapForUnit, "player")
         if mapOk and type(mapID) == "number" then
-            local tasksOk, tasks = pcall(C_TaskQuest.GetQuestsForPlayerByMapID, mapID)
+            local tasksOk, tasks = pcall(C_TaskQuest.C_TaskQuest.GetQuestsOnMap, mapID)
             if tasksOk and type(tasks) == "table" then
                 for _, task in ipairs(tasks) do
                     if type(task) == "table" then
