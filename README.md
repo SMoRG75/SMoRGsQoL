@@ -72,7 +72,3 @@ Type `/sqol` to see current status, or use:
 
 Settings are stored per account in:
 - 💾 `SQOL_DB`
-
-## Credits
-
-- Alliance "Job's done" sound clip from [QuestSoundBits](https://github.com/Road-block/QuestSoundBits).
