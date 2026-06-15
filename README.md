@@ -6,13 +6,20 @@ Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
+## What's new in 1.0.16
+
+- Separate worker voice line when an individual quest objective is completed.
+- Selectable Horde (Peon) and Alliance (Human worker) quest sound profiles.
+- Improved quest completion tracking when accepting or re-accepting quests.
+- Updated for WoW Retail interface versions `12.0.5` and `12.0.7`.
+
 ## Features
 
 - 🧭 **Auto-track newly accepted quests**
   - Automatically tracks new quests in the Objective Tracker (with sanity checks to avoid unsupported edge cases).
 - 🔔 **Quest completion alert**
   - Plays a sound (toggleable) and prints a chat message when a quest is ready to turn in (or done for bonus/world quests).
-  - Optionally plays a separate worker voice line when an individual objective is completed.
+  - Optionally plays a separate worker voice line when an individual objective is completed before the full quest is done.
   - Supports selectable Horde (Peon) and Alliance (Human worker) sound profiles.
 - 🎨 **Colorized progress messages**
   - Colorizes common progress patterns like `3/10` or `45%` and quest objective progress (red → yellow → green).
@@ -49,7 +56,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol color` (or `/sqol col`)
 - `/sqol questsound` (or `/sqol qs`)
 - `/sqol objectivesound` (or `/sqol os`)
-- `/sqol soundprofile`
+- `/sqol soundprofile` (or `/sqol soundset`)
 - `/sqol splash`
 - `/sqol hideach` (or `/sqol ha`)
 - `/sqol rep` (or `/sqol rw`)
