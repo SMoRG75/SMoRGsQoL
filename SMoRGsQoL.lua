@@ -849,6 +849,17 @@ local function SQOL_NameplateObjectives_GetProgressBarInfo(questID)
         end
     end
 
+    -- Standard retail API for progress-bar objectives returns a single 0-100
+    -- percentage. Treat it as cur/100 so quests like "Umbral Attuning Shard
+    -- charged" report progress even when the *Info variants above are absent.
+    if not (type(cur) == "number" and type(total) == "number" and total > 0)
+        and type(GetQuestProgressBarPercent) == "function" then
+        local ok, pct = pcall(GetQuestProgressBarPercent, questID)
+        if ok and type(pct) == "number" and pct > 0 then
+            cur, total = math.floor(pct + 0.5), 100
+        end
+    end
+
     if type(cur) == "number" and type(total) == "number" and total > 0 then
         return cur, total
     end
@@ -3236,12 +3247,12 @@ f:SetScript("OnEvent", function(self, event, ...)
             local msg = ...
             local handled = false
 
-        if SQOL.DB.DebugTrack then
-            dprint("RepWatch -> CHAT_MSG_COMBAT_FACTION_CHANGE:", tostring(msg))
-        end
-        if SQOL_RepWatch_HandleFactionChangeMessage then
-            handled = SQOL_RepWatch_HandleFactionChangeMessage(msg)
-        end
+            if SQOL.DB.DebugTrack then
+                dprint("RepWatch -> CHAT_MSG_COMBAT_FACTION_CHANGE:", tostring(msg))
+            end
+            if SQOL_RepWatch_HandleFactionChangeMessage then
+                handled = SQOL_RepWatch_HandleFactionChangeMessage(msg)
+            end
 
             -- Fallback: if we couldn't parse/resolve the faction, do a delta-based scan.
             if not handled and SQOL_RepWatch_ScheduleScan then
