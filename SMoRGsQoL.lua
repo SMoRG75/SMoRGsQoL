@@ -890,11 +890,20 @@ local function SQOL_GetQuestProgressBarLabel(questID)
     if C_QuestLog and type(C_QuestLog.GetQuestObjectives) == "function" then
         local ok, objectives = pcall(C_QuestLog.GetQuestObjectives, questID)
         if ok and type(objectives) == "table" then
+            -- Prefer the progress-bar objective's own text; a quest can have
+            -- several objectives and the bar rarely belongs to the first one.
+            local fallback
             for _, obj in ipairs(objectives) do
                 local text = type(obj) == "table" and rawget(obj, "text")
                 if type(text) == "string" and text ~= "" then
-                    return text
+                    if rawget(obj, "type") == "progressbar" then
+                        return text
+                    end
+                    fallback = fallback or text
                 end
+            end
+            if fallback then
+                return fallback
             end
         end
     end
