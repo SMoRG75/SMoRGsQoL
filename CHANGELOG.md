@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.17] - 2026-07-04
+
+### Fixed
+- Show colorized progress messages for progress-bar quest objectives (e.g. "Umbral Attuning Shard charged"), using the objective's own label and avoiding a duplicated percentage.
+
 ## [1.0.16] - 2026-06-14
 
 ### Added
