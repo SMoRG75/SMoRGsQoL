@@ -887,6 +887,12 @@ SQOL._questProgressBarState = SQOL._questProgressBarState or {}
 SQOL._questProgressBarScanPending = false
 
 local function SQOL_GetQuestProgressBarLabel(questID)
+    -- Progress-bar objective text often already ends in "(NN%)"; drop it so the
+    -- percentage isn't printed twice once the count is appended.
+    local function stripPercent(text)
+        return (text:gsub("%s*%(%d+%%%)%s*$", ""))
+    end
+
     if C_QuestLog and type(C_QuestLog.GetQuestObjectives) == "function" then
         local ok, objectives = pcall(C_QuestLog.GetQuestObjectives, questID)
         if ok and type(objectives) == "table" then
@@ -897,7 +903,7 @@ local function SQOL_GetQuestProgressBarLabel(questID)
                 local text = type(obj) == "table" and rawget(obj, "text")
                 if type(text) == "string" and text ~= "" then
                     if rawget(obj, "type") == "progressbar" then
-                        return text
+                        return stripPercent(text)
                     end
                     fallback = fallback or text
                 end
