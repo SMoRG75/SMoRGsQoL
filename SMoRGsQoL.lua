@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.17 by SMoRG75
+-- SMoRGsQoL v1.0.18 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
 -- Now with throttled updates and a stable PlayerFrame iLvl+Speed line.
@@ -2514,6 +2514,17 @@ local function SQOL_RepWatch_CollectionsOpen()
     return false
 end
 
+-- Avoid the expand-all/re-collapse scan while the Reputation panel is open.
+-- That scan re-lays out the reputation list, which makes the text visibly jump
+-- when the user simply clicks an expansion header to collapse/expand it.
+local function SQOL_RepWatch_ReputationFrameOpen()
+    local repFrame = rawget(_G, "ReputationFrame")
+    if repFrame and repFrame.IsShown and repFrame:IsShown() then
+        return true
+    end
+    return false
+end
+
 local function SQOL_RepWatch_HandleFactionChangeMessage(msg)
     if not SQOL.DB or not SQOL.DB.RepWatch then
         return false
@@ -3253,7 +3264,11 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "UPDATE_FACTION" then
-        if SQOL.DB and SQOL.DB.RepWatch and SQOL_RepWatch_ScheduleScan then
+        -- Clicking an expansion header in the Reputation panel fires UPDATE_FACTION.
+        -- Skip the header-expanding scan while the panel is open so the list does
+        -- not jump; actual rep gains are still caught by CHAT_MSG_COMBAT_FACTION_CHANGE.
+        if SQOL.DB and SQOL.DB.RepWatch and SQOL_RepWatch_ScheduleScan
+            and not SQOL_RepWatch_ReputationFrameOpen() then
             SQOL_RepWatch_ScheduleScan("update_faction")
         end
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.18] - 2026-07-05
+
+### Fixed
+- RepWatch no longer rescans on UPDATE_FACTION while the Reputation panel is open, so clicking an expansion header to collapse/expand it no longer makes the list jump.
+
 ## [1.0.17] - 2026-07-04
 
 ### Fixed
