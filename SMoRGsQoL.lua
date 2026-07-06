@@ -887,10 +887,13 @@ SQOL._questProgressBarState = SQOL._questProgressBarState or {}
 SQOL._questProgressBarScanPending = false
 
 local function SQOL_GetQuestProgressBarLabel(questID)
-    -- Progress-bar objective text often already ends in "(NN%)"; drop it so the
+    -- Progress-bar objective text often already carries the percentage, either
+    -- as a leading "NN% " prefix or a trailing "(NN%)"/"NN%"; drop it so the
     -- percentage isn't printed twice once the count is appended.
     local function stripPercent(text)
-        return (text:gsub("%s*%(%d+%%%)%s*$", ""))
+        text = text:gsub("^%s*%d+%%%s*", "")
+        text = text:gsub("%s*%(?%d+%%%)?%s*$", "")
+        return text
     end
 
     if C_QuestLog and type(C_QuestLog.GetQuestObjectives) == "function" then
