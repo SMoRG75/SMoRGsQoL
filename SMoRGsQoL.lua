@@ -1061,6 +1061,132 @@ local function SQOL_ScheduleQuestProgressBarScan(showChanges)
     end
 end
 
+------------------------------------------------------------
+-- Scenario progress bars (weighted-progress criteria, e.g. Void Incursion)
+--
+-- Scenarios live outside the quest system, so the quest scan above never sees
+-- them. Their segmented progress bar is a "weighted progress" criterion read
+-- via C_ScenarioInfo; we surface it through the same splash message as quests.
+------------------------------------------------------------
+SQOL._scenarioCriteriaState = SQOL._scenarioCriteriaState or {}
+SQOL._scenarioScanPending = false
+
+local function SQOL_IsInScenario()
+    if C_Scenario and type(C_Scenario.IsInScenario) == "function" then
+        local ok, active = pcall(C_Scenario.IsInScenario)
+        if ok then
+            return active and true or false
+        end
+    end
+    -- Fallback: a valid current step implies an active scenario.
+    if C_ScenarioInfo and type(C_ScenarioInfo.GetScenarioStepInfo) == "function" then
+        local ok, info = pcall(C_ScenarioInfo.GetScenarioStepInfo)
+        if ok and type(info) == "table" then
+            return true
+        end
+    end
+    return false
+end
+
+-- Reads a single weighted-progress scenario criterion. Returns cur, total,
+-- description, key -- with cur/total normalized to a 0-100 percentage so the
+-- splash message mirrors the on-screen bar (e.g. "Stillwhisper defended: 40%").
+local function SQOL_GetScenarioCriterion(index)
+    if not (C_ScenarioInfo and type(C_ScenarioInfo.GetCriteriaInfo) == "function") then
+        return nil
+    end
+    local ok, info = pcall(C_ScenarioInfo.GetCriteriaInfo, index)
+    if not ok or type(info) ~= "table" or not info.isWeightedProgress then
+        return nil
+    end
+
+    local cur = tonumber(info.quantity)
+    local total = tonumber(info.totalQuantity)
+
+    -- Some clients only expose progress as a percentage string ("40%").
+    if not (type(cur) == "number" and type(total) == "number" and total > 0) then
+        local pct = type(info.quantityString) == "string" and info.quantityString:match("(%d+)%%")
+        if pct then
+            cur, total = tonumber(pct), 100
+        end
+    end
+
+    if not (type(cur) == "number" and type(total) == "number" and total > 0) then
+        return nil
+    end
+
+    -- Normalize to a percentage so weighted totals (which are rarely 100)
+    -- render as "NN%" like the bar rather than a raw weighted count.
+    if total ~= 100 then
+        cur = math.floor((cur / total) * 100 + 0.5)
+        total = 100
+    end
+
+    local description = (type(info.description) == "string" and info.description ~= "")
+        and info.description or nil
+    local key = info.criteriaID or index
+
+    return cur, total, description, key
+end
+
+local function SQOL_ScanScenarioProgress(showChanges)
+    if not SQOL.DB or not SQOL.DB.ColorProgress then
+        return
+    end
+
+    if not SQOL_IsInScenario() then
+        if next(SQOL._scenarioCriteriaState) ~= nil then
+            SQOL._scenarioCriteriaState = {}
+        end
+        return
+    end
+
+    local seen = {}
+    -- Criteria indices are contiguous within a step; 20 is a safe upper bound.
+    for index = 1, 20 do
+        local cur, total, description, key = SQOL_GetScenarioCriterion(index)
+        if cur then
+            seen[key] = true
+
+            local previous = SQOL._scenarioCriteriaState[key]
+            local changed = previous and (previous.cur ~= cur or previous.total ~= total)
+            local firstVisibleProgress = (not previous) and cur > 0 and cur < total
+
+            if showChanges and (changed or firstVisibleProgress) then
+                local progress = SQOL_ShowProgressMessage(description, cur, total)
+                if SQOL.DB.DebugTrack then
+                    dprint(string.format("Scenario progress message: criterion %s %s (%d/%d, %.2f)",
+                        tostring(key), description or "-", cur, total, progress or 0))
+                end
+            end
+
+            SQOL._scenarioCriteriaState[key] = { cur = cur, total = total, label = description }
+        end
+    end
+
+    for key in pairs(SQOL._scenarioCriteriaState) do
+        if not seen[key] then
+            SQOL._scenarioCriteriaState[key] = nil
+        end
+    end
+end
+
+local function SQOL_ScheduleScenarioProgressScan(showChanges)
+    if SQOL._scenarioScanPending then return end
+    SQOL._scenarioScanPending = true
+
+    local function scan()
+        SQOL._scenarioScanPending = false
+        SQOL_ScanScenarioProgress(showChanges)
+    end
+
+    if C_Timer and type(C_Timer.After) == "function" then
+        C_Timer.After(0.2, scan)
+    else
+        scan()
+    end
+end
+
 local function SQOL_NameplateObjectives_NormalizeQuestEntry(entry)
     local questID, objectiveIndex
 
@@ -2939,6 +3065,7 @@ function SQOL.ApplyOption(key)
         if SQOL.DB.ColorProgress then
             SQOL_EnableCustomInfoMessages()
             SQOL_ScheduleQuestProgressBarScan(false)
+            SQOL_ScheduleScenarioProgressScan(false)
         else
             if UIErrorsFrame and UIErrorsFrame.RegisterEvent then
                 UIErrorsFrame:RegisterEvent("UI_INFO_MESSAGE")
@@ -3121,6 +3248,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         if SQOL.DB.ColorProgress then
             SQOL_EnableCustomInfoMessages()
             SQOL_ScheduleQuestProgressBarScan(false)
+            SQOL_ScheduleScenarioProgressScan(false)
         end
 
         -- Apply saved preference when logging in (only if already loaded)
@@ -3167,6 +3295,7 @@ f:SetScript("OnEvent", function(self, event, ...)
 
         if SQOL.DB and SQOL.DB.ColorProgress then
             SQOL_ScheduleQuestProgressBarScan(false)
+            SQOL_ScheduleScenarioProgressScan(false)
         end
 
         if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
@@ -3297,6 +3426,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL_CheckQuestProgress()
         SQOL_RecolorQuestObjectives_Throttle()
         SQOL_ScheduleQuestProgressBarScan(true)
+        SQOL_ScheduleScenarioProgressScan(true)
         if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
             SQOL_NameplateObjectives_ScheduleUpdateAll()
         end
@@ -3306,6 +3436,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL_CheckQuestProgress()
         SQOL_RecolorQuestObjectives_Throttle()
         SQOL_ScheduleQuestProgressBarScan(true)
+        SQOL_ScheduleScenarioProgressScan(true)
         if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
             SQOL_NameplateObjectives_ScheduleUpdateAll()
         end

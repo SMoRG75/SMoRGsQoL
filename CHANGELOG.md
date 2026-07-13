@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.19] - 2026-07-08
+
+### Added
+- Show colorized progress messages for scenario weighted-progress bars (e.g. Void Incursion's "Defending Stillwhisper"), which live outside the quest system and were previously never reported.
+
 ## [1.0.18] - 2026-07-05
 
 ### Fixed
