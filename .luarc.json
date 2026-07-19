@@ -36,6 +36,8 @@
         "READY_CHECK_MESSAGE",
         "ReadyCheckFrameText",
         "ReadyCheckListenerFrame",
+        "LFGDungeonReadyStatus",
+        "LFGDungeonReadyPopup",
         "ReadyCheckPortrait",
         "SetPortraitTexture"
     ]

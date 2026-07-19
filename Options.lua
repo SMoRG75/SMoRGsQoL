@@ -150,6 +150,7 @@ local function SQOL_CreateSettingsCategory()
     AddCheckbox("DamageTextFont", "Custom damage text font", "Use the TrashHand damage text font for floating combat text.")
     AddCheckbox("CursorShakeHighlight", "Highlight cursor on shake", "Highlight the cursor when you shake the mouse.")
     AddCheckbox("ShowReadyCheckTimer", "Ready check countdown timer", "Show a live countdown on the ready check popup for how long until it expires.")
+    AddCheckbox("ShowLFGProposalTimer", "LFG queue pop countdown timer", "Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds).")
     AddCheckbox("DebugTrack", "Debug tracking", "Print verbose debug information (for troubleshooting).")
 
 end

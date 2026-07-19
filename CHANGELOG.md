@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.21] - 2026-07-20
+
+### Added
+- Added a countdown timer on the group finder queue pop showing how long is left to accept (40 seconds). Toggle with `/SQOL lfgtimer` (`lfg`) or the settings panel.
+- Added `/SQOL rctest` and `/SQOL lfgtest` to preview either countdown without a group or a queue.
+
+### Fixed
+- The ready check countdown is no longer invisible when you start the ready check yourself. It was drawn inside `ReadyCheckFrame`, which Blizzard never shows to the initiator; it now lives on its own frame and moves to the top of the screen when there is no popup to sit under.
+
 ## [1.0.20] - 2026-07-13
 
 ### Added

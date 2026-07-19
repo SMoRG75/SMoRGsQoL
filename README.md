@@ -6,7 +6,12 @@ Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.0.20
+## What's new in 1.0.21
+
+- ⏳ **LFG queue pop countdown** — a live timer showing how long you have left to accept when the group finder pops (40 seconds), turning red for the last 5. Toggle with `/sqol lfgtimer` (`lfg`).
+- Fixed the ready check countdown being invisible when *you* started the ready check — Blizzard never shows the popup to the initiator, so the timer now moves to the top of the screen instead.
+
+### 1.0.20
 
 - ⏱️ **Ready check countdown** — a live timer showing how many seconds are left before the ready check expires, turning red for the last 5 seconds. Toggle with `/sqol readycheck` (`rc`).
 
@@ -36,6 +41,9 @@ Everything is toggleable:
 - ⏱️ **Ready check countdown**
   - Shows a live countdown of the seconds left on a ready check, turning red for the last 5 seconds.
   - Appears below the ready check popup, or near the top of the screen when you started the ready check yourself (Blizzard never shows the popup to the initiator).
+- ⏳ **LFG queue pop countdown**
+  - Shows how many of your 40 seconds are left to accept a group finder pop, turning red for the last 5.
+  - Sits below the queue pop's ready status frame, so it stays useful while you wait for the rest of the group to accept.
 - 🚪 **Login splash**
   - Optional status splash on login showing which features are ON/OFF.
 - ✅ **Hide completed achievements**
@@ -80,6 +88,8 @@ Type `/sqol` to see current status, or use:
 - `/sqol cursorflash` (or `/sqol cf`)
 - `/sqol readycheck` (or `/sqol rc`)
 - `/sqol rctest` — preview the countdown solo; `/sqol rctest popup` also shows the ready check popup
+- `/sqol lfgtimer` (or `/sqol lfg`)
+- `/sqol lfgtest` — preview the queue pop countdown without a queue
 - `/sqol debugtrack` (or `/sqol dbg`)
 - `/sqol reset`
 

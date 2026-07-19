@@ -52,6 +52,9 @@ SQOL.defaults = {
     -- Countdown timer on the ReadyCheckFrame showing time until it expires.
     ShowReadyCheckTimer = true,
 
+    -- Countdown timer on the LFG queue pop showing time left to accept.
+    ShowLFGProposalTimer = true,
+
 }
 
 ------------------------------------------------------------
@@ -2863,6 +2866,7 @@ local function SQOL_Splash()
     print("|cff33ff99DamageTextFont:|r " .. dmgState)
     print("|cff33ff99CursorShake:|r " .. cursorState)
     print("|cff33ff99ReadyCheckTimer:|r " .. (SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+    print("|cff33ff99LFGQueuePopTimer:|r " .. (SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
     print("|cffccccccType |cff00ff00/SQOL help|r for command list.|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
@@ -3020,6 +3024,10 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL cf|r          |cffcccccc- Shorthand for cursorflash|r")
     print("|cff00ff00/SQOL readycheck|r  |cffcccccc- Toggle ready check countdown timer|r")
     print("|cff00ff00/SQOL rc|r          |cffcccccc- Shorthand for readycheck|r")
+    print("|cff00ff00/SQOL rctest|r      |cffcccccc- Preview the ready check timer (add 'popup' for the frame)|r")
+    print("|cff00ff00/SQOL lfgtimer|r    |cffcccccc- Toggle LFG queue pop countdown timer|r")
+    print("|cff00ff00/SQOL lfg|r         |cffcccccc- Shorthand for lfgtimer|r")
+    print("|cff00ff00/SQOL lfgtest|r     |cffcccccc- Preview the LFG queue pop timer|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
@@ -3029,23 +3037,61 @@ local function SQOL_Help()
     print("|cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState)
     print("|cff33ff99StatsLine:|r " .. statsState)
     local rcState = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState .. "  |cff33ff99ReadyCheckTimer:|r " .. rcState)
+    local lfgState = SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState .. "  |cff33ff99ReadyCheckTimer:|r " .. rcState .. "  |cff33ff99LFGQueuePopTimer:|r " .. lfgState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
 ------------------------------------------------------------
--- Ready Check countdown timer
--- Adds a live countdown to the default ReadyCheckFrame showing how
--- many seconds are left before the ready check expires.
+-- Countdown timers
+-- Shared machinery for the ready check and LFG proposal countdowns:
+-- a fontstring on its own frame, ticked ten times a second, turning red
+-- for the last few seconds. Each timer supplies its own anchor rule.
 ------------------------------------------------------------
-local SQOL_READY_CHECK_DURATION = 30 -- Blizzard default; used as a fallback.
+local SQOL_COUNTDOWN_WARN_SECONDS = 5
 
--- The timer lives on its own frame parented to UIParent instead of on
--- ReadyCheckFrame: the initiator of a ready check never gets the popup
--- (they are auto-readied), so anything parented to it stays invisible.
-local function SQOL_ReadyCheck_EnsureText()
-    if SQOL.readyCheckTimerText then
-        return SQOL.readyCheckTimerText
+local SQOL_Countdown = {}
+SQOL_Countdown.__index = SQOL_Countdown
+
+local function SQOL_Countdown_OnUpdate(updater, elapsed)
+    local countdown = updater.countdown
+    updater.accum = (updater.accum or 0) + elapsed
+    if updater.accum < 0.1 then return end
+    updater.accum = 0
+
+    local remaining = (updater.expires or 0) - GetTime()
+    if remaining < 0 then remaining = 0 end
+
+    local fs = countdown.text
+    if fs then
+        local secs = math.ceil(remaining)
+        if secs <= SQOL_COUNTDOWN_WARN_SECONDS then
+            fs:SetTextColor(1, 0.2, 0.2)
+        else
+            fs:SetTextColor(1, 0.82, 0)
+        end
+        fs:SetFormattedText("%ds", secs)
+        -- The popup can appear a frame or two after the event fires.
+        countdown:Anchor()
+    end
+
+    if remaining <= 0 then
+        countdown:Stop()
+    end
+end
+
+-- anchorFn positions the holder frame; onStop is optional cleanup.
+local function SQOL_Countdown_New(anchorFn, onStop)
+    return setmetatable({ anchorFn = anchorFn, onStop = onStop }, SQOL_Countdown)
+end
+
+-- The timer lives on its own frame parented to UIParent rather than on
+-- the popup it belongs to: those popups are not always shown (see the
+-- ready check initiator case), and anything parented to a hidden frame
+-- stays invisible.
+function SQOL_Countdown:Ensure()
+    if self.text then
+        return self.text
     end
 
     local holder = CreateFrame("Frame", nil, UIParent)
@@ -3056,10 +3102,56 @@ local function SQOL_ReadyCheck_EnsureText()
     fs:SetPoint("CENTER")
     fs:SetTextColor(1, 0.82, 0)
 
-    SQOL.readyCheckTimerHolder = holder
-    SQOL.readyCheckTimerText = fs
+    self.holder = holder
+    self.text = fs
     return fs
 end
+
+function SQOL_Countdown:Anchor()
+    if not self.holder then return end
+    self.holder:ClearAllPoints()
+    self.anchorFn(self.holder)
+end
+
+function SQOL_Countdown:Start(duration)
+    duration = tonumber(duration)
+    if not duration or duration <= 0 then return end
+
+    local fs = self:Ensure()
+    if not fs then return end
+
+    if not self.updater then
+        self.updater = CreateFrame("Frame")
+        self.updater.countdown = self
+    end
+    local updater = self.updater
+    updater.expires = GetTime() + duration
+    updater.accum = 1 -- Force an immediate draw on the next OnUpdate.
+    updater:SetScript("OnUpdate", SQOL_Countdown_OnUpdate)
+    updater:Show()
+
+    fs:SetFormattedText("%ds", math.ceil(duration))
+    self:Anchor()
+    self.holder:Show()
+end
+
+function SQOL_Countdown:Stop()
+    if self.onStop then
+        self.onStop(self)
+    end
+    if self.updater then
+        self.updater:SetScript("OnUpdate", nil)
+        self.updater:Hide()
+    end
+    if self.holder then
+        self.holder:Hide()
+    end
+end
+
+------------------------------------------------------------
+-- Ready check countdown (party/raid ready check, READY_CHECK event)
+------------------------------------------------------------
+local SQOL_READY_CHECK_DURATION = 30 -- Blizzard default; used as a fallback.
 
 -- ReadyCheckFrame is only an invisible container: the artwork, text and
 -- buttons all live in its ReadyCheckListenerFrame child, which Blizzard
@@ -3068,20 +3160,6 @@ end
 local function SQOL_ReadyCheck_PopupVisible()
     return ReadyCheckFrame and ReadyCheckFrame:IsShown()
         and ReadyCheckListenerFrame and ReadyCheckListenerFrame:IsShown()
-end
-
--- Snap to the ready check popup when it is visible, otherwise park the
--- countdown near the top of the screen so the initiator can see it too.
-local function SQOL_ReadyCheck_Anchor()
-    local holder = SQOL.readyCheckTimerHolder
-    if not holder then return end
-
-    holder:ClearAllPoints()
-    if SQOL_ReadyCheck_PopupVisible() then
-        holder:SetPoint("TOP", ReadyCheckFrame, "BOTTOM", 0, -4)
-    else
-        holder:SetPoint("TOP", UIParent, "TOP", 0, -180)
-    end
 end
 
 -- Test helper: force the Blizzard popup open so the anchoring can be
@@ -3104,50 +3182,27 @@ local function SQOL_ReadyCheck_ShowFakePopup()
     SQOL.readyCheckFakePopup = true
 end
 
-local function SQOL_ReadyCheck_HideFakePopup()
-    if not SQOL.readyCheckFakePopup then return end
-    SQOL.readyCheckFakePopup = nil
-
-    if ReadyCheckFrame then
-        ReadyCheckFrame:Hide()
+local SQOL_ReadyCheckTimer = SQOL_Countdown_New(
+    -- Snap to the ready check popup when it is visible, otherwise park
+    -- the countdown near the top so the initiator can see it too.
+    function(holder)
+        if SQOL_ReadyCheck_PopupVisible() then
+            holder:SetPoint("TOP", ReadyCheckFrame, "BOTTOM", 0, -4)
+        else
+            holder:SetPoint("TOP", UIParent, "TOP", 0, -180)
+        end
+    end,
+    function()
+        if not SQOL.readyCheckFakePopup then return end
+        SQOL.readyCheckFakePopup = nil
+        if ReadyCheckFrame then
+            ReadyCheckFrame:Hide()
+        end
     end
-end
+)
 
 local function SQOL_ReadyCheck_Hide()
-    SQOL_ReadyCheck_HideFakePopup()
-    if SQOL.readyCheckTimerFrame then
-        SQOL.readyCheckTimerFrame:SetScript("OnUpdate", nil)
-        SQOL.readyCheckTimerFrame:Hide()
-    end
-    if SQOL.readyCheckTimerHolder then
-        SQOL.readyCheckTimerHolder:Hide()
-    end
-end
-
-local function SQOL_ReadyCheck_OnUpdate(self, elapsed)
-    self.accum = (self.accum or 0) + elapsed
-    if self.accum < 0.1 then return end
-    self.accum = 0
-
-    local remaining = (self.expires or 0) - GetTime()
-    if remaining < 0 then remaining = 0 end
-
-    local fs = SQOL.readyCheckTimerText
-    if fs then
-        local secs = math.ceil(remaining)
-        if secs <= 5 then
-            fs:SetTextColor(1, 0.2, 0.2)
-        else
-            fs:SetTextColor(1, 0.82, 0)
-        end
-        fs:SetFormattedText("%ds", secs)
-        -- The popup can appear a frame or two after READY_CHECK fires.
-        SQOL_ReadyCheck_Anchor()
-    end
-
-    if remaining <= 0 then
-        SQOL_ReadyCheck_Hide()
-    end
+    SQOL_ReadyCheckTimer:Stop()
 end
 
 local function SQOL_ReadyCheck_Start(duration)
@@ -3157,22 +3212,7 @@ local function SQOL_ReadyCheck_Start(duration)
     if not duration or duration <= 0 then
         duration = SQOL_READY_CHECK_DURATION
     end
-
-    local fs = SQOL_ReadyCheck_EnsureText()
-    if not fs then return end
-
-    if not SQOL.readyCheckTimerFrame then
-        SQOL.readyCheckTimerFrame = CreateFrame("Frame")
-    end
-    local updater = SQOL.readyCheckTimerFrame
-    updater.expires = GetTime() + duration
-    updater.accum = 1 -- Force an immediate draw on the next OnUpdate.
-    updater:SetScript("OnUpdate", SQOL_ReadyCheck_OnUpdate)
-    updater:Show()
-
-    fs:SetFormattedText("%ds", math.ceil(duration))
-    SQOL_ReadyCheck_Anchor()
-    SQOL.readyCheckTimerHolder:Show()
+    SQOL_ReadyCheckTimer:Start(duration)
 end
 
 -- Manual test: fakes a ready check (popup + countdown) without a group.
@@ -3181,6 +3221,39 @@ function SQOL_ReadyCheck_Test(duration, withPopup)
         SQOL_ReadyCheck_ShowFakePopup()
     end
     SQOL_ReadyCheck_Start(duration or SQOL_READY_CHECK_DURATION)
+end
+
+------------------------------------------------------------
+-- LFG proposal countdown (queue pop, LFG_PROPOSAL_SHOW event)
+-- Blizzard's LFGDungeonReadyStatus frame is labelled "Ready Check" but
+-- belongs to the group finder, not the READY_CHECK event, and no API
+-- exposes how long is left. The accept window is a fixed 40 seconds, so
+-- the countdown is driven from when the proposal appears.
+------------------------------------------------------------
+local SQOL_LFG_PROPOSAL_DURATION = 40
+
+local SQOL_LFGProposalTimer = SQOL_Countdown_New(function(holder)
+    if LFGDungeonReadyStatus and LFGDungeonReadyStatus:IsShown() then
+        holder:SetPoint("TOP", LFGDungeonReadyStatus, "BOTTOM", 0, -4)
+    elseif LFGDungeonReadyPopup and LFGDungeonReadyPopup:IsShown() then
+        holder:SetPoint("TOP", LFGDungeonReadyPopup, "BOTTOM", 0, -4)
+    else
+        holder:SetPoint("TOP", UIParent, "TOP", 0, -180)
+    end
+end)
+
+local function SQOL_LFGProposal_Hide()
+    SQOL_LFGProposalTimer:Stop()
+end
+
+local function SQOL_LFGProposal_Start()
+    if not (SQOL.DB and SQOL.DB.ShowLFGProposalTimer) then return end
+    SQOL_LFGProposalTimer:Start(SQOL_LFG_PROPOSAL_DURATION)
+end
+
+-- Manual test: the countdown alone, without a queue pop.
+function SQOL_LFGProposal_Test(duration)
+    SQOL_LFGProposalTimer:Start(duration or SQOL_LFG_PROPOSAL_DURATION)
 end
 
 ------------------------------------------------------------
@@ -3279,6 +3352,11 @@ function SQOL.ApplyOption(key)
             SQOL_ReadyCheck_Hide()
         end
 
+    elseif key == "ShowLFGProposalTimer" then
+        if not SQOL.DB.ShowLFGProposalTimer then
+            SQOL_LFGProposal_Hide()
+        end
+
     end
 
     SQOL.SyncSettingObject(key)
@@ -3356,6 +3434,12 @@ SlashCmdList["SQOL"] = function(msg)
             print("|cff33ff99SQoL:|r Ready check timer is |cffff0000OFF|r - enable it with /sqol rc")
         end
 
+    elseif msg == "lfgtimer" or msg == "lfg" then
+        toggle("ShowLFGProposalTimer", "LFG queue pop timer is")
+
+    elseif msg == "lfgtest" then
+        SQOL_LFGProposal_Test()
+
     elseif msg == "debugtrack" or msg == "dbg" then
         toggle("DebugTrack", "Debug tracking")
 
@@ -3376,7 +3460,8 @@ SlashCmdList["SQOL"] = function(msg)
         local qo = SQOL.DB.QuestObjectiveSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
         local profile = SQOL.DB.QuestSoundProfile or SQOL.defaults.QuestSoundProfile
         local rc = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " ObjectiveSound:" .. qo .. " QuestSoundProfile:" .. profile .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor .. " ReadyCheckTimer:" .. rc)
+        local lfg = SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " ObjectiveSound:" .. qo .. " QuestSoundProfile:" .. profile .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor .. " ReadyCheckTimer:" .. rc .. " LFGQueuePopTimer:" .. lfg)
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -3412,6 +3497,10 @@ f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 f:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 SQOL_RegisterOptionalEvent("READY_CHECK")
 SQOL_RegisterOptionalEvent("READY_CHECK_FINISHED")
+SQOL_RegisterOptionalEvent("LFG_PROPOSAL_SHOW")
+SQOL_RegisterOptionalEvent("LFG_PROPOSAL_DONE")
+SQOL_RegisterOptionalEvent("LFG_PROPOSAL_FAILED")
+SQOL_RegisterOptionalEvent("LFG_PROPOSAL_SUCCEEDED")
 
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
@@ -3528,6 +3617,13 @@ f:SetScript("OnEvent", function(self, event, ...)
 
     elseif event == "READY_CHECK_FINISHED" then
         SQOL_ReadyCheck_Hide()
+
+    elseif event == "LFG_PROPOSAL_SHOW" then
+        SQOL_LFGProposal_Start()
+
+    elseif event == "LFG_PROPOSAL_DONE" or event == "LFG_PROPOSAL_FAILED"
+        or event == "LFG_PROPOSAL_SUCCEEDED" then
+        SQOL_LFGProposal_Hide()
 
     elseif event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_AVG_ITEM_LEVEL_UPDATE" then
         if SQOL.DB and SQOL.DB.ShowIlvlSpd then
