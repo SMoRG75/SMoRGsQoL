@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.20] - 2026-07-13
+
+### Added
+- Added a live countdown timer on the ready check popup showing how many seconds are left before it expires (turns red in the last 5 seconds). Toggle with `/SQOL readycheck` (`rc`) or the settings panel.
+
 ## [1.0.19] - 2026-07-08
 
 ### Added

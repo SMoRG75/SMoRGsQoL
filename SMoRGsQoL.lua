@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL v1.0.18 by SMoRG75
+-- SMoRGsQoL v1.0.20 by SMoRG75
 -- Retail-only.
 -- Optional auto-tracking for newly accepted quests.
 -- Now with throttled updates and a stable PlayerFrame iLvl+Speed line.
@@ -48,6 +48,9 @@ SQOL.defaults = {
 
     -- Highlight the cursor when shaking the mouse.
     CursorShakeHighlight = false,
+
+    -- Countdown timer on the ReadyCheckFrame showing time until it expires.
+    ShowReadyCheckTimer = true,
 
 }
 
@@ -2859,6 +2862,7 @@ local function SQOL_Splash()
     print("|cff33ff99StatsLine:|r " .. statsState)
     print("|cff33ff99DamageTextFont:|r " .. dmgState)
     print("|cff33ff99CursorShake:|r " .. cursorState)
+    print("|cff33ff99ReadyCheckTimer:|r " .. (SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
     print("|cffccccccType |cff00ff00/SQOL help|r for command list.|r")
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
@@ -3014,6 +3018,8 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL cs|r          |cffcccccc- Shorthand for cursor|r")
     print("|cff00ff00/SQOL cursorflash|r |cffcccccc- Flash cursor ring once (debug)|r")
     print("|cff00ff00/SQOL cf|r          |cffcccccc- Shorthand for cursorflash|r")
+    print("|cff00ff00/SQOL readycheck|r  |cffcccccc- Toggle ready check countdown timer|r")
+    print("|cff00ff00/SQOL rc|r          |cffcccccc- Shorthand for readycheck|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
@@ -3022,8 +3028,89 @@ local function SQOL_Help()
     print("|cff33ff99ObjectiveSound:|r " .. qoState .. "  |cff33ff99QuestSoundProfile:|r " .. questSoundProfile)
     print("|cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState)
     print("|cff33ff99StatsLine:|r " .. statsState)
-    print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState)
+    local rcState = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState .. "  |cff33ff99ReadyCheckTimer:|r " .. rcState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
+end
+
+------------------------------------------------------------
+-- Ready Check countdown timer
+-- Adds a live countdown to the default ReadyCheckFrame showing how
+-- many seconds are left before the ready check expires.
+------------------------------------------------------------
+local SQOL_READY_CHECK_DURATION = 30 -- Blizzard default; used as a fallback.
+
+local function SQOL_ReadyCheck_EnsureText()
+    if SQOL.readyCheckTimerText then
+        return SQOL.readyCheckTimerText
+    end
+    if not ReadyCheckFrame then
+        return nil
+    end
+
+    local fs = ReadyCheckFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    fs:SetPoint("TOP", ReadyCheckFrame, "BOTTOM", 0, -2)
+    fs:SetTextColor(1, 0.82, 0)
+    SQOL.readyCheckTimerText = fs
+    return fs
+end
+
+local function SQOL_ReadyCheck_Hide()
+    if SQOL.readyCheckTimerFrame then
+        SQOL.readyCheckTimerFrame:SetScript("OnUpdate", nil)
+        SQOL.readyCheckTimerFrame:Hide()
+    end
+    if SQOL.readyCheckTimerText then
+        SQOL.readyCheckTimerText:Hide()
+    end
+end
+
+local function SQOL_ReadyCheck_OnUpdate(self, elapsed)
+    self.accum = (self.accum or 0) + elapsed
+    if self.accum < 0.1 then return end
+    self.accum = 0
+
+    local remaining = (self.expires or 0) - GetTime()
+    if remaining < 0 then remaining = 0 end
+
+    local fs = SQOL.readyCheckTimerText
+    if fs then
+        local secs = math.ceil(remaining)
+        if secs <= 5 then
+            fs:SetTextColor(1, 0.2, 0.2)
+        else
+            fs:SetTextColor(1, 0.82, 0)
+        end
+        fs:SetFormattedText("%ds", secs)
+    end
+
+    if remaining <= 0 then
+        SQOL_ReadyCheck_Hide()
+    end
+end
+
+local function SQOL_ReadyCheck_Start(duration)
+    if not (SQOL.DB and SQOL.DB.ShowReadyCheckTimer) then return end
+    if not ReadyCheckFrame then return end
+
+    duration = tonumber(duration)
+    if not duration or duration <= 0 then
+        duration = SQOL_READY_CHECK_DURATION
+    end
+
+    local fs = SQOL_ReadyCheck_EnsureText()
+    if not fs then return end
+
+    if not SQOL.readyCheckTimerFrame then
+        SQOL.readyCheckTimerFrame = CreateFrame("Frame")
+    end
+    local updater = SQOL.readyCheckTimerFrame
+    updater.expires = GetTime() + duration
+    updater.accum = 1 -- Force an immediate draw on the next OnUpdate.
+    updater:SetScript("OnUpdate", SQOL_ReadyCheck_OnUpdate)
+    updater:Show()
+
+    fs:Show()
 end
 
 ------------------------------------------------------------
@@ -3117,6 +3204,11 @@ function SQOL.ApplyOption(key)
             SQOL_CursorShake_Disable()
         end
 
+    elseif key == "ShowReadyCheckTimer" then
+        if not SQOL.DB.ShowReadyCheckTimer then
+            SQOL_ReadyCheck_Hide()
+        end
+
     end
 
     SQOL.SyncSettingObject(key)
@@ -3184,6 +3276,9 @@ SlashCmdList["SQOL"] = function(msg)
     elseif msg == "cursorflash" or msg == "cf" then
         SQOL_CursorShake_FlashNow(0.8)
 
+    elseif msg == "readycheck" or msg == "rc" then
+        toggle("ShowReadyCheckTimer", "Ready check timer is")
+
     elseif msg == "debugtrack" or msg == "dbg" then
         toggle("DebugTrack", "Debug tracking")
 
@@ -3203,7 +3298,8 @@ SlashCmdList["SQOL"] = function(msg)
         local version, at, sp, co, qs, lo, rep, stats, np, dmg, cursor = SQOL_GetStateStrings()
         local qo = SQOL.DB.QuestObjectiveSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
         local profile = SQOL.DB.QuestSoundProfile or SQOL.defaults.QuestSoundProfile
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " ObjectiveSound:" .. qo .. " QuestSoundProfile:" .. profile .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor)
+        local rc = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " ObjectiveSound:" .. qo .. " QuestSoundProfile:" .. profile .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor .. " ReadyCheckTimer:" .. rc)
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -3237,6 +3333,8 @@ f:RegisterEvent("UNIT_INVENTORY_CHANGED")
 f:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
 f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 f:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+SQOL_RegisterOptionalEvent("READY_CHECK")
+SQOL_RegisterOptionalEvent("READY_CHECK_FINISHED")
 
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
@@ -3344,6 +3442,15 @@ f:SetScript("OnEvent", function(self, event, ...)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         local unit = ...
         SQOL_NameplateObjectives_ClearUnit(unit)
+
+    elseif event == "READY_CHECK" then
+        if SQOL.DB and SQOL.DB.ShowReadyCheckTimer then
+            local initiator, timeLeft = ...
+            SQOL_ReadyCheck_Start(timeLeft)
+        end
+
+    elseif event == "READY_CHECK_FINISHED" then
+        SQOL_ReadyCheck_Hide()
 
     elseif event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_AVG_ITEM_LEVEL_UPDATE" then
         if SQOL.DB and SQOL.DB.ShowIlvlSpd then
