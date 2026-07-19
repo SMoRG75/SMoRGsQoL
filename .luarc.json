@@ -31,6 +31,12 @@
         "DEAD",
         "GameTooltip_UnitColor",
         "GetNumQuestWatches",
-        "GetQuestIndexForWatch"
+        "GetQuestIndexForWatch",
+        "ReadyCheckFrame",
+        "READY_CHECK_MESSAGE",
+        "ReadyCheckFrameText",
+        "ReadyCheckListenerFrame",
+        "ReadyCheckPortrait",
+        "SetPortraitTexture"
     ]
 }

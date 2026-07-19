@@ -6,12 +6,21 @@ Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.0.16
+## What's new in 1.0.20
 
-- Separate worker voice line when an individual quest objective is completed.
-- Selectable Horde (Peon) and Alliance (Human worker) quest sound profiles.
-- Improved quest completion tracking when accepting or re-accepting quests.
-- Updated for WoW Retail interface versions `12.0.5` and `12.0.7`.
+- ⏱️ **Ready check countdown** — a live timer showing how many seconds are left before the ready check expires, turning red for the last 5 seconds. Toggle with `/sqol readycheck` (`rc`).
+
+### 1.0.19
+
+- Colorized progress messages now cover scenario weighted-progress bars (e.g. Void Incursion's "Defending Stillwhisper"), which live outside the quest system and were previously never reported.
+
+### 1.0.18
+
+- RepWatch no longer rescans while the Reputation panel is open, so collapsing or expanding an expansion header no longer makes the list jump.
+
+### 1.0.17
+
+- Colorized progress messages now cover progress-bar quest objectives (e.g. "Umbral Attuning Shard charged"), using the objective's own label and without a duplicated percentage.
 
 ## Features
 
@@ -23,6 +32,10 @@ Everything is toggleable:
   - Supports selectable Horde (Peon) and Alliance (Human worker) sound profiles.
 - 🎨 **Colorized progress messages**
   - Colorizes common progress patterns like `3/10` or `45%` and quest objective progress (red → yellow → green).
+  - Also covers progress-bar quest objectives and scenario weighted-progress bars, which the default UI reports silently.
+- ⏱️ **Ready check countdown**
+  - Shows a live countdown of the seconds left on a ready check, turning red for the last 5 seconds.
+  - Appears below the ready check popup, or near the top of the screen when you started the ready check yourself (Blizzard never shows the popup to the initiator).
 - 🚪 **Login splash**
   - Optional status splash on login showing which features are ON/OFF.
 - ✅ **Hide completed achievements**
@@ -65,6 +78,8 @@ Type `/sqol` to see current status, or use:
 - `/sqol damagefont` (or `/sqol df`)
 - `/sqol cursor` (or `/sqol cs`)
 - `/sqol cursorflash` (or `/sqol cf`)
+- `/sqol readycheck` (or `/sqol rc`)
+- `/sqol rctest` — preview the countdown solo; `/sqol rctest popup` also shows the ready check popup
 - `/sqol debugtrack` (or `/sqol dbg`)
 - `/sqol reset`
 

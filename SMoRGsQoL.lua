@@ -1148,7 +1148,7 @@ local function SQOL_ScanScenarioProgress(showChanges)
     -- Criteria indices are contiguous within a step; 20 is a safe upper bound.
     for index = 1, 20 do
         local cur, total, description, key = SQOL_GetScenarioCriterion(index)
-        if cur then
+        if cur and key then
             seen[key] = true
 
             local previous = SQOL._scenarioCriteriaState[key]
@@ -3040,28 +3040,87 @@ end
 ------------------------------------------------------------
 local SQOL_READY_CHECK_DURATION = 30 -- Blizzard default; used as a fallback.
 
+-- The timer lives on its own frame parented to UIParent instead of on
+-- ReadyCheckFrame: the initiator of a ready check never gets the popup
+-- (they are auto-readied), so anything parented to it stays invisible.
 local function SQOL_ReadyCheck_EnsureText()
     if SQOL.readyCheckTimerText then
         return SQOL.readyCheckTimerText
     end
-    if not ReadyCheckFrame then
-        return nil
-    end
 
-    local fs = ReadyCheckFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    fs:SetPoint("TOP", ReadyCheckFrame, "BOTTOM", 0, -2)
+    local holder = CreateFrame("Frame", nil, UIParent)
+    holder:SetFrameStrata("FULLSCREEN_DIALOG")
+    holder:SetSize(160, 24)
+
+    local fs = holder:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    fs:SetPoint("CENTER")
     fs:SetTextColor(1, 0.82, 0)
+
+    SQOL.readyCheckTimerHolder = holder
     SQOL.readyCheckTimerText = fs
     return fs
 end
 
+-- ReadyCheckFrame is only an invisible container: the artwork, text and
+-- buttons all live in its ReadyCheckListenerFrame child, which Blizzard
+-- keeps hidden for the initiator. So the container being shown says
+-- nothing about anything being on screen - check the child.
+local function SQOL_ReadyCheck_PopupVisible()
+    return ReadyCheckFrame and ReadyCheckFrame:IsShown()
+        and ReadyCheckListenerFrame and ReadyCheckListenerFrame:IsShown()
+end
+
+-- Snap to the ready check popup when it is visible, otherwise park the
+-- countdown near the top of the screen so the initiator can see it too.
+local function SQOL_ReadyCheck_Anchor()
+    local holder = SQOL.readyCheckTimerHolder
+    if not holder then return end
+
+    holder:ClearAllPoints()
+    if SQOL_ReadyCheck_PopupVisible() then
+        holder:SetPoint("TOP", ReadyCheckFrame, "BOTTOM", 0, -4)
+    else
+        holder:SetPoint("TOP", UIParent, "TOP", 0, -180)
+    end
+end
+
+-- Test helper: force the Blizzard popup open so the anchoring can be
+-- checked solo. A real ready check needs a group, and the initiator is
+-- auto-readied and never sees the popup at all.
+local function SQOL_ReadyCheck_ShowFakePopup()
+    if not (ReadyCheckFrame and ReadyCheckListenerFrame) then return end
+
+    -- Mirror what ShowReadyCheck() does for a non-initiator: fill in the
+    -- portrait and text, then show the child that holds the artwork.
+    if ReadyCheckPortrait then
+        SetPortraitTexture(ReadyCheckPortrait, "player")
+    end
+    if ReadyCheckFrameText then
+        ReadyCheckFrameText:SetFormattedText(READY_CHECK_MESSAGE, UnitName("player") or "?")
+    end
+
+    ReadyCheckFrame:Show()
+    ReadyCheckListenerFrame:Show()
+    SQOL.readyCheckFakePopup = true
+end
+
+local function SQOL_ReadyCheck_HideFakePopup()
+    if not SQOL.readyCheckFakePopup then return end
+    SQOL.readyCheckFakePopup = nil
+
+    if ReadyCheckFrame then
+        ReadyCheckFrame:Hide()
+    end
+end
+
 local function SQOL_ReadyCheck_Hide()
+    SQOL_ReadyCheck_HideFakePopup()
     if SQOL.readyCheckTimerFrame then
         SQOL.readyCheckTimerFrame:SetScript("OnUpdate", nil)
         SQOL.readyCheckTimerFrame:Hide()
     end
-    if SQOL.readyCheckTimerText then
-        SQOL.readyCheckTimerText:Hide()
+    if SQOL.readyCheckTimerHolder then
+        SQOL.readyCheckTimerHolder:Hide()
     end
 end
 
@@ -3082,6 +3141,8 @@ local function SQOL_ReadyCheck_OnUpdate(self, elapsed)
             fs:SetTextColor(1, 0.82, 0)
         end
         fs:SetFormattedText("%ds", secs)
+        -- The popup can appear a frame or two after READY_CHECK fires.
+        SQOL_ReadyCheck_Anchor()
     end
 
     if remaining <= 0 then
@@ -3091,7 +3152,6 @@ end
 
 local function SQOL_ReadyCheck_Start(duration)
     if not (SQOL.DB and SQOL.DB.ShowReadyCheckTimer) then return end
-    if not ReadyCheckFrame then return end
 
     duration = tonumber(duration)
     if not duration or duration <= 0 then
@@ -3110,7 +3170,17 @@ local function SQOL_ReadyCheck_Start(duration)
     updater:SetScript("OnUpdate", SQOL_ReadyCheck_OnUpdate)
     updater:Show()
 
-    fs:Show()
+    fs:SetFormattedText("%ds", math.ceil(duration))
+    SQOL_ReadyCheck_Anchor()
+    SQOL.readyCheckTimerHolder:Show()
+end
+
+-- Manual test: fakes a ready check (popup + countdown) without a group.
+function SQOL_ReadyCheck_Test(duration, withPopup)
+    if withPopup then
+        SQOL_ReadyCheck_ShowFakePopup()
+    end
+    SQOL_ReadyCheck_Start(duration or SQOL_READY_CHECK_DURATION)
 end
 
 ------------------------------------------------------------
@@ -3278,6 +3348,13 @@ SlashCmdList["SQOL"] = function(msg)
 
     elseif msg == "readycheck" or msg == "rc" then
         toggle("ShowReadyCheckTimer", "Ready check timer is")
+
+    elseif msg == "rctest" or msg == "rctest popup" then
+        if SQOL.DB.ShowReadyCheckTimer then
+            SQOL_ReadyCheck_Test(nil, msg == "rctest popup")
+        else
+            print("|cff33ff99SQoL:|r Ready check timer is |cffff0000OFF|r - enable it with /sqol rc")
+        end
 
     elseif msg == "debugtrack" or msg == "dbg" then
         toggle("DebugTrack", "Debug tracking")
