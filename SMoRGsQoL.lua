@@ -55,6 +55,9 @@ SQOL.defaults = {
     -- Countdown timer on the LFG queue pop showing time left to accept.
     ShowLFGProposalTimer = true,
 
+    -- Show each party member's level on the default party frames.
+    ShowPartyLevel = true,
+
 }
 
 ------------------------------------------------------------
@@ -2083,6 +2086,246 @@ local function SQOL_TryEnsurePlayerFrameIlvlUI(retries)
 end
 
 ------------------------------------------------------------
+-- Party member level
+-- The default (non-raid-style) party frames never show a level,
+-- which is annoying in 5-man instances. Add a small level label
+-- to each visible party member frame.
+------------------------------------------------------------
+SQOL._partyLevelTexts = SQOL._partyLevelTexts or {}
+SQOL._partyFramesHooked = SQOL._partyFramesHooked or {}
+
+local PARTY_MEMBER_COUNT = 4
+
+local function SQOL_GetPartyMemberFrame(i)
+    local partyFrame = rawget(_G, "PartyFrame")
+    if partyFrame then
+        -- Retail (10.0+): PartyFrame.MemberFrame1 .. MemberFrame4
+        local ok, mf = pcall(function() return partyFrame["MemberFrame" .. i] end)
+        if ok and mf then return mf end
+    end
+    -- Legacy global name, just in case.
+    return rawget(_G, "PartyMemberFrame" .. i)
+end
+
+local function SQOL_GetPartyMemberUnit(frame, i)
+    if frame then
+        local ok, u = pcall(function() return frame.unit or frame.unitToken end)
+        if ok and type(u) == "string" and u ~= "" then
+            return u
+        end
+    end
+    return "party" .. i
+end
+
+local function SQOL_GetPartyMemberNameFS(frame, i)
+    if frame then
+        local ok, n = pcall(function() return frame.name or frame.Name end)
+        if ok and n and n.GetObjectType and n:GetObjectType() == "FontString" then
+            return n
+        end
+    end
+    local g = rawget(_G, "PartyMemberFrame" .. i .. "Name")
+    if g and g.GetObjectType and g:GetObjectType() == "FontString" then
+        return g
+    end
+    return nil
+end
+
+local function SQOL_EnsurePartyLevelText(i, frame)
+    local fs = SQOL._partyLevelTexts[i]
+    if fs then return fs end
+
+    fs = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    fs:SetDrawLayer("OVERLAY", 7)
+    fs:SetWordWrap(false)
+    if fs.SetMaxLines then fs:SetMaxLines(1) end
+
+    -- Prefer sitting just after the member's name; fall back to the
+    -- frame's top-left if the name FontString can't be located.
+    local nameFS = SQOL_GetPartyMemberNameFS(frame, i)
+    if nameFS then
+        fs:SetPoint("LEFT", nameFS, "RIGHT", 4, 0)
+    else
+        fs:SetPoint("TOPLEFT", frame, "TOPLEFT", 45, -6)
+    end
+
+    SQOL._partyLevelTexts[i] = fs
+    return fs
+end
+
+local function SQOL_UpdatePartyMemberLevel(i)
+    local existing = SQOL._partyLevelTexts[i]
+
+    if not (SQOL.DB and SQOL.DB.ShowPartyLevel) then
+        if existing then existing:Hide() end
+        return
+    end
+
+    local frame = SQOL_GetPartyMemberFrame(i)
+    if not frame then
+        if existing then existing:Hide() end
+        return
+    end
+
+    local unit = SQOL_GetPartyMemberUnit(frame, i)
+    if not UnitExists(unit) then
+        if existing then existing:Hide() end
+        return
+    end
+
+    local fs = SQOL_EnsurePartyLevelText(i, frame)
+    local level = UnitLevel(unit)
+    if type(level) == "number" and level > 0 then
+        fs:SetText("|cffffd100" .. level .. "|r")
+        fs:Show()
+    elseif level == -1 then
+        -- Level unknown to the client (e.g. much higher level / out of range).
+        fs:SetText("|cffff2020??|r")
+        fs:Show()
+    else
+        fs:SetText("")
+        fs:Hide()
+    end
+end
+
+------------------------------------------------------------
+-- Raid-style party frames (CompactUnitFrame) don't show a level
+-- either. Decorate the compact party member frames the same way.
+-- Restricted to party units so real raid/arena frames are left alone.
+------------------------------------------------------------
+local RAID_PARTY_MEMBER_COUNT = 5
+
+local function SQOL_IsCompactPartyMemberFrame(frame)
+    if not frame then return false end
+
+    local name = frame.GetName and frame:GetName()
+    if type(name) == "string" and name:find("CompactPartyFrame") then
+        return true
+    end
+
+    -- Fallback: only decorate player / party units so we never touch
+    -- real raid frames, arena frames, boss frames, etc.
+    local ok, unit = pcall(function() return frame.unit end)
+    if ok and type(unit) == "string" then
+        if unit == "player" or unit:match("^party[1-9]$") then
+            return true
+        end
+    end
+    return false
+end
+
+local function SQOL_EnsureCompactLevelText(frame)
+    local fs = frame.SQOL_LevelText
+    if fs then return fs end
+
+    fs = frame:CreateFontString(nil, "OVERLAY")
+    local font = rawget(_G, "STANDARD_TEXT_FONT") or "Fonts\\FRIZQT__.TTF"
+    -- Outlined so it stays legible over the health bar.
+    pcall(fs.SetFont, fs, font, 10, "OUTLINE")
+    fs:SetJustifyH("RIGHT")
+    fs:SetWordWrap(false)
+    if fs.SetMaxLines then fs:SetMaxLines(1) end
+    fs:SetDrawLayer("OVERLAY", 7)
+    -- Bottom-right corner keeps clear of the centered name and the
+    -- role / leader / ready-check icons that live near the top.
+    fs:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -2, 2)
+
+    frame.SQOL_LevelText = fs
+    return fs
+end
+
+local function SQOL_UpdateCompactPartyFrameLevel(frame)
+    if not SQOL_IsCompactPartyMemberFrame(frame) then
+        return
+    end
+
+    if not (SQOL.DB and SQOL.DB.ShowPartyLevel) then
+        if frame.SQOL_LevelText then frame.SQOL_LevelText:Hide() end
+        return
+    end
+
+    local ok, unit = pcall(function() return frame.unit end)
+    if not ok or type(unit) ~= "string"
+        or not UnitExists(unit) or not UnitIsPlayer(unit) then
+        if frame.SQOL_LevelText then frame.SQOL_LevelText:Hide() end
+        return
+    end
+
+    local fs = SQOL_EnsureCompactLevelText(frame)
+    local level = UnitLevel(unit)
+    if type(level) == "number" and level > 0 then
+        fs:SetText("|cffffd100" .. level .. "|r")
+        fs:Show()
+    elseif level == -1 then
+        fs:SetText("|cffff2020??|r")
+        fs:Show()
+    else
+        fs:SetText("")
+        fs:Hide()
+    end
+end
+
+local function SQOL_UpdateAllCompactPartyFrameLevels()
+    for i = 1, RAID_PARTY_MEMBER_COUNT do
+        local frame = rawget(_G, "CompactPartyFrameMember" .. i)
+        if frame then
+            SQOL_UpdateCompactPartyFrameLevel(frame)
+        end
+    end
+end
+
+-- Hook Blizzard's compact frame refresh so we re-apply whenever a
+-- raid-style frame is set up, re-sorted, or reassigned to a new unit.
+local function SQOL_HookCompactPartyFrames()
+    if SQOL._compactHooked then return end
+    local fn = rawget(_G, "CompactUnitFrame_UpdateName")
+    if type(fn) ~= "function" or type(hooksecurefunc) ~= "function" then
+        return
+    end
+    SQOL._compactHooked = true
+    hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
+        if not (SQOL.DB and SQOL.DB.ShowPartyLevel) then return end
+        SQOL_UpdateCompactPartyFrameLevel(frame)
+    end)
+end
+
+local function SQOL_UpdateAllPartyMemberLevels()
+    for i = 1, PARTY_MEMBER_COUNT do
+        SQOL_UpdatePartyMemberLevel(i)
+    end
+    SQOL_UpdateAllCompactPartyFrameLevels()
+end
+
+local function SQOL_HookPartyMemberFrames()
+    for i = 1, PARTY_MEMBER_COUNT do
+        local frame = SQOL_GetPartyMemberFrame(i)
+        if frame and not SQOL._partyFramesHooked[i] and frame.HookScript then
+            SQOL._partyFramesHooked[i] = true
+            frame:HookScript("OnShow", function()
+                SQOL_UpdatePartyMemberLevel(i)
+            end)
+        end
+    end
+end
+
+-- Public entry point used on login / roster changes.
+local function SQOL_RefreshPartyMemberLevels()
+    -- The compact hook checks the DB flag itself, so it's safe to
+    -- install once regardless of the current toggle state.
+    SQOL_HookCompactPartyFrames()
+
+    if not (SQOL.DB and SQOL.DB.ShowPartyLevel) then
+        SQOL_UpdateAllPartyMemberLevels() -- hides any leftover texts
+        return
+    end
+    SQOL_HookPartyMemberFrames()
+    SQOL_UpdateAllPartyMemberLevels()
+    -- Party members' levels aren't always known the instant they join;
+    -- give the client a moment and refresh once more.
+    C_Timer.After(0.5, SQOL_UpdateAllPartyMemberLevels)
+end
+
+------------------------------------------------------------
 -- Helpers: trackable types
 ------------------------------------------------------------
 local function SQOL_HandleTrackableTypes(questID)
@@ -3028,6 +3271,8 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL lfgtimer|r    |cffcccccc- Toggle LFG queue pop countdown timer|r")
     print("|cff00ff00/SQOL lfg|r         |cffcccccc- Shorthand for lfgtimer|r")
     print("|cff00ff00/SQOL lfgtest|r     |cffcccccc- Preview the LFG queue pop timer|r")
+    print("|cff00ff00/SQOL partylevel|r  |cffcccccc- Toggle party member level display|r")
+    print("|cff00ff00/SQOL pl|r          |cffcccccc- Shorthand for partylevel|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
@@ -3038,7 +3283,8 @@ local function SQOL_Help()
     print("|cff33ff99StatsLine:|r " .. statsState)
     local rcState = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local lfgState = SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState .. "  |cff33ff99ReadyCheckTimer:|r " .. rcState .. "  |cff33ff99LFGQueuePopTimer:|r " .. lfgState)
+    local plState = SQOL.DB.ShowPartyLevel and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState .. "  |cff33ff99ReadyCheckTimer:|r " .. rcState .. "  |cff33ff99LFGQueuePopTimer:|r " .. lfgState .. "  |cff33ff99PartyLevel:|r " .. plState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
@@ -3357,6 +3603,9 @@ function SQOL.ApplyOption(key)
             SQOL_LFGProposal_Hide()
         end
 
+    elseif key == "ShowPartyLevel" then
+        SQOL_RefreshPartyMemberLevels()
+
     end
 
     SQOL.SyncSettingObject(key)
@@ -3437,6 +3686,9 @@ SlashCmdList["SQOL"] = function(msg)
     elseif msg == "lfgtimer" or msg == "lfg" then
         toggle("ShowLFGProposalTimer", "LFG queue pop timer is")
 
+    elseif msg == "partylevel" or msg == "pl" then
+        toggle("ShowPartyLevel", "Party member level display is")
+
     elseif msg == "lfgtest" then
         SQOL_LFGProposal_Test()
 
@@ -3495,6 +3747,8 @@ f:RegisterEvent("UNIT_INVENTORY_CHANGED")
 f:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
 f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 f:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+f:RegisterEvent("GROUP_ROSTER_UPDATE")
+f:RegisterEvent("UNIT_LEVEL")
 SQOL_RegisterOptionalEvent("READY_CHECK")
 SQOL_RegisterOptionalEvent("READY_CHECK_FINISHED")
 SQOL_RegisterOptionalEvent("LFG_PROPOSAL_SHOW")
@@ -3541,6 +3795,9 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL_NameplateObjectives_HideAll()
         end
 
+        -- Party member level labels on the default party frames.
+        SQOL_RefreshPartyMemberLevels()
+
         -- Initialize RepWatch snapshot (if enabled)
         if SQOL.DB.RepWatch and SQOL_RepWatch_ScheduleScan then
             SQOL._repLastStanding = nil
@@ -3564,6 +3821,16 @@ f:SetScript("OnEvent", function(self, event, ...)
 
         if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
             SQOL_NameplateObjectives_RefreshVisibleUnits()
+        end
+
+        SQOL_RefreshPartyMemberLevels()
+
+    elseif event == "GROUP_ROSTER_UPDATE" then
+        SQOL_RefreshPartyMemberLevels()
+
+    elseif event == "UNIT_LEVEL" then
+        if SQOL.DB and SQOL.DB.ShowPartyLevel then
+            SQOL_UpdateAllPartyMemberLevels()
         end
 
     elseif event == "ADDON_LOADED" then

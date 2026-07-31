@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.22] - 2026-08-01
+
+### Added
+- Show each party member's level on the party frames — both the default frames and raid-style (CompactUnitFrame) party frames — since neither ever displayed a level, which was awkward in 5-man instances. Toggle with `/SQOL partylevel` (`pl`) or the settings panel.
+
 ## [1.0.21] - 2026-07-20
 
 ### Added
