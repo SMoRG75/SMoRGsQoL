@@ -738,9 +738,17 @@ local function SQOL_NameplateObjectives_GetTooltipProgress(unit)
         local leftColor = line.leftColor
 
         local isQuestTitle = false
-        if leftText and leftColor and type(leftColor.r) == "number" then
-            if leftColor.r > 0.99 and leftColor.g > 0.8 and leftColor.b < 0.1 then
-                isQuestTitle = true
+        if leftText and leftColor then
+            -- leftColor can be a "secret" value under Blizzard's taint
+            -- protection; indexing it directly throws. Guard the access so
+            -- parsing continues instead of aborting the whole function.
+            local okColor, r, g, b = pcall(function()
+                return leftColor.r, leftColor.g, leftColor.b
+            end)
+            if okColor and type(r) == "number" then
+                if r > 0.99 and g > 0.8 and b < 0.1 then
+                    isQuestTitle = true
+                end
             end
         end
 
