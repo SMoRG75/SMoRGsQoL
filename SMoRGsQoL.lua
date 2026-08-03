@@ -1109,27 +1109,29 @@ local function SQOL_GetScenarioCriterion(index)
         return nil
     end
 
-    local cur = tonumber(info.quantity)
-    local total = tonumber(info.totalQuantity)
-
-    -- Some clients only expose progress as a percentage string ("40%").
-    if not (type(cur) == "number" and type(total) == "number" and total > 0) then
-        local pct = type(info.quantityString) == "string" and info.quantityString:match("(%d+)%%")
-        if pct then
-            cur, total = tonumber(pct), 100
-        end
+    if SQOL.DB and SQOL.DB.DebugTrack then
+        dprint(string.format(
+            "Scenario criterion raw: idx=%d id=%s desc=%q qty=%s total=%s qtyStr=%q",
+            index, tostring(info.criteriaID), tostring(info.description),
+            tostring(info.quantity), tostring(info.totalQuantity),
+            tostring(info.quantityString)))
     end
 
-    if not (type(cur) == "number" and type(total) == "number" and total > 0) then
+    -- For weighted-progress criteria the client already reports `quantity` as a
+    -- 0-100 percentage -- the exact number Blizzard renders on the bar (e.g. a
+    -- delve criterion with quantity=29 shows "29%", while totalQuantity=17 and
+    -- quantityString="5%/17" are internal weights that do NOT map to the bar).
+    -- Use quantity directly; only fall back to a leading percentage in
+    -- quantityString when quantity is unavailable.
+    local cur = tonumber(info.quantity)
+    if type(cur) ~= "number" then
+        local pct = type(info.quantityString) == "string" and info.quantityString:match("^(%d+)%%")
+        cur = pct and tonumber(pct) or nil
+    end
+    if type(cur) ~= "number" then
         return nil
     end
-
-    -- Normalize to a percentage so weighted totals (which are rarely 100)
-    -- render as "NN%" like the bar rather than a raw weighted count.
-    if total ~= 100 then
-        cur = math.floor((cur / total) * 100 + 0.5)
-        total = 100
-    end
+    local total = 100
 
     local description = (type(info.description) == "string" and info.description ~= "")
         and info.description or nil
