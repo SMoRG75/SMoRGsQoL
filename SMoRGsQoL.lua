@@ -2236,9 +2236,9 @@ local function SQOL_EnsureCompactLevelText(frame)
     fs:SetWordWrap(false)
     if fs.SetMaxLines then fs:SetMaxLines(1) end
     fs:SetDrawLayer("OVERLAY", 7)
-    -- Bottom-right corner keeps clear of the centered name and the
+    -- Bottom-left corner keeps clear of the centered name and the
     -- role / leader / ready-check icons that live near the top.
-    fs:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -2, 2)
+    fs:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 2)
 
     frame.SQOL_LevelText = fs
     return fs
