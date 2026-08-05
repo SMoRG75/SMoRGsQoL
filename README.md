@@ -6,7 +6,11 @@ Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.0.21
+## What's new in 1.0.22
+
+- 👥 **Party member levels** — shows each party member's level on both the default party frames and raid-style party frames. Enabled by default; toggle with `/sqol partylevel` (`pl`).
+
+### 1.0.21
 
 - ⏳ **LFG queue pop countdown** — a live timer showing how long you have left to accept when the group finder pops (40 seconds), turning red for the last 5. Toggle with `/sqol lfgtimer` (`lfg`).
 - Fixed the ready check countdown being invisible when *you* started the ready check — Blizzard never shows the popup to the initiator, so the timer now moves to the top of the screen instead.
@@ -44,6 +48,8 @@ Everything is toggleable:
 - ⏳ **LFG queue pop countdown**
   - Shows how many of your 40 seconds are left to accept a group finder pop, turning red for the last 5.
   - Sits below the queue pop's ready status frame, so it stays useful while you wait for the rest of the group to accept.
+- 👥 **Party member levels**
+  - Shows each party member's level on both default and raid-style party frames while leaving raid and arena frames unchanged.
 - 🚪 **Login splash**
   - Optional status splash on login showing which features are ON/OFF.
 - ✅ **Hide completed achievements**
@@ -90,6 +96,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol rctest` — preview the countdown solo; `/sqol rctest popup` also shows the ready check popup
 - `/sqol lfgtimer` (or `/sqol lfg`)
 - `/sqol lfgtest` — preview the queue pop countdown without a queue
+- `/sqol partylevel` (or `/sqol pl`)
 - `/sqol debugtrack` (or `/sqol dbg`)
 - `/sqol reset`
 
