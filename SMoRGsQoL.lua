@@ -2238,7 +2238,7 @@ local function SQOL_EnsureCompactLevelText(frame)
     fs:SetDrawLayer("OVERLAY", 7)
     -- Bottom-left corner keeps clear of the centered name and the
     -- role / leader / ready-check icons that live near the top.
-    fs:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 2)
+    fs:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 2, 2)
 
     frame.SQOL_LevelText = fs
     return fs
