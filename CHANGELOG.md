@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.23] - 2026-08-24
+
+### Fixed
+- Fixed a taint error ("Attempt to access forbidden object") spammed when nameplates appeared. The party-level hook on `CompactUnitFrame_UpdateName` also fires for nameplates (forbidden frames), and touching them threw. It now bails out early on forbidden frames and never touches nameplate frames.
+
 ## [1.0.22] - 2026-08-01
 
 ### Added
