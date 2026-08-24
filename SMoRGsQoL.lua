@@ -84,6 +84,32 @@ local function clamp01(x)
     return x
 end
 
+-- WoW normally lets short-lived Lua allocations accumulate until its next GC
+-- cycle, which makes the addon-memory display climb even after SQOL has dropped
+-- every reference. Do a few small incremental steps after allocation-heavy
+-- scans; unlike collectgarbage("collect"), this spreads the work across frames.
+local function SQOL_RequestIncrementalGC()
+    if type(collectgarbage) ~= "function" then return end
+
+    if not SQOL._gcStepper then
+        local worker = CreateFrame("Frame")
+        worker:Hide()
+        worker:SetScript("OnUpdate", function(self)
+            local cycleComplete = collectgarbage("step", 256)
+            self.stepsRemaining = (self.stepsRemaining or 1) - 1
+            if cycleComplete or self.stepsRemaining <= 0 then
+                self:Hide()
+            end
+        end)
+        SQOL._gcStepper = worker
+    end
+
+    -- At most 16 bounded steps per request. Repeated event bursts extend the
+    -- worker instead of creating timers or closures of their own.
+    SQOL._gcStepper.stepsRemaining = math.max(SQOL._gcStepper.stepsRemaining or 0, 16)
+    SQOL._gcStepper:Show()
+end
+
 ------------------------------------------------------------
 -- Damage text font
 ------------------------------------------------------------
@@ -528,6 +554,20 @@ local function SQOL_EnsureProgressMessageFrame()
     SQOL.MessageFrame:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
 end
 
+local SQOL_MESSAGE_HISTORY_LIMIT = 100
+
+local function SQOL_AddProgressFrameMessage(...)
+    SQOL_EnsureProgressMessageFrame()
+    SQOL._messageFrameHistoryCount = (SQOL._messageFrameHistoryCount or 0) + 1
+    if SQOL._messageFrameHistoryCount > SQOL_MESSAGE_HISTORY_LIMIT then
+        -- MessageFrame has no SetMaxLines API. Clear its native message objects
+        -- periodically so a long session cannot retain an unbounded history.
+        SQOL.MessageFrame:Clear()
+        SQOL._messageFrameHistoryCount = 1
+    end
+    SQOL.MessageFrame:AddMessage(...)
+end
+
 local function SQOL_ShowProgressMessage(label, cur, total)
     if not SQOL.DB or not SQOL.DB.ColorProgress then return end
     if type(cur) ~= "number" or type(total) ~= "number" or total <= 0 then return end
@@ -550,7 +590,7 @@ local function SQOL_ShowProgressMessage(label, cur, total)
         or progressText
         or string.format("%d/%d", cur, total)
 
-    SQOL.MessageFrame:AddMessage(colorCode .. displayMessage .. "|r")
+    SQOL_AddProgressFrameMessage(colorCode .. displayMessage .. "|r")
     return progress
 end
 
@@ -561,13 +601,65 @@ end
 SQOL._recolorPending = false
 SQOL._lastRecolorAt  = 0
 
+-- Quest APIs return freshly allocated tables. Several SQOL features consume
+-- the same data after the same quest event, so share one bounded snapshot
+-- until the next quest-data change instead of asking the client repeatedly.
+SQOL._questObjectiveCache = SQOL._questObjectiveCache or {}
+SQOL._questLogSnapshot = nil
+local SQOL_NO_QUEST_OBJECTIVES = {}
+
+local function SQOL_InvalidateQuestDataCache()
+    SQOL._questLogSnapshot = nil
+    for questID in pairs(SQOL._questObjectiveCache) do
+        SQOL._questObjectiveCache[questID] = nil
+    end
+end
+
+local function SQOL_GetQuestObjectivesCached(questID)
+    if type(questID) ~= "number" or not C_QuestLog
+        or type(C_QuestLog.GetQuestObjectives) ~= "function" then
+        return nil
+    end
+
+    local cached = SQOL._questObjectiveCache[questID]
+    if cached ~= nil then
+        return cached ~= SQOL_NO_QUEST_OBJECTIVES and cached or nil
+    end
+
+    local ok, objectives = pcall(C_QuestLog.GetQuestObjectives, questID)
+    if not ok then
+        objectives = nil
+    end
+    SQOL._questObjectiveCache[questID] = type(objectives) == "table"
+        and objectives or SQOL_NO_QUEST_OBJECTIVES
+    return type(objectives) == "table" and objectives or nil
+end
+
+local function SQOL_GetQuestLogSnapshot()
+    if SQOL._questLogSnapshot then
+        return SQOL._questLogSnapshot
+    end
+
+    local snapshot = {}
+    if C_QuestLog and type(C_QuestLog.GetNumQuestLogEntries) == "function"
+        and type(C_QuestLog.GetInfo) == "function" then
+        local numEntries = C_QuestLog.GetNumQuestLogEntries()
+        for i = 1, numEntries do
+            local info = C_QuestLog.GetInfo(i)
+            if info then
+                snapshot[#snapshot + 1] = info
+            end
+        end
+    end
+    SQOL._questLogSnapshot = snapshot
+    return snapshot
+end
+
 local function SQOL_RecolorQuestObjectives_Impl()
     if not SQOL.DB.ColorProgress then return end
-    local numEntries = C_QuestLog.GetNumQuestLogEntries()
-    for i = 1, numEntries do
-        local info = C_QuestLog.GetInfo(i)
+    for _, info in ipairs(SQOL_GetQuestLogSnapshot()) do
         if info and not info.isHeader and info.questID then
-            local objectives = C_QuestLog.GetQuestObjectives(info.questID)
+            local objectives = SQOL_GetQuestObjectivesCached(info.questID)
             if objectives then
                 for _, obj in ipairs(objectives) do
                     local numItems     = rawget(obj, "numItems")
@@ -600,6 +692,7 @@ local function SQOL_RecolorQuestObjectives_Impl()
             end
         end
     end
+    SQOL_RequestIncrementalGC()
 end
 
 local function SQOL_RecolorQuestObjectives_Throttle()
@@ -617,6 +710,7 @@ end
 ------------------------------------------------------------
 SQOL._npUnits = SQOL._npUnits or {}
 SQOL._npUpdatePending = false
+local SQOL_NAMEPLATE_UPDATE_DELAY = 0.35
 
 local function SQOL_NameplateObjectives_SafeCall(fn, ...)
     if type(fn) ~= "function" then
@@ -914,8 +1008,8 @@ local function SQOL_GetQuestProgressBarLabel(questID)
     end
 
     if C_QuestLog and type(C_QuestLog.GetQuestObjectives) == "function" then
-        local ok, objectives = pcall(C_QuestLog.GetQuestObjectives, questID)
-        if ok and type(objectives) == "table" then
+        local objectives = SQOL_GetQuestObjectivesCached(questID)
+        if type(objectives) == "table" then
             -- Prefer the progress-bar objective's own text; a quest can have
             -- several objectives and the bar rarely belongs to the first one.
             local fallback
@@ -955,13 +1049,9 @@ local function SQOL_CollectProgressBarQuestIDs()
 
     if C_QuestLog and type(C_QuestLog.GetNumQuestLogEntries) == "function"
         and type(C_QuestLog.GetInfo) == "function" then
-        local ok, numEntries = pcall(C_QuestLog.GetNumQuestLogEntries)
-        if ok and type(numEntries) == "number" then
-            for i = 1, numEntries do
-                local infoOk, info = pcall(C_QuestLog.GetInfo, i)
-                if infoOk and info and not info.isHeader then
-                    addQuestID(info.questID)
-                end
+        for _, info in ipairs(SQOL_GetQuestLogSnapshot()) do
+            if info and not info.isHeader then
+                addQuestID(info.questID)
             end
         end
     end
@@ -1060,6 +1150,7 @@ local function SQOL_ScanQuestProgressBars(showChanges)
             SQOL._questProgressBarState[questID] = nil
         end
     end
+    SQOL_RequestIncrementalGC()
 end
 
 local function SQOL_ScheduleQuestProgressBarScan(showChanges)
@@ -1188,6 +1279,7 @@ local function SQOL_ScanScenarioProgress(showChanges)
             SQOL._scenarioCriteriaState[key] = nil
         end
     end
+    SQOL_RequestIncrementalGC()
 end
 
 local function SQOL_ScheduleScenarioProgressScan(showChanges)
@@ -1279,7 +1371,7 @@ local function SQOL_NameplateObjectives_SelectObjective(questID, unitName, npcId
     if not questID then return nil end
 
     local progressBarCandidate = SQOL_NameplateObjectives_GetProgressBarCandidate(questID)
-    local objectives = C_QuestLog.GetQuestObjectives(questID)
+    local objectives = SQOL_GetQuestObjectivesCached(questID)
     if not objectives then
         if progressBarCandidate then
             return progressBarCandidate
@@ -1625,6 +1717,7 @@ local function SQOL_NameplateObjectives_UpdateAll()
     for unit in pairs(SQOL._npUnits) do
         SQOL_NameplateObjectives_UpdateUnit(unit)
     end
+    SQOL_RequestIncrementalGC()
 end
 
 local function SQOL_NameplateObjectives_ScheduleUpdateAll()
@@ -1632,7 +1725,7 @@ local function SQOL_NameplateObjectives_ScheduleUpdateAll()
     SQOL._npUpdatePending = true
 
     if C_Timer and type(C_Timer.After) == "function" then
-        C_Timer.After(0.2, function()
+        C_Timer.After(SQOL_NAMEPLATE_UPDATE_DELAY, function()
             SQOL._npUpdatePending = false
             SQOL_NameplateObjectives_UpdateAll()
         end)
@@ -1710,14 +1803,16 @@ local function SQOL_EnableCustomInfoMessages()
                     end
                 end
 
-                SQOL.MessageFrame:AddMessage(message, r, g, b)
+                SQOL_AddProgressFrameMessage(message, r, g, b)
                 return
             end
 
             local progress = SQOL_ShowProgressMessage(label, cur, total)
 
-            dprint(string.format("Custom UI_INFO_MESSAGE: %s (%d/%d, %.2f)",
-                label or "-", cur or -1, total or -1, progress))
+            if SQOL.DB.DebugTrack then
+                dprint(string.format("Custom UI_INFO_MESSAGE: %s (%d/%d, %.2f)",
+                    label or "-", cur or -1, total or -1, progress))
+            end
         end)
     end
 end
@@ -2208,8 +2303,15 @@ local RAID_PARTY_MEMBER_COUNT = 5
 local function SQOL_IsCompactPartyMemberFrame(frame)
     if not frame then return false end
 
-    local name = frame.GetName and frame:GetName()
-    if type(name) == "string" and name:find("CompactPartyFrame") then
+    -- Nameplates (ForbiddenNamePlate*) also flow through
+    -- CompactUnitFrame_UpdateName. They are forbidden/tainted frames, and
+    -- touching them (even frame:GetName()) throws a taint error. Bail out.
+    if frame.IsForbidden and frame:IsForbidden() then
+        return false
+    end
+
+    local ok, name = pcall(function() return frame.GetName and frame:GetName() end)
+    if ok and type(name) == "string" and name:find("CompactPartyFrame") then
         return true
     end
 
@@ -3129,6 +3231,11 @@ end
 ------------------------------------------------------------
 SQOL.fullyCompleted = {}
 SQOL.questObjectiveStates = {}
+SQOL._seenQuestProgress = SQOL._seenQuestProgress or {}
+SQOL._questProgressCheckPending = false
+SQOL._questProgressNeedsBaseline = true
+local SQOL_QUEST_PROGRESS_SCAN_DELAY = 0.20
+local SQOL_QUEST_HANDLED_TTL = 10
 
 local function SQOL_PlayQuestSound(soundType)
     if not SQOL.DB then return end
@@ -3182,23 +3289,30 @@ local function SQOL_NotifyQuestCompletion(questID, title, isTask, isWorld)
 end
 
 local function SQOL_CheckQuestProgress()
-    local numEntries = C_QuestLog.GetNumQuestLogEntries()
-    local seenQuests = {}
+    if not SQOL.DB
+        or (not SQOL.DB.QuestCompleteSound and not SQOL.DB.QuestObjectiveSound) then
+        return
+    end
 
-    for i = 1, numEntries do
-        local info = C_QuestLog.GetInfo(i)
+    local seenQuests = SQOL._seenQuestProgress
+    local suppressAlerts = SQOL._questProgressNeedsBaseline
+    SQOL_TableWipe(seenQuests)
+
+    for _, info in ipairs(SQOL_GetQuestLogSnapshot()) do
         if info and not info.isHeader and info.questID then
             seenQuests[info.questID] = true
-            local objectives = C_QuestLog.GetQuestObjectives(info.questID)
+            local objectives = SQOL_GetQuestObjectivesCached(info.questID)
             if objectives and #objectives > 0 then
                 local allDone = true
                 local objectiveCompleted = false
                 local previousObjectives = SQOL.questObjectiveStates[info.questID]
-                local currentObjectives = {}
+                -- Reuse the per-quest table. QUEST_LOG_UPDATE can fire in bursts;
+                -- replacing every table on every event produced large amounts of
+                -- short-lived garbage even though the live state was tiny.
+                local currentObjectives = previousObjectives or {}
 
                 for objectiveIndex, obj in ipairs(objectives) do
                     local finished = not not obj.finished
-                    currentObjectives[objectiveIndex] = finished
 
                     if previousObjectives
                         and previousObjectives[objectiveIndex] == false
@@ -3209,6 +3323,14 @@ local function SQOL_CheckQuestProgress()
                     if not obj.finished then
                         allDone = false
                     end
+
+                    currentObjectives[objectiveIndex] = finished
+                end
+
+                -- A quest can change its objective list while it remains in the
+                -- log. Drop any stale tail entries from the reused table.
+                for objectiveIndex = #objectives + 1, #currentObjectives do
+                    currentObjectives[objectiveIndex] = nil
                 end
 
                 SQOL.questObjectiveStates[info.questID] = currentObjectives
@@ -3223,13 +3345,18 @@ local function SQOL_CheckQuestProgress()
                         isTask = isTask,
                         isWorld = isWorld,
                     }
-                    SQOL_NotifyQuestCompletion(info.questID, title, isTask, isWorld)
+                    if not suppressAlerts then
+                        SQOL_NotifyQuestCompletion(info.questID, title, isTask, isWorld)
+                    end
                 elseif not allDone
                     and objectiveCompleted
+                    and not suppressAlerts
                     and SQOL.DB
                     and SQOL.DB.QuestObjectiveSound then
                     SQOL_PlayQuestSound("objective")
                 end
+            else
+                SQOL.questObjectiveStates[info.questID] = nil
             end
         end
     end
@@ -3239,6 +3366,38 @@ local function SQOL_CheckQuestProgress()
             SQOL.questObjectiveStates[questID] = nil
         end
     end
+
+    SQOL._questProgressNeedsBaseline = false
+    SQOL_RequestIncrementalGC()
+end
+
+local function SQOL_ScheduleQuestProgressCheck()
+    if not SQOL.DB
+        or (not SQOL.DB.QuestCompleteSound and not SQOL.DB.QuestObjectiveSound)
+        or SQOL._questProgressCheckPending then
+        return
+    end
+
+    SQOL._questProgressCheckPending = true
+    C_Timer.After(SQOL_QUEST_PROGRESS_SCAN_DELAY, function()
+        SQOL._questProgressCheckPending = false
+        SQOL_CheckQuestProgress()
+    end)
+end
+
+-- A short-lived marker suppresses delayed QUEST_LOG_UPDATE events during a
+-- turn-in/removal. Previously these entries stayed in fullyCompleted for the
+-- entire session, so the table grew monotonically with every handled quest.
+local function SQOL_MarkQuestHandledTemporarily(questID)
+    if not questID then return end
+
+    local marker = {}
+    SQOL.fullyCompleted[questID] = marker
+    C_Timer.After(SQOL_QUEST_HANDLED_TTL, function()
+        if SQOL.fullyCompleted[questID] == marker then
+            SQOL.fullyCompleted[questID] = nil
+        end
+    end)
 end
 
 ------------------------------------------------------------
@@ -3547,7 +3706,23 @@ end
 function SQOL.ApplyOption(key)
     if not SQOL.DB then return end
 
-    if key == "ColorProgress" then
+    if key == "QuestCompleteSound" or key == "QuestObjectiveSound" then
+        if not SQOL.DB.QuestCompleteSound and not SQOL.DB.QuestObjectiveSound then
+            -- No progress history is needed while both notifications are off.
+            SQOL_TableWipe(SQOL.questObjectiveStates)
+            SQOL_TableWipe(SQOL.fullyCompleted)
+            SQOL_TableWipe(SQOL._seenQuestProgress)
+            SQOL._questProgressNeedsBaseline = true
+        else
+            -- When notifications are re-enabled after being fully disabled,
+            -- establish a silent baseline before reporting later transitions.
+            if next(SQOL.questObjectiveStates) == nil then
+                SQOL._questProgressNeedsBaseline = true
+            end
+            SQOL_ScheduleQuestProgressCheck()
+        end
+
+    elseif key == "ColorProgress" then
         if SQOL.DB.ColorProgress then
             SQOL_EnableCustomInfoMessages()
             SQOL_ScheduleQuestProgressBarScan(false)
@@ -3914,6 +4089,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "QUEST_ACCEPTED" then
+        SQOL_InvalidateQuestDataCache()
         local a1, a2 = ...
         local questIndex, questID
         if a2 then questIndex, questID = a1, a2 else questID = a1 end
@@ -3936,19 +4112,22 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "QUEST_TURNED_IN" then
+        SQOL_InvalidateQuestDataCache()
         local questID = ...
         if questID then
             -- Keep the quest marked as handled so delayed QUEST_LOG_UPDATE events
             -- during turn-in do not fire the completion alert again.
-            SQOL.fullyCompleted[questID] = SQOL.fullyCompleted[questID] or true
+            SQOL_MarkQuestHandledTemporarily(questID)
             SQOL.questObjectiveStates[questID] = nil
         end
 
     elseif event == "QUEST_REMOVED" then
+        SQOL_InvalidateQuestDataCache()
         local questID = ...
         if questID then
-            -- QUEST_ACCEPTED clears this when the quest is picked up again.
-            SQOL.fullyCompleted[questID] = SQOL.fullyCompleted[questID] or true
+            -- QUEST_ACCEPTED also clears this if the quest is picked up again
+            -- before the short suppression window expires.
+            SQOL_MarkQuestHandledTemporarily(questID)
             SQOL.questObjectiveStates[questID] = nil
         end
 
@@ -3980,22 +4159,35 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "QUEST_LOG_UPDATE" then
-        SQOL_CheckQuestProgress()
-        SQOL_RecolorQuestObjectives_Throttle()
-        SQOL_ScheduleQuestProgressBarScan(true)
-        SQOL_ScheduleScenarioProgressScan(true)
+        SQOL_InvalidateQuestDataCache()
+        SQOL_ScheduleQuestProgressCheck()
+        if SQOL.DB and SQOL.DB.ColorProgress then
+            SQOL_RecolorQuestObjectives_Throttle()
+            SQOL_ScheduleQuestProgressBarScan(true)
+        end
         if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
             SQOL_NameplateObjectives_ScheduleUpdateAll()
         end
 
     elseif event == "QUEST_WATCH_UPDATE" or event == "QUEST_POI_UPDATE"
-        or event == "QUEST_CRITERIA_UPDATE" or event == "SCENARIO_CRITERIA_UPDATE" then
-        SQOL_CheckQuestProgress()
-        SQOL_RecolorQuestObjectives_Throttle()
-        SQOL_ScheduleQuestProgressBarScan(true)
-        SQOL_ScheduleScenarioProgressScan(true)
+        or event == "QUEST_CRITERIA_UPDATE" then
+        SQOL_InvalidateQuestDataCache()
+        if event ~= "QUEST_POI_UPDATE" then
+            SQOL_ScheduleQuestProgressCheck()
+        end
+        if SQOL.DB and SQOL.DB.ColorProgress then
+            SQOL_RecolorQuestObjectives_Throttle()
+            SQOL_ScheduleQuestProgressBarScan(true)
+        end
         if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
             SQOL_NameplateObjectives_ScheduleUpdateAll()
+        end
+
+    elseif event == "SCENARIO_CRITERIA_UPDATE" then
+        -- Scenario criteria do not change quest objectives or nameplate data.
+        -- Keep this high-frequency event on the scenario-only path.
+        if SQOL.DB and SQOL.DB.ColorProgress then
+            SQOL_ScheduleScenarioProgressScan(true)
         end
     end
 end)
