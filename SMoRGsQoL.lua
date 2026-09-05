@@ -627,12 +627,13 @@ local function SQOL_GetQuestObjectivesCached(questID)
     end
 
     local ok, objectives = pcall(C_QuestLog.GetQuestObjectives, questID)
-    if not ok then
-        objectives = nil
+    if not ok or type(objectives) ~= "table" then
+        SQOL._questObjectiveCache[questID] = SQOL_NO_QUEST_OBJECTIVES
+        return nil
     end
-    SQOL._questObjectiveCache[questID] = type(objectives) == "table"
-        and objectives or SQOL_NO_QUEST_OBJECTIVES
-    return type(objectives) == "table" and objectives or nil
+
+    SQOL._questObjectiveCache[questID] = objectives
+    return objectives
 end
 
 local function SQOL_GetQuestLogSnapshot()
