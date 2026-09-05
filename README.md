@@ -46,6 +46,9 @@ Everything is toggleable:
 - 🎨 **Colorized progress messages**
   - Colorizes common progress patterns like `3/10` or `45%` and quest objective progress (red → yellow → green).
   - Also covers progress-bar quest objectives and scenario weighted-progress bars, which the default UI reports silently.
+- 🎨 **XP/reputation number colors**
+  - Independently colors the current XP/reputation number on Blizzard's standard bars (red → yellow → green), with outlined text. Labels and maximum values stay white; bar colors are unchanged.
+  - Toggle with `/sqol barcolor` (`bc`) or **Color XP/reputation numbers** in Settings. Disabled by default; independent of quest progress colors.
 - ⏱️ **Ready check countdown**
   - Shows a live countdown of the seconds left on a ready check, turning red for the last 5 seconds.
   - Appears below the ready check popup, or near the top of the screen when you started the ready check yourself (Blizzard never shows the popup to the initiator).
@@ -63,7 +66,7 @@ Everything is toggleable:
 - 🏷️ **Nameplate objective counts**
   - Shows quest objective progress (e.g., 0/10 or 45%) above relevant nameplates, with fallbacks for bonus/world quests.
 - 🧾 **PlayerFrame iLvl + Speed**
-  - Adds an extra line to the PlayerFrame: `iLvl: xx.x  Spd: yy%`
+  - Independently toggle item level and movement speed. Shows either value alone, or both on the same line: `iLvl: xx.x  Spd: yy%`.
 - 🖋️ **Custom damage text font**
   - Replaces floating combat text damage numbers with a custom font.
 - 🖱️ **Cursor shake highlight**
@@ -85,6 +88,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol help`
 - `/sqol autotrack` (or `/sqol at`)
 - `/sqol color` (or `/sqol col`)
+- `/sqol barcolor` (or `/sqol bc`)
 - `/sqol questsound` (or `/sqol qs`)
 - `/sqol objectivesound` (or `/sqol os`)
 - `/sqol soundprofile` (or `/sqol soundset`)
@@ -93,6 +97,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol rep` (or `/sqol rw`)
 - `/sqol nameplate` (or `/sqol np`)
 - `/sqol stats` (or `/sqol ilvl`)
+- `/sqol speed` (or `/sqol spd`) — independently toggle movement speed; `stats`/`ilvl` now toggles only item level.
 - `/sqol damagefont` (or `/sqol df`)
 - `/sqol cursor` (or `/sqol cs`)
 - `/sqol cursorflash` (or `/sqol cf`)

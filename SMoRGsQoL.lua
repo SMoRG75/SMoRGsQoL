@@ -33,6 +33,7 @@ SQOL.defaults = {
     DebugTrack    = false,
     ShowSplash    = false,
     ColorProgress = false,
+    ColorStatusBarProgress = false,
     QuestCompleteSound = true,
     QuestObjectiveSound = true,
     QuestSoundProfile = "Horde",
@@ -41,7 +42,8 @@ SQOL.defaults = {
     ShowNameplateObjectives = false,
 
     -- PlayerFrame line: "iLvl: xx.x  Spd: yy%"
-    ShowIlvlSpd  = false,
+    ShowItemLevel = false,
+    ShowMovementSpeed = false,
 
     -- Floating combat text damage numbers font.
     DamageTextFont = false,
@@ -412,6 +414,13 @@ function SQOL.Init(reset)
         SQOL_DB = {}
     end
 
+    -- Preserve the old combined preference once; new settings are independent.
+    if SQOL_DB.ShowIlvlSpd ~= nil then
+        if SQOL_DB.ShowItemLevel == nil then SQOL_DB.ShowItemLevel = SQOL_DB.ShowIlvlSpd end
+        if SQOL_DB.ShowMovementSpeed == nil then SQOL_DB.ShowMovementSpeed = SQOL_DB.ShowIlvlSpd end
+        SQOL_DB.ShowIlvlSpd = nil
+    end
+
     -- Apply defaults into SQOL_DB without clobbering user values
     for k, v in pairs(SQOL.defaults) do
         if SQOL_DB[k] == nil then
@@ -427,6 +436,8 @@ function SQOL.Init(reset)
     SQOL.DB = SQOL_DB
 
     if reset then
+        if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
         print("|cff33ff99SQoL:|r Settings have been reset to defaults.")
 
         -- 🟢 Apply Achievement filter after reset
@@ -465,7 +476,8 @@ local function SQOL_GetStateStrings()
     local qsState = SQOL.DB.QuestCompleteSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local loState = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local repState = SQOL.DB.RepWatch and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local statsState = SQOL.DB.ShowIlvlSpd and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    local statsState = "iLvl " .. (SQOL.DB.ShowItemLevel and "|cff00ff00ON|r" or "|cffff0000OFF|r")
+        .. " / Speed " .. (SQOL.DB.ShowMovementSpeed and "|cff00ff00ON|r" or "|cffff0000OFF|r")
     local npState = SQOL.DB.ShowNameplateObjectives and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local dmgState = SQOL.DB.DamageTextFont and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local cursorState = SQOL.DB.CursorShakeHighlight and "|cff00ff00ON|r" or "|cffff0000OFF|r"
@@ -492,6 +504,8 @@ local function SQOL_GetProgressColor(progress)
     local G = math.floor(g * 255 + 0.5)
     return string.format("|cff%02x%02x%02x", R, G, 0)
 end
+
+SQOL.GetProgressColor = SQOL_GetProgressColor
 
 local function SQOL_FormatProgressText(cur, total)
     if type(cur) ~= "number" or type(total) ~= "number" or total <= 0 then
@@ -1881,6 +1895,7 @@ local function SQOL_GetEquippedItemLevel()
 end
 
 local function SQOL_RefreshIlvlCache(force)
+    if not SQOL.DB or not SQOL.DB.ShowItemLevel then return end
     local now = (type(GetTime) == "function") and GetTime() or 0
     if not force and (now - (SQOL._cachedIlvlAt or 0)) < 1.5 then
         return
@@ -1955,7 +1970,7 @@ local function SQOL_GetMovementSpeedPercent()
 end
 
 local function SQOL_UpdateCharacterIlvlText(forceIlvlRefresh)
-    if SQOL.DB and SQOL.DB.ShowIlvlSpd == false then
+    if SQOL.DB and (not SQOL.DB.ShowItemLevel and not SQOL.DB.ShowMovementSpeed) then
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         return
     end
@@ -1964,7 +1979,7 @@ local function SQOL_UpdateCharacterIlvlText(forceIlvlRefresh)
     -- Keep iLvl cached so speed polling is cheap.
     SQOL_RefreshIlvlCache(forceIlvlRefresh == true)
 
-    if SQOL._cachedIlvlMissingInfo and not SQOL._ilvlRetryPending then
+    if SQOL.DB.ShowItemLevel and SQOL._cachedIlvlMissingInfo and not SQOL._ilvlRetryPending then
         SQOL._ilvlRetryPending = true
         C_Timer.After(0.5, function()
             SQOL._ilvlRetryPending = false
@@ -1973,7 +1988,7 @@ local function SQOL_UpdateCharacterIlvlText(forceIlvlRefresh)
         end)
     end
 
-    local speedPct = SQOL_GetMovementSpeedPercent()
+    local speedPct = SQOL.DB.ShowMovementSpeed and SQOL_GetMovementSpeedPercent() or nil
 
     local ilvlText = SQOL._cachedIlvlText or "--"
     local speedText
@@ -1983,7 +1998,10 @@ local function SQOL_UpdateCharacterIlvlText(forceIlvlRefresh)
         speedText = "--"
     end
 
-    local line = string.format("iLvl: %s  Spd: %s", ilvlText, speedText)
+    local parts = {}
+    if SQOL.DB.ShowItemLevel then parts[#parts + 1] = "iLvl: " .. ilvlText end
+    if SQOL.DB.ShowMovementSpeed then parts[#parts + 1] = "Spd: " .. speedText end
+    local line = table.concat(parts, "  ")
     if SQOL._lastStatLineText ~= line then
         SQOL._lastStatLineText = line
         SQOL.iLvlText:SetText(line)
@@ -2034,7 +2052,7 @@ local function SQOL_UpdatePlayerFrameIlvlAnchor()
         return false
     end
 
-    if SQOL.DB and SQOL.DB.ShowIlvlSpd == false then
+    if SQOL.DB and (not SQOL.DB.ShowItemLevel and not SQOL.DB.ShowMovementSpeed) then
         SQOL.iLvlHolder:Hide()
         return true
     end
@@ -2116,8 +2134,8 @@ local function SQOL_EnsurePlayerFrameIlvlUI()
         return false
     end
 
-    -- If disabled via /SQOL stats, don't build or show anything.
-    if SQOL.DB and SQOL.DB.ShowIlvlSpd == false then
+    -- Don't build or show the line when both fields are disabled.
+    if SQOL.DB and (not SQOL.DB.ShowItemLevel and not SQOL.DB.ShowMovementSpeed) then
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         return true
     end
@@ -2136,7 +2154,8 @@ local function SQOL_EnsurePlayerFrameIlvlUI()
         SQOL.iLvlText:SetWidth(240)
         SQOL.iLvlText:SetWordWrap(false)
         if SQOL.iLvlText.SetMaxLines then SQOL.iLvlText:SetMaxLines(1) end
-        SQOL.iLvlText:SetText("iLvl: --  Spd: --")
+        SQOL._lastStatLineText = nil
+        SQOL.iLvlText:SetText("")
     end
 
     if not SQOL._playerFrameHooked and playerFrame.HookScript then
@@ -2155,6 +2174,7 @@ local function SQOL_EnsurePlayerFrameIlvlUI()
         SQOL._speedPoller = CreateFrame("Frame", nil, SQOL.iLvlHolder)
         SQOL._speedPoller._elapsed = 0
         SQOL._speedPoller:SetScript("OnUpdate", function(self, elapsed)
+            if not SQOL.DB or not SQOL.DB.ShowMovementSpeed then return end
             self._elapsed = (self._elapsed or 0) + (elapsed or 0)
             if self._elapsed < 0.20 then return end
             self._elapsed = 0
@@ -3212,6 +3232,7 @@ local function SQOL_Splash()
     print("|cff33ff99AutoTrack:|r " .. atState)
     print("|cff33ff99Splash:|r " .. spState)
     print("|cff33ff99ColorProgress:|r " .. coState)
+    print("|cff33ff99XP/Rep colors:|r " .. (SQOL.DB.ColorStatusBarProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
     print("|cff33ff99QuestSound:|r " .. qsState)
     print("|cff33ff99ObjectiveSound:|r " .. qoState)
     print("|cff33ff99QuestSoundProfile:|r " .. questSoundProfile)
@@ -3413,7 +3434,8 @@ local function SQOL_Help()
     print("|cff33ff99-----------------------------------|r")
     print("|cff00ff00/SQOL autotrack|r   |cffcccccc- Toggle automatic quest tracking|r")
     print("|cff00ff00/SQOL at|r          |cffcccccc- Shorthand for autotrack|r")
-    print("|cff00ff00/SQOL color|r       |cffcccccc- Toggle progress colorization|r")
+    print("|cff00ff00/SQOL color|r       |cffcccccc- Toggle quest progress colorization|r")
+    print("|cff00ff00/SQOL barcolor|r    |cffcccccc- Toggle XP/reputation number colors|r")
     print("|cff00ff00/SQOL col|r         |cffcccccc- Shorthand for color|r")
     print("|cff00ff00/SQOL questsound|r  |cffcccccc- Toggle quest completion sound|r")
     print("|cff00ff00/SQOL qs|r          |cffcccccc- Shorthand for questsound|r")
@@ -3427,8 +3449,8 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL rw|r          |cffcccccc- Shorthand for rep|r")
     print("|cff00ff00/SQOL nameplate|r   |cffcccccc- Toggle nameplate objective counts|r")
     print("|cff00ff00/SQOL np|r          |cffcccccc- Shorthand for nameplate|r")
-    print("|cff00ff00/SQOL stats|r       |cffcccccc- Toggle PlayerFrame iLvl+Spd line|r")
-    print("|cff00ff00/SQOL ilvl|r        |cffcccccc- Shorthand for stats|r")
+    print("|cff00ff00/SQOL ilvl|r        |cffcccccc- Toggle PlayerFrame item level (alias: stats)|r")
+    print("|cff00ff00/SQOL speed|r       |cffcccccc- Toggle PlayerFrame movement speed|r")
     print("|cff00ff00/SQOL damagefont|r  |cffcccccc- Toggle custom damage text font|r")
     print("|cff00ff00/SQOL df|r          |cffcccccc- Shorthand for damagefont|r")
     print("|cff00ff00/SQOL cursor|r      |cffcccccc- Highlight cursor when you shake the mouse|r")
@@ -3723,6 +3745,9 @@ function SQOL.ApplyOption(key)
             SQOL_ScheduleQuestProgressCheck()
         end
 
+    elseif key == "ColorStatusBarProgress" then
+        if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
+
     elseif key == "ColorProgress" then
         if SQOL.DB.ColorProgress then
             SQOL_EnableCustomInfoMessages()
@@ -3758,8 +3783,8 @@ function SQOL.ApplyOption(key)
             SQOL_NameplateObjectives_HideAll()
         end
 
-    elseif key == "ShowIlvlSpd" then
-        if SQOL.DB.ShowIlvlSpd then
+    elseif key == "ShowItemLevel" or key == "ShowMovementSpeed" then
+        if (SQOL.DB.ShowItemLevel or SQOL.DB.ShowMovementSpeed) then
             SQOL_TryEnsurePlayerFrameIlvlUI(0)
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
@@ -3825,7 +3850,10 @@ SlashCmdList["SQOL"] = function(msg)
         toggle("AutoTrack", "Auto-track is")
 
     elseif msg == "color" or msg == "col" then
-        toggle("ColorProgress", "Progress colorization is")
+        toggle("ColorProgress", "Quest progress colorization is")
+
+    elseif msg == "barcolor" or msg == "bc" then
+        toggle("ColorStatusBarProgress", "XP/reputation number colorization is")
 
     elseif msg == "questsound" or msg == "qs" then
         toggle("QuestCompleteSound", "Quest completion sound is")
@@ -3848,7 +3876,10 @@ SlashCmdList["SQOL"] = function(msg)
         toggle("ShowNameplateObjectives", "Nameplate objectives are")
 
     elseif msg == "stats" or msg == "ilvl" then
-        toggle("ShowIlvlSpd", "PlayerFrame iLvl+Spd line is")
+        toggle("ShowItemLevel", "PlayerFrame item level is")
+
+    elseif msg == "speed" or msg == "spd" then
+        toggle("ShowMovementSpeed", "PlayerFrame movement speed is")
 
     elseif msg == "damagefont" or msg == "df" then
         toggle("DamageTextFont", "Damage text font is")
@@ -3900,6 +3931,7 @@ SlashCmdList["SQOL"] = function(msg)
         local rc = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
         local lfg = SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
         print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " ObjectiveSound:" .. qo .. " QuestSoundProfile:" .. profile .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor .. " ReadyCheckTimer:" .. rc .. " LFGQueuePopTimer:" .. lfg)
+        print("|cff33ff99XP/Rep colors:|r " .. (SQOL.DB.ColorStatusBarProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
         print("|cffccccccCommands:|r help for more info")
     end
 end
@@ -3969,7 +4001,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
         -- Ensure PlayerFrame iLvl display.
-        if SQOL.DB.ShowIlvlSpd then
+        if (SQOL.DB.ShowItemLevel or SQOL.DB.ShowMovementSpeed) then
             SQOL_TryEnsurePlayerFrameIlvlUI(0)
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
@@ -3994,7 +4026,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "PLAYER_ENTERING_WORLD" then
-        if SQOL.DB and SQOL.DB.ShowIlvlSpd then
+        if SQOL.DB and (SQOL.DB.ShowItemLevel or SQOL.DB.ShowMovementSpeed) then
             SQOL_TryEnsurePlayerFrameIlvlUI(0)
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
@@ -4035,7 +4067,7 @@ f:SetScript("OnEvent", function(self, event, ...)
     elseif event == "UNIT_INVENTORY_CHANGED" then
         local unit = ...
         if unit == "player" then
-            if SQOL.DB and SQOL.DB.ShowIlvlSpd then
+            if SQOL.DB and (SQOL.DB.ShowItemLevel or SQOL.DB.ShowMovementSpeed) then
                 if not SQOL.iLvlText then
                     SQOL_TryEnsurePlayerFrameIlvlUI(0)
                 end
@@ -4046,7 +4078,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "EDIT_MODE_LAYOUTS_UPDATED" then
-        if SQOL.DB and SQOL.DB.ShowIlvlSpd then
+        if SQOL.DB and (SQOL.DB.ShowItemLevel or SQOL.DB.ShowMovementSpeed) then
             SQOL_UpdatePlayerFrameIlvlAnchor()
         else
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
@@ -4079,7 +4111,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL_LFGProposal_Hide()
 
     elseif event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_AVG_ITEM_LEVEL_UPDATE" then
-        if SQOL.DB and SQOL.DB.ShowIlvlSpd then
+        if SQOL.DB and (SQOL.DB.ShowItemLevel or SQOL.DB.ShowMovementSpeed) then
             if not SQOL.iLvlText then
                 SQOL_TryEnsurePlayerFrameIlvlUI(0)
             end

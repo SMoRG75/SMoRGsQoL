@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Split PlayerFrame item level and movement speed into independent settings (`/sqol ilvl` and `/sqol speed`). Existing combined preferences are migrated to both settings; either value can be shown alone.
+
+- Added a separate **Color XP/reputation numbers** option (`/sqol barcolor` or `bc`), independent of quest progress colors and disabled by default. Current values transition from red through yellow to green; labels and maximum values stay white, with outlined text. Bar textures and colors are unchanged.
+
 ## [1.0.23] - 2026-08-24
 
 ### Fixed

@@ -15,3 +15,4 @@
 
 SMoRGsQoL.lua
 Options.lua
+StatusBarProgress.lua
