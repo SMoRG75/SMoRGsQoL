@@ -1,18 +1,24 @@
-## Interface: 120007, 120100
+## Interface: 120100
 ## Title: SMoRG's QoL
-## Notes: Quality-of-life tweaks: auto-track newly accepted quests, colorized progress messages, optional login splash, hide completed achievements, auto-watch reputation gains, custom damage text font, PlayerFrame iLvl + Speed, cursor shake highlight, and countdown timers for ready checks and group finder queue pops.
+## Notes: Toggleable quality-of-life tweaks: quest tracking and alerts, separate quest and XP/reputation text colors, independent item level and movement speed displays, party levels, reputation watching, cursor highlight, and ready check/queue countdowns.
 ## Author: SMoRG75
-## Version: 1.0.23
+## Version: 1.0.24
 ## IconTexture: Interface\AddOns\SMoRGsQoL\smorgsqol.png
 ## SavedVariables: SQOL_DB
 ## X-Curse-Project-ID: 1418599
-## X-Interface: 120005
 ## X-Category: Quests & Leveling
 ## X-License: MIT
 ## X-Website: https://github.com/SMoRG75/SMoRGsQoL
 ## X-Feedback: https://www.curseforge.com/wow/addons/smorgsqol
 ## X-Localizations: enUS
 
+Core.lua
+VisualTweaks.lua
+QuestProgress.lua
+PlayerStats.lua
+PartyLevels.lua
+Reputation.lua
+Countdowns.lua
 SMoRGsQoL.lua
 Options.lua
 StatusBarProgress.lua

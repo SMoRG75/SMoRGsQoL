@@ -1,10 +1,22 @@
 # Changelog
 
-## Unreleased
+## [1.0.24] - 2026-09-06
 
-- Split PlayerFrame item level and movement speed into independent settings (`/sqol ilvl` and `/sqol speed`). Existing combined preferences are migrated to both settings; either value can be shown alone.
+### Added
 
-- Added a separate **Color XP/reputation numbers** option (`/sqol barcolor` or `bc`), independent of quest progress colors and disabled by default. Current values transition from red through yellow to green; labels and maximum values stay white, with outlined text. Bar textures and colors are unchanged.
+- Added **Color XP/reputation numbers** (`/sqol barcolor` or `/sqol bc`). The current number on Blizzard's standard XP and reputation bars changes from red through yellow to green as progress increases. Labels and maximum values stay white, and the text gains an outline for readability. Bar textures and colors are unchanged.
+- XP/reputation number colors have their own setting, independent of **Color quest progress**, and are disabled by default.
+
+### Changed
+
+- Split the PlayerFrame item level and movement speed display into two independent settings: **Show item level on PlayerFrame** and **Show movement speed on PlayerFrame**. Enable either value alone, both on the same line, or neither.
+- `/sqol ilvl` and `/sqol stats` now toggle only item level. `/sqol speed` and `/sqol spd` toggle movement speed separately.
+- Existing combined item level/speed preferences are migrated to both new settings on first load, preserving the previous display. Existing values for the new settings are kept.
+- Organized the implementation into shared core, visual tweaks, quest progress, player stats, party levels, reputation and countdown modules. Settings, commands and event routing remain in the main controller.
+
+### Developer validation
+
+- Added a standalone smoke test that loads the actual TOC file order and exercises initialization, commands, option changes, events, deferred callbacks and reset using mocked WoW objects.
 
 ## [1.0.23] - 2026-08-24
 

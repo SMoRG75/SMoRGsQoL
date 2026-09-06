@@ -1,12 +1,21 @@
 # SMoRG's QoL
 
-A small collection of **opt-in** quality-of-life tweaks for World of Warcraft (Retail).
+A small collection of **individually toggleable** quality-of-life tweaks for World of Warcraft (Retail).
 
 Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.0.23
+## What's new in 1.0.24
+
+- 🎨 **XP/reputation number colors** — the current number changes from red through yellow to green, with outlined text. Labels and maximum values stay white, and the bars keep their existing colors. Enable it with `/sqol barcolor` (`bc`); it is disabled by default and independent of quest colors.
+- 🧾 **Separate item level and speed settings** — show either value alone or both on your PlayerFrame. Use `/sqol ilvl` for item level and `/sqol speed` for movement speed. `/sqol stats` now toggles only item level.
+- ⚙️ **Your previous display is preserved** — the old combined item level/speed preference carries over to both new settings, which you can then change independently.
+- 🛠️ **Modular code structure** — feature code is now organized into dedicated files for easier maintenance.
+
+See the [changelog](CHANGELOG.md) for the full release history.
+
+### 1.0.23
 
 - 🐛 **Fixed nameplate taint error** — the party-level feature could spam an "Attempt to access forbidden object" error whenever nameplates appeared, because its hook also fired for (forbidden) nameplate frames. It now ignores those frames entirely.
 
@@ -87,8 +96,8 @@ Type `/sqol` to see current status, or use:
 
 - `/sqol help`
 - `/sqol autotrack` (or `/sqol at`)
-- `/sqol color` (or `/sqol col`)
-- `/sqol barcolor` (or `/sqol bc`)
+- `/sqol color` (or `/sqol col`) — toggle quest progress colors
+- `/sqol barcolor` (or `/sqol bc`) — independently toggle XP/reputation number colors
 - `/sqol questsound` (or `/sqol qs`)
 - `/sqol objectivesound` (or `/sqol os`)
 - `/sqol soundprofile` (or `/sqol soundset`)
@@ -96,8 +105,8 @@ Type `/sqol` to see current status, or use:
 - `/sqol hideach` (or `/sqol ha`)
 - `/sqol rep` (or `/sqol rw`)
 - `/sqol nameplate` (or `/sqol np`)
-- `/sqol stats` (or `/sqol ilvl`)
-- `/sqol speed` (or `/sqol spd`) — independently toggle movement speed; `stats`/`ilvl` now toggles only item level.
+- `/sqol ilvl` (or `/sqol stats`) — toggle item level only
+- `/sqol speed` (or `/sqol spd`) — independently toggle movement speed
 - `/sqol damagefont` (or `/sqol df`)
 - `/sqol cursor` (or `/sqol cs`)
 - `/sqol cursorflash` (or `/sqol cf`)
@@ -113,3 +122,36 @@ Type `/sqol` to see current status, or use:
 
 Settings are stored per account in:
 - 💾 `SQOL_DB`
+
+## Updating to 1.0.24
+
+Install the complete addon folder, including all Lua files listed in
+`SMoRGsQoL.toc`. This release introduces additional modules, so replacing only
+`SMoRGsQoL.lua` is not sufficient. Keep your saved variables; existing settings
+are preserved and the old combined item level/speed setting migrates automatically.
+
+## Code structure
+
+The `.toc` loads shared utilities and feature modules before the main controller.
+Modules share the addon's private `SQOL` namespace; implementation helpers stay local.
+
+| File | Responsibility |
+| --- | --- |
+| `Core.lua` | Defaults, sound profiles, shared utilities and namespace setup |
+| `VisualTweaks.lua` | Damage font, cursor highlight and achievement filter |
+| `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
+| `PlayerStats.lua` | Independent item level and movement speed displays |
+| `PartyLevels.lua` | Levels on default and raid-style party frames |
+| `Reputation.lua` | Reputation watching, faction lookup and header preservation |
+| `Countdowns.lua` | Shared countdown implementation, ready checks and queue pops |
+| `SMoRGsQoL.lua` | Saved settings/migration, option side effects, commands, events, auto-tracking and quest completion notifications |
+| `Options.lua` | In-game Settings controls |
+| `StatusBarProgress.lua` | Independent XP/reputation number colors |
+
+Quest progress and nameplate logic remain together because they share quest parsing
+and cached data. New feature modules should keep private state/helpers local and
+expose only the entry points needed by the controller through `SQOL`.
+
+Run `lua tests/smoke.lua` from the repository root for a mocked load/event/command
+smoke test. It reads the real TOC order. In-game testing is still needed for frame
+layout, protected UI behavior and real quest/reputation data.
