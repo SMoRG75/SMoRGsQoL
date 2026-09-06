@@ -35,6 +35,7 @@ function SQOL.Init(reset)
 
     if reset then
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
+        SQOL.RepGains_Hide()
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
         print("|cff33ff99SQoL:|r Settings have been reset to defaults.")
 
@@ -371,6 +372,7 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL ha|r          |cffcccccc- Shorthand for hideach|r")
     print("|cff00ff00/SQOL splash|r      |cffcccccc- Toggle splash on login|r")
     print("|cff00ff00/SQOL rep|r         |cffcccccc- Toggle watched reputation auto-switch on rep gain|r")
+    print("|cff00ff00/SQOL reptext|r     |cffcccccc- Toggle floating reputation gains (rt); reptexttest previews it|r")
     print("|cff00ff00/SQOL rw|r          |cffcccccc- Shorthand for rep|r")
     print("|cff00ff00/SQOL nameplate|r   |cffcccccc- Toggle nameplate objective counts|r")
     print("|cff00ff00/SQOL np|r          |cffcccccc- Shorthand for nameplate|r")
@@ -475,6 +477,9 @@ function SQOL.ApplyOption(key)
             C_AddOns.LoadAddOn("Blizzard_AchievementUI")
         end
         SQOL.ApplyAchievementFilter()
+
+    elseif key == "ShowRepGains" then
+        if not SQOL.DB.ShowRepGains then SQOL.RepGains_Hide() end
 
     elseif key == "RepWatch" then
         if SQOL.DB.RepWatch then
@@ -582,6 +587,12 @@ SlashCmdList["SQOL"] = function(msg)
 
     elseif msg == "rep" or msg == "rw" then
         toggle("RepWatch", "RepWatch is")
+
+    elseif msg == "reptext" or msg == "rt" then
+        toggle("ShowRepGains", "Floating reputation gains are")
+
+    elseif msg == "reptexttest" then
+        SQOL.RepGains_Show("Valarjar", 25)
 
     elseif msg == "nameplate" or msg == "np" then
         toggle("ShowNameplateObjectives", "Nameplate objectives are")
@@ -885,6 +896,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
+        SQOL.RepGains_HandleMessage(...)
         if SQOL.DB and SQOL.DB.RepWatch then
             local msg = ...
             local handled = false

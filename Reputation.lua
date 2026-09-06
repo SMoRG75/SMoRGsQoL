@@ -444,6 +444,83 @@ local function SQOL_Rep_ParseFactionNameFromMessage(msg)
     return name
 end
 
+-- Small, bounded pool of floating labels. This uses chat gains rather than
+-- faction snapshots, so login, watched-bar changes and standing transitions
+-- cannot create synthetic reputation gains.
+local repGainFrame
+local repGainLines = {}
+local repGainDuration = 2.5
+
+function SQOL.RepGains_Hide()
+    if not repGainFrame then return end
+    for _, line in ipairs(repGainLines) do
+        line.age = nil
+        line:Hide()
+    end
+    repGainFrame:Hide()
+end
+
+function SQOL.RepGains_Show(name, amount)
+    if not repGainFrame then
+        repGainFrame = CreateFrame("Frame", nil, UIParent)
+        repGainFrame:SetAllPoints(UIParent)
+        repGainFrame:EnableMouse(false)
+        repGainFrame:SetScript("OnUpdate", function(self, elapsed)
+            local active = false
+            for _, line in ipairs(repGainLines) do
+                if line.age then
+                    line.age = line.age + elapsed
+                    if line.age >= repGainDuration then
+                        line.age = nil
+                        line:Hide()
+                    else
+                        active = true
+                        line:SetPoint("CENTER", self, "CENTER", 0, 65 + line.offset + line.age * 22)
+                        line:SetAlpha(math.min(1, (repGainDuration - line.age) / 0.8))
+                    end
+                end
+            end
+            if not active then self:Hide() end
+        end)
+    end
+
+    local available, oldest
+    for _, line in ipairs(repGainLines) do
+        if not line.age then
+            available = available or line
+        else
+            line.offset = line.offset + 28
+            if not oldest or line.age > oldest.age then oldest = line end
+        end
+    end
+    if not available and #repGainLines < 3 then
+        available = repGainFrame:CreateFontString(nil, "OVERLAY")
+        available:SetFont(STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 22, "OUTLINE")
+        available:SetTextColor(0.3, 1, 0.3)
+        repGainLines[#repGainLines + 1] = available
+    end
+    local line = available or oldest
+    line.age, line.offset = 0, 0
+    line:SetText("+" .. amount .. " Rep — " .. name)
+    line:SetPoint("CENTER", repGainFrame, "CENTER", 0, 65)
+    line:SetAlpha(1)
+    line:Show()
+    repGainFrame:Show()
+end
+
+function SQOL.RepGains_HandleMessage(msg)
+    if not SQOL.DB or not SQOL.DB.ShowRepGains then return end
+    if issecretvalue and issecretvalue(msg) then return end
+    if type(msg) ~= "string" then return end
+    -- The addon currently supports enUS, matching RepWatch's parser above.
+    msg = SQOL_Rep_StripChatCodes(msg)
+    local amount = string.match(msg, "increased by ([%d,]+)")
+    amount = amount and tonumber((string.gsub(amount, ",", "")))
+    if not amount or amount <= 0 then return end
+    local name = SQOL_Rep_ParseFactionNameFromMessage(msg)
+    if name then SQOL.RepGains_Show(name, amount) end
+end
+
 local function SQOL_Rep_FindFactionIDFromMessage(msg)
     if type(msg) ~= "string" then
         return nil, nil

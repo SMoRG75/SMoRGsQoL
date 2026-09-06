@@ -36,6 +36,7 @@ SQOL.defaults = {
     QuestSoundProfile = "Horde",
     HideDoneAchievements = false,
     RepWatch     = false,
+    ShowRepGains = false,
     ShowNameplateObjectives = false,
 
     -- PlayerFrame line: "iLvl: xx.x  Spd: yy%"

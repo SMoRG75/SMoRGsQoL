@@ -39,6 +39,8 @@
         "LFGDungeonReadyStatus",
         "LFGDungeonReadyPopup",
         "ReadyCheckPortrait",
-        "SetPortraitTexture"
+        "SetPortraitTexture",
+        "StatusTrackingBarManager",
+        "StatusTrackingBarInfo"
     ]
 }

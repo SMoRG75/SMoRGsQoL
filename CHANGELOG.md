@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added optional **Floating reputation gains** (`/sqol reptext` or `/sqol rt`): simple green text near the character that rises and fades out. Independent of RepWatch and disabled by default. `/sqol reptexttest` previews the display. Uses English reputation gain messages, including kills and quests.
 - Added **Color XP/reputation numbers** (`/sqol barcolor` or `/sqol bc`). The current number on Blizzard's standard XP and reputation bars changes from red through yellow to green as progress increases. Labels and maximum values stay white, and the text gains an outline for readability. Bar textures and colors are unchanged.
 - XP/reputation number colors have their own setting, independent of **Color quest progress**, and are disabled by default.
 

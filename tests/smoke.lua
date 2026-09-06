@@ -17,7 +17,12 @@ local function widget()
     function w:SetFormattedText(...) self.text = string.format(...) end
     function w:SetFont(font, size, flags) self.font, self.size, self.flags = font, size, flags end
     function w:GetFont() return self.font or 'font.ttf', self.size or 12, self.flags or '' end
-    function w:CreateFontString() return widget() end
+    function w:CreateFontString()
+        local text = widget()
+        self.fontStrings = self.fontStrings or {}
+        self.fontStrings[#self.fontStrings + 1] = text
+        return text
+    end
     function w:CreateTexture() return widget() end
     function w:GetEffectiveScale() return 1 end
     function w:GetCenter() return 100, 100 end
@@ -89,7 +94,34 @@ for _, event in ipairs({ 'READY_CHECK_FINISHED', 'LFG_PROPOSAL_FAILED',
 local scheduled = pending
 pending = {}
 for _, fn in ipairs(scheduled) do fn() end
+
+-- Real chat routing: independent of RepWatch; ignore losses and hidden values.
+local before = #frames
+fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Reputation with Valarjar increased by 25.')
+assert(#frames == before, 'Disabled rep text must not allocate a frame')
+SlashCmdList.SQOL('reptext')
+assert(sqol.DB.ShowRepGains and not sqol.DB.RepWatch)
+fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Reputation with Valarjar decreased by 25.')
+issecretvalue = function() return true end
+fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Reputation with Valarjar increased by 25.')
+issecretvalue = nil
+assert(#frames == before, 'Losses and secret messages must be ignored')
+fire('CHAT_MSG_COMBAT_FACTION_CHANGE', '|cff00ff00Reputation with Valarjar increased by 1,250.|r')
+local repFrame = frames[#frames]
+assert(repFrame:IsShown() and repFrame.fontStrings[1].text == '+1250 Rep — Valarjar')
+for i = 1, 6 do
+    fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Your reputation with Stormwind has increased by 10.')
+end
+assert(#repFrame.fontStrings == 3, 'Burst gains must reuse the bounded label pool')
+repFrame.scripts.OnUpdate(repFrame, 3)
+assert(not repFrame:IsShown(), 'Floating labels must expire')
+SlashCmdList.SQOL('reptexttest')
+assert(repFrame:IsShown())
+SlashCmdList.SQOL('rt')
+assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
+SlashCmdList.SQOL('reptexttest')
 SlashCmdList.SQOL('reset')
+assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
 assert(not sqol.DB.ShowItemLevel and not sqol.DB.ShowMovementSpeed)
 for _, message in ipairs(messages) do io.write(message, '\n') end
 io.write('PASS: TOC loading, login, commands, independent options, events, deferred callbacks, reset\n')

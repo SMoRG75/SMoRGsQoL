@@ -8,6 +8,7 @@ Everything is toggleable:
 
 ## What's new in 1.0.24
 
+- **Floating reputation gains** — simple green `+25 Rep — Valarjar` text near the screen center, floating upward and fading out. Enable with `/sqol reptext` (`rt`) or **Floating reputation gains** in Settings. Disabled by default, independent of auto-watch; shows gains from kills and quests using English reputation messages. Preview with `/sqol reptexttest`, even while disabled.
 - 🎨 **XP/reputation number colors** — the current number changes from red through yellow to green, with outlined text. Labels and maximum values stay white, and the bars keep their existing colors. Enable it with `/sqol barcolor` (`bc`); it is disabled by default and independent of quest colors.
 - 🧾 **Separate item level and speed settings** — show either value alone or both on your PlayerFrame. Use `/sqol ilvl` for item level and `/sqol speed` for movement speed. `/sqol stats` now toggles only item level.
 - ⚙️ **Your previous display is preserved** — the old combined item level/speed preference carries over to both new settings, which you can then change independently.
