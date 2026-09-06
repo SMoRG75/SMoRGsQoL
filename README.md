@@ -57,6 +57,7 @@ See the [changelog](CHANGELOG.md) for the full release history.
   - Colorizes common progress patterns like `3/10` or `45%` and quest objective progress (red → yellow → green).
   - Also covers progress-bar quest objectives and scenario weighted-progress bars, which the default UI reports silently.
 - 🎨 **XP/reputation number colors**
+  - Reputation text also shows the percentage remaining in the current bar and your current standing after the total, e.g. `4995 / 6000 · 16.8% left · Friendly`.
   - Independently colors the current XP/reputation number on Blizzard's standard bars (red → yellow → green), with outlined text. Labels and maximum values stay white; bar colors are unchanged.
   - Toggle with `/sqol barcolor` (`bc`) or **Color XP/reputation numbers** in Settings. Disabled by default; independent of quest progress colors.
 - ⏱️ **Ready check countdown**

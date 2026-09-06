@@ -137,7 +137,7 @@ local function SQOL_CreateSettingsCategory()
     AddCheckbox("AutoTrack", "Auto-track newly accepted quests", "Automatically track newly accepted quests in the objective tracker.")
     AddCheckbox("ShowSplash", "Show splash on login", "Show the status splash message when you log in.")
     AddCheckbox("ColorProgress", "Color quest progress", "Colorize quest and scenario progress messages and quest objective counts on nameplates (red → yellow → green).")
-    AddCheckbox("ColorStatusBarProgress", "Color XP/reputation numbers", "Colorize the current XP/reputation number (red → yellow → green), with outlined text. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors.")
+    AddCheckbox("ColorStatusBarProgress", "Color XP/reputation numbers", "Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors.")
     AddCheckbox("QuestCompleteSound", "Quest completion sound", "Play a sound when a quest is ready to turn in (or done for bonus/world quests).")
     AddCheckbox("QuestObjectiveSound", "Quest objective completion sound", "Play a worker voice line when one objective is completed but the quest is not yet done.")
     AddDropdown("QuestSoundProfile", "Quest sound profile", "Choose the worker voice used for objective and full quest completion.", {

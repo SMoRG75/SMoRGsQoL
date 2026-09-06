@@ -91,6 +91,45 @@ assert(sqol.iLvlHolder and not sqol.iLvlHolder:IsShown())
 for _, event in ipairs({ 'READY_CHECK_FINISHED', 'LFG_PROPOSAL_FAILED',
     'GROUP_ROSTER_UPDATE', 'PLAYER_EQUIPMENT_CHANGED', 'QUEST_LOG_UPDATE',
     'UPDATE_FACTION', 'EDIT_MODE_LAYOUTS_UPDATED' }) do fire(event) end
+-- Reputation suffix uses the current rank and remaining (not earned) percent.
+local oldHook = hooksecurefunc
+function hooksecurefunc(object, method, callback)
+    local original = object[method]
+    object[method] = function(self, ...)
+        original(self, ...)
+        callback(self, ...)
+    end
+end
+local function progressBar(text)
+    local bar = { OverlayFrame = { Text = widget() } }
+    function bar:SetBarText(value) self.OverlayFrame.Text:SetText(value) end
+    bar:SetBarText(text)
+    return bar
+end
+local repBar = progressBar('Avengers of Hyjal 4995 / 6000')
+local xpBar = progressBar('XP 4995 / 6000')
+StatusTrackingBarInfo = { BarsEnum = { Experience = 1, Reputation = 2 } }
+StatusTrackingBarManager = { bars = { xpBar, repBar } }
+local watched = { factionID = 1204, reaction = 5 }
+C_Reputation = { GetWatchedFactionData = function() return watched end }
+FACTION_STANDING_LABEL5, FACTION_STANDING_LABEL6 = 'Friendly', 'Honored'
+sqol.SetOption('ColorStatusBarProgress', true)
+local function plainRep() return repBar.OverlayFrame.Text.text:gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|r', '') end
+assert(plainRep() == 'Avengers of Hyjal 4995 / 6000 · 16.8% left · Friendly')
+sqol.RefreshStatusBarProgress()
+assert(plainRep() == 'Avengers of Hyjal 4995 / 6000 · 16.8% left · Friendly')
+assert(not xpBar.OverlayFrame.Text.text:find('left', 1, true))
+watched.reaction = 6
+repBar:SetBarText('Avengers of Hyjal 0 / 12000')
+assert(plainRep() == 'Avengers of Hyjal 0 / 12000 · 100.0% left · Honored')
+repBar:SetBarText('Avengers of Hyjal')
+assert(plainRep() == 'Avengers of Hyjal')
+repBar:SetBarText('Avengers of Hyjal 6000 / 12000')
+sqol.SetOption('ColorStatusBarProgress', false)
+assert(repBar.OverlayFrame.Text.text == 'Avengers of Hyjal 6000 / 12000')
+C_Reputation, StatusTrackingBarInfo, StatusTrackingBarManager = nil, nil, nil
+hooksecurefunc = oldHook
+
 local scheduled = pending
 pending = {}
 for _, fn in ipairs(scheduled) do fn() end
