@@ -152,6 +152,12 @@ for i = 1, 6 do
     fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Your reputation with Stormwind has increased by 10.')
 end
 assert(#repFrame.fontStrings == 3, 'Burst gains must reuse the bounded label pool')
+fire('CHAT_MSG_COMBAT_FACTION_CHANGE', "Your Warband's reputation with The Wild Hunt increased by 30.")
+local warbandShown = false
+for _, fs in ipairs(repFrame.fontStrings) do
+    if fs.text == '+30 Rep — The Wild Hunt' then warbandShown = true end
+end
+assert(warbandShown, 'Account-wide (Warband) gains must be shown')
 repFrame.scripts.OnUpdate(repFrame, 3)
 assert(not repFrame:IsShown(), 'Floating labels must expire')
 SlashCmdList.SQOL('reptexttest')

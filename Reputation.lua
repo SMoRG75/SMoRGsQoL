@@ -428,7 +428,10 @@ local function SQOL_Rep_ParseFactionNameFromMessage(msg)
         string.match(msg, "^Reputation with (.-) increased") or
         string.match(msg, "^Reputation with (.-) decreased") or
         string.match(msg, "^Your reputation with (.-) has increased") or
-        string.match(msg, "^Your reputation with (.-) has decreased")
+        string.match(msg, "^Your reputation with (.-) has decreased") or
+        -- Account-wide factions: "Your Warband's reputation with X increased by N."
+        string.match(msg, "^Your [^']-'s reputation with (.-) increased") or
+        string.match(msg, "^Your [^']-'s reputation with (.-) decreased")
 
     if type(name) ~= "string" then
         return nil
