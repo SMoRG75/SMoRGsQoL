@@ -50,13 +50,13 @@ SQOL.defaults = {
     CursorShakeHighlight = false,
 
     -- Countdown timer on the ReadyCheckFrame showing time until it expires.
-    ShowReadyCheckTimer = true,
+    ShowReadyCheckTimer = false,
 
     -- Countdown timer on the LFG queue pop showing time left to accept.
-    ShowLFGProposalTimer = true,
+    ShowLFGProposalTimer = false,
 
     -- Show each party member's level on the default party frames.
-    ShowPartyLevel = true,
+    ShowPartyLevel = false,
 
 }
 
