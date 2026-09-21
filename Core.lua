@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL by SMoRG75 (Retail-only).
+-- SMoRGsQoL by SMoRG75 (Retail and WoW Forever).
 -- Shared namespace, defaults and utilities. Loaded before feature modules.
 ------------------------------------------------------------
 
@@ -8,6 +8,11 @@ ADDON_NAME = ADDON_NAME or "SMoRGsQoL"
 
 SQOL = SQOL or {}        -- addon namespace table (shared across files)
 SQOL.ADDON_NAME = ADDON_NAME
+
+-- WoW Forever runs the Mainline client (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+-- but reports a 1.x interface version (16001), so detect it by build number.
+local interfaceVersion = type(GetBuildInfo) == "function" and select(4, GetBuildInfo())
+SQOL.IsForever = type(interfaceVersion) == "number" and interfaceVersion < 100000
 
 SQOL.QuestSoundProfiles = {
     Horde = {

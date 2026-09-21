@@ -40,12 +40,11 @@ function SQOL.Init(reset)
         print("|cff33ff99SQoL:|r Settings have been reset to defaults.")
 
         -- 🟢 Apply Achievement filter after reset
-        if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
-            C_AddOns.LoadAddOn("Blizzard_AchievementUI")
+        if SQOL.EnsureAchievementUILoaded() then
+            C_Timer.After(0.1, function()
+                SQOL.ApplyAchievementFilter()
+            end)
         end
-        C_Timer.After(0.1, function()
-            SQOL.ApplyAchievementFilter()
-        end)
     end
 end
 
@@ -74,6 +73,9 @@ local function SQOL_GetStateStrings()
     local coState = SQOL.DB.ColorProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local qsState = SQOL.DB.QuestCompleteSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local loState = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    if not SQOL.IsAchievementFilterSupported() then
+        loState = "|cff888888N/A|r"
+    end
     local repState = SQOL.DB.RepWatch and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local statsState = "iLvl " .. (SQOL.DB.ShowItemLevel and "|cff00ff00ON|r" or "|cffff0000OFF|r")
         .. " / Speed " .. (SQOL.DB.ShowMovementSpeed and "|cff00ff00ON|r" or "|cffff0000OFF|r")
@@ -473,10 +475,9 @@ function SQOL.ApplyOption(key)
         end
 
     elseif key == "HideDoneAchievements" then
-        if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
-            C_AddOns.LoadAddOn("Blizzard_AchievementUI")
+        if SQOL.EnsureAchievementUILoaded() then
+            SQOL.ApplyAchievementFilter()
         end
-        SQOL.ApplyAchievementFilter()
 
     elseif key == "ShowRepGains" then
         if not SQOL.DB.ShowRepGains then SQOL.RepGains_Hide() end
@@ -635,7 +636,11 @@ SlashCmdList["SQOL"] = function(msg)
         toggle("DebugTrack", "Debug tracking")
 
     elseif msg == "hideach" or msg == "ha" then
-        toggle("HideDoneAchievements", "Hide completed achievements is")
+        if SQOL.IsAchievementFilterSupported() then
+            toggle("HideDoneAchievements", "Hide completed achievements is")
+        else
+            print("|cff33ff99SQoL:|r Hide completed achievements is not available in this client (no achievement UI).")
+        end
 
     elseif msg == "reset" then
         SQOL.Init(true)

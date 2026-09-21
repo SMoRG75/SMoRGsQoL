@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- WoW Forever support: the TOC now lists interface `16001` alongside Retail `120100`.
+
+### Changed
+
+- **Hide completed achievements** is hidden from the options and shown as `N/A` in `/sqol` output on clients without `Blizzard_AchievementUI` (such as WoW Forever, which uses the Legacy system instead of achievements). `/sqol ha` explains that the option is unavailable there.
+
 ## [1.0.24] - 2026-09-06
 
 ### Added

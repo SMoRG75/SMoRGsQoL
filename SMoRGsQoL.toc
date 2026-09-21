@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 120100, 16001
 ## Title: SMoRG's QoL
 ## Notes: Toggleable quality-of-life tweaks: quest tracking and alerts, separate quest and XP/reputation text colors, independent item level and movement speed displays, party levels, reputation watching, cursor highlight, and ready check/queue countdowns.
 ## Author: SMoRG75

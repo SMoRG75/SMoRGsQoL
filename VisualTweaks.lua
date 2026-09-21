@@ -272,8 +272,33 @@ end
 ------------------------------------------------------------
 -- Apply the achievement filter according to saved setting
 ------------------------------------------------------------
+-- WoW Forever replaces achievements with the Legacy system, so the
+-- achievement filter only exists on clients that ship Blizzard_AchievementUI.
+function SQOL.IsAchievementFilterSupported()
+    if SQOL.IsForever then return false end
+    if not C_AddOns then return false end
+    if type(C_AddOns.DoesAddOnExist) == "function" then
+        return C_AddOns.DoesAddOnExist("Blizzard_AchievementUI") and true or false
+    end
+    if type(C_AddOns.GetAddOnInfo) == "function" then
+        local reason = select(5, C_AddOns.GetAddOnInfo("Blizzard_AchievementUI"))
+        return reason ~= "MISSING"
+    end
+    return true
+end
+
+-- Load Blizzard_AchievementUI on demand; returns true when it is loaded.
+function SQOL.EnsureAchievementUILoaded()
+    if not SQOL.IsAchievementFilterSupported() then return false end
+    if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
+        pcall(C_AddOns.LoadAddOn, "Blizzard_AchievementUI")
+    end
+    return C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") and true or false
+end
+
 function SQOL.ApplyAchievementFilter()
     if not SQOL.DB then return end
+    if not SQOL.IsAchievementFilterSupported() then return end
     if not C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI") then return end
 
     local filter = SQOL.DB.HideDoneAchievements and ACHIEVEMENT_FILTER_INCOMPLETE or ACHIEVEMENT_FILTER_ALL

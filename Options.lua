@@ -1,6 +1,6 @@
 ------------------------------------------------------------
 -- SMoRGsQoL - Settings (Interface -> AddOns)
--- Retail-only (11.2.7+). Uses the Settings API.
+-- Retail (11.2.7+) and WoW Forever. Uses the Settings API.
 -- Slash commands are kept as-is in SMoRGsQoL.lua.
 ------------------------------------------------------------
 
@@ -144,7 +144,9 @@ local function SQOL_CreateSettingsCategory()
         { value = "Horde", label = SQOL.QuestSoundProfiles.Horde.label },
         { value = "Alliance", label = SQOL.QuestSoundProfiles.Alliance.label },
     })
-    AddCheckbox("HideDoneAchievements", "Hide completed achievements", "Achievement UI will default to showing incomplete achievements only.")
+    if SQOL.IsAchievementFilterSupported() then
+        AddCheckbox("HideDoneAchievements", "Hide completed achievements", "Achievement UI will default to showing incomplete achievements only.")
+    end
     AddCheckbox("RepWatch", "Auto-watch reputation gains", "When a faction reputation changes, automatically switch your watched faction to the one that changed.")
     AddCheckbox("ShowRepGains", "Floating reputation gains", "Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch.")
     AddCheckbox("ShowNameplateObjectives", "Show objective counts on nameplates", "Show quest objective counts (e.g., 0/10) above relevant nameplates.")

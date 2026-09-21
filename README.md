@@ -1,6 +1,6 @@
 # SMoRG's QoL
 
-A small collection of **individually toggleable** quality-of-life tweaks for World of Warcraft (Retail).
+A small collection of **individually toggleable** quality-of-life tweaks for World of Warcraft (Retail and WoW Forever).
 
 Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
@@ -72,6 +72,7 @@ See the [changelog](CHANGELOG.md) for the full release history.
   - Optional status splash on login showing which features are ON/OFF.
 - ✅ **Hide completed achievements**
   - Makes the Achievement UI default to showing incomplete achievements only.
+  - Not available in WoW Forever, which replaces achievements with the Legacy system.
 - 🤝 **Auto-watch reputation gains**
   - Switches your watched faction to the one that changed when you gain reputation.
 - 🏷️ **Nameplate objective counts**
