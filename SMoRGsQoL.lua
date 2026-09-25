@@ -464,6 +464,7 @@ function SQOL.ApplyOption(key)
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
 
     elseif key == "ColorProgress" then
+        SQOL.RefreshQuestTrackerColors()
         if SQOL.DB.ColorProgress then
             SQOL.EnableCustomInfoMessages()
             SQOL.ScheduleQuestProgressBarScan(false)
@@ -708,10 +709,14 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL_Splash()
         end
 
+        -- Always hook the quest tracker; the hook checks ColorProgress itself.
+        SQOL.HookQuestTrackerColors()
+
         if SQOL.DB.ColorProgress then
             SQOL.EnableCustomInfoMessages()
             SQOL.ScheduleQuestProgressBarScan(false)
             SQOL.ScheduleScenarioProgressScan(false)
+            SQOL.RecolorQuestObjectives_Throttle()
         end
 
         -- Apply saved preference when logging in (only if already loaded)
@@ -789,6 +794,8 @@ f:SetScript("OnEvent", function(self, event, ...)
             end
         elseif addonName == "Blizzard_AchievementUI" then
             C_Timer.After(0.1, SQOL.ApplyAchievementFilter)
+        elseif addonName == "Blizzard_ObjectiveTracker" then
+            SQOL.HookQuestTrackerColors()
         end
 
     elseif event == "UNIT_INVENTORY_CHANGED" then

@@ -128,6 +128,26 @@ repBar:SetBarText('Avengers of Hyjal 6000 / 12000')
 sqol.SetOption('ColorStatusBarProgress', false)
 assert(repBar.OverlayFrame.Text.text == 'Avengers of Hyjal 6000 / 12000')
 C_Reputation, StatusTrackingBarInfo, StatusTrackingBarManager = nil, nil, nil
+
+-- Quest tracker: only the current count is colored, also on finished lines.
+local function trackerLine(text) local line = { Text = widget() } line.Text:SetText(text) return line end
+local questBlock = { usedLines = {
+    [1] = trackerLine('1/5 Boar Pelt'), [2] = trackerLine('5/5 Wolf Fang'),
+    [3] = trackerLine('Speak to Marshal'), QuestComplete = trackerLine('0/1 extra line') } }
+QuestObjectiveTracker = { usedBlocks = { QuestBlock = { [42] = questBlock } } }
+function QuestObjectiveTracker:DoQuestObjectives(block) end
+sqol.HookQuestTrackerColors()
+sqol.SetOption('ColorProgress', true)
+QuestObjectiveTracker:DoQuestObjectives(questBlock)
+assert(questBlock.usedLines[1].Text.text == '|cffff66001|r/5 Boar Pelt')
+assert(questBlock.usedLines[2].Text.text == '|cff00ff005|r/5 Wolf Fang')
+assert(questBlock.usedLines[3].Text.text == 'Speak to Marshal')
+assert(questBlock.usedLines.QuestComplete.Text.text == '0/1 extra line')
+sqol.RefreshQuestTrackerColors()
+assert(questBlock.usedLines[1].Text.text == '|cffff66001|r/5 Boar Pelt', 'Coloring must be idempotent')
+sqol.SetOption('ColorProgress', false)
+assert(questBlock.usedLines[1].Text.text == '1/5 Boar Pelt' and questBlock.usedLines[2].Text.text == '5/5 Wolf Fang')
+QuestObjectiveTracker = nil
 hooksecurefunc = oldHook
 
 local scheduled = pending

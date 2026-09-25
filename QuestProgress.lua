@@ -186,44 +186,96 @@ function SQOL.GetQuestLogSnapshot()
     return snapshot
 end
 
-local function SQOL_RecolorQuestObjectives_Impl()
-    if not SQOL.DB.ColorProgress then return end
-    for _, info in ipairs(SQOL.GetQuestLogSnapshot()) do
-        if info and not info.isHeader and info.questID then
-            local objectives = SQOL.GetQuestObjectivesCached(info.questID)
-            if objectives then
-                for _, obj in ipairs(objectives) do
-                    local numItems     = rawget(obj, "numItems")
-                    local numRequired  = rawget(obj, "numRequired")
-                    local numFulfilled = rawget(obj, "numFulfilled")
-                    local objText      = rawget(obj, "text")
-                    local hasCounter = (type(numItems) == "number" and numItems > 0)
-                                    or (type(numRequired) == "number" and numRequired > 0)
-                    if hasCounter then
-                        local required  = (type(numRequired) == "number" and numRequired)
-                                       or (type(numItems) == "number" and numItems)
-                                       or 0
-                        local fulfilled = (type(numFulfilled) == "number" and numFulfilled) or 0
-                        local progress = (required > 0) and (fulfilled / required) or 0
-                        local color = SQOL_GetProgressColor(progress)
-                        local progressText = SQOL_FormatProgressText(fulfilled, required) or string.format("%d/%d",
-                            fulfilled, required)
-                        local text = string.format("%s%s|r %s", color, progressText, objText or "")
-                        local block = ObjectiveTrackerBlocksFrame and ObjectiveTrackerBlocksFrame:GetBlock(info.questID)
-                        if block and block.lines then
-                            for _, line in pairs(block.lines) do
-                                local lineText = line.text and line.text:GetText()
-                                if lineText and objText and lineText:find(objText, 1, true) then
-                                    line.text:SetText(text)
-                                end
-                            end
-                        end
-                    end
-                end
-            end
+-- Quest and campaign quest trackers share QuestObjectiveTrackerMixin, whose
+-- DoQuestObjectives() writes each objective line (keyed by objective index),
+-- including finished lines that Blizzard grays out before fading them.
+local SQOL_QUEST_TRACKER_NAMES = { "QuestObjectiveTracker", "CampaignQuestObjectiveTracker" }
+
+-- Color only the current count in "1/5 Boar Pelt", leaving the rest of the
+-- line in Blizzard's own color. Lines we already colored contain "|c" and are
+-- skipped, so repeated passes are harmless.
+local function SQOL_ColorTrackerLine(line)
+    local fontString = line and line.Text
+    if not fontString or type(fontString.GetText) ~= "function" then return end
+
+    local text = fontString:GetText()
+    if type(text) ~= "string" or text:find("|c", 1, true) then return end
+
+    local startPos, _, curText, totalText = text:find("(%d+)/(%d+)")
+    if not startPos then return end
+
+    local cur, total = tonumber(curText), tonumber(totalText)
+    if not cur or not total or total <= 0 then return end
+
+    local colored = text:sub(1, startPos - 1)
+        .. SQOL_GetProgressColor(cur / total) .. curText .. "|r"
+        .. text:sub(startPos + #curText)
+    fontString:SetText(colored)
+    -- Remember both versions so the option can be turned off without asking
+    -- Blizzard's tracker to rebuild (calling its MarkDirty from here would taint it).
+    fontString._sqolPlainText = text
+    fontString._sqolColoredText = colored
+end
+
+local function SQOL_RestoreTrackerLine(line)
+    local fontString = line and line.Text
+    if not fontString or not fontString._sqolPlainText then return end
+    if fontString:GetText() == fontString._sqolColoredText then
+        fontString:SetText(fontString._sqolPlainText)
+    end
+    fontString._sqolPlainText = nil
+    fontString._sqolColoredText = nil
+end
+
+local function SQOL_ColorTrackerBlock(block, lineFunc)
+    local usedLines = block and block.usedLines
+    if type(usedLines) ~= "table" then return end
+    for objectiveKey, line in pairs(usedLines) do
+        -- String keys are Blizzard's extra lines (QuestComplete, Money, Waypoint...).
+        if type(objectiveKey) == "number" then
+            (lineFunc or SQOL_ColorTrackerLine)(line)
         end
     end
-    SQOL.RequestIncrementalGC()
+end
+
+local function SQOL_ForEachQuestTracker(func)
+    for _, name in ipairs(SQOL_QUEST_TRACKER_NAMES) do
+        local tracker = rawget(_G, name)
+        if type(tracker) == "table" then
+            func(tracker)
+        end
+    end
+end
+
+function SQOL.HookQuestTrackerColors()
+    SQOL_ForEachQuestTracker(function(tracker)
+        if tracker._sqolColorHooked or type(tracker.DoQuestObjectives) ~= "function" then return end
+        tracker._sqolColorHooked = true
+        hooksecurefunc(tracker, "DoQuestObjectives", function(_, block)
+            if SQOL.DB and SQOL.DB.ColorProgress then
+                SQOL_ColorTrackerBlock(block)
+            end
+        end)
+    end)
+end
+
+-- Apply or remove the colors on every line currently shown in the trackers.
+function SQOL.RefreshQuestTrackerColors()
+    SQOL.HookQuestTrackerColors()
+    local lineFunc = (SQOL.DB and SQOL.DB.ColorProgress) and SQOL_ColorTrackerLine or SQOL_RestoreTrackerLine
+    SQOL_ForEachQuestTracker(function(tracker)
+        if type(tracker.usedBlocks) ~= "table" then return end
+        for _, blocks in pairs(tracker.usedBlocks) do
+            for _, block in pairs(blocks) do
+                SQOL_ColorTrackerBlock(block, lineFunc)
+            end
+        end
+    end)
+end
+
+local function SQOL_RecolorQuestObjectives_Impl()
+    if not SQOL.DB or not SQOL.DB.ColorProgress then return end
+    SQOL.RefreshQuestTrackerColors()
 end
 
 function SQOL.RecolorQuestObjectives_Throttle()
