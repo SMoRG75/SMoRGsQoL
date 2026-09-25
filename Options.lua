@@ -157,6 +157,7 @@ local function SQOL_CreateSettingsCategory()
     AddCheckbox("ShowReadyCheckTimer", "Ready check countdown timer", "Show a live countdown on the ready check popup for how long until it expires.")
     AddCheckbox("ShowLFGProposalTimer", "LFG queue pop countdown timer", "Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds).")
     AddCheckbox("ShowPartyLevel", "Show party member levels", "Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances.")
+    AddCheckbox("ShowTooltipTarget", "Show target in unit tooltips", "Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover.")
     AddCheckbox("DebugTrack", "Debug tracking", "Print verbose debug information (for troubleshooting).")
 
 end

@@ -82,35 +82,6 @@ end
 
 -- Returns movement speed as a percentage of normal run speed (100% = base).
 -- Note: GetUnitSpeed() returns 0 when standing still; we keep the last non-zero value as fallback.
-local function SQOL_CanUseValue(value)
-    local accessChecked = false
-
-    if type(canaccessvalue) == "function" then
-        local ok, canAccess = pcall(canaccessvalue, value)
-        if not ok then
-            return false
-        end
-
-        accessChecked = true
-        if canAccess == false then
-            return false
-        end
-    end
-
-    if type(issecretvalue) == "function" then
-        local ok, isSecret = pcall(issecretvalue, value)
-        if not ok then
-            return false
-        end
-
-        if isSecret and not accessChecked then
-            return false
-        end
-    end
-
-    return true
-end
-
 local function SQOL_GetMovementSpeedPercent()
     local baseRunSpeed = 7 -- yards/sec (100% run speed)
 
@@ -123,7 +94,7 @@ local function SQOL_GetMovementSpeedPercent()
         return nil
     end
 
-    if not SQOL_CanUseValue(speed) then
+    if not SQOL.CanUseValue(speed) then
         return SQOL._lastSpeedPct
     end
 

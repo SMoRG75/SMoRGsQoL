@@ -79,6 +79,9 @@ See the [changelog](CHANGELOG.md) for the full release history.
   - Shows quest objective progress (e.g., 0/10 or 45%) above relevant nameplates, with fallbacks for bonus/world quests.
 - 🧾 **PlayerFrame iLvl + Speed**
   - Independently toggle item level and movement speed. Shows either value alone, or both on the same line: `iLvl: xx.x  Spd: yy%`.
+- 🎯 **Target in unit tooltips**
+  - Adds a `Target:` line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red `You` when it is you. Updates live while you hover.
+  - Toggle with `/sqol tooltiptarget` (`tt`). Disabled by default. Skipped when the client hides the unit's data (secret values in 12.x).
 - 🖋️ **Custom damage text font**
   - Replaces floating combat text damage numbers with a custom font.
 - 🖱️ **Cursor shake highlight**
@@ -118,6 +121,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol lfgtimer` (or `/sqol lfg`)
 - `/sqol lfgtest` — preview the queue pop countdown without a queue
 - `/sqol partylevel` (or `/sqol pl`)
+- `/sqol tooltiptarget` (or `/sqol tt`)
 - `/sqol debugtrack` (or `/sqol dbg`)
 - `/sqol reset`
 
@@ -141,7 +145,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | File | Responsibility |
 | --- | --- |
 | `Core.lua` | Defaults, sound profiles, shared utilities and namespace setup |
-| `VisualTweaks.lua` | Damage font, cursor highlight and achievement filter |
+| `VisualTweaks.lua` | Damage font, cursor highlight, achievement filter and tooltip target line |
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
 | `PlayerStats.lua` | Independent item level and movement speed displays |
 | `PartyLevels.lua` | Levels on default and raid-style party frames |

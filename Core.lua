@@ -63,6 +63,9 @@ SQOL.defaults = {
     -- Show each party member's level on the default party frames.
     ShowPartyLevel = false,
 
+    -- Add a "Target:" line to unit tooltips showing who the unit is targeting.
+    ShowTooltipTarget = false,
+
 }
 
 ------------------------------------------------------------
@@ -80,6 +83,36 @@ function SQOL.safe_pcall(fn, ...)
         SQOL.dprint("pcall error:", err)
     end
     return ok
+end
+
+-- False for secret values (12.x) that addon code may not read or compare.
+function SQOL.CanUseValue(value)
+    local accessChecked = false
+
+    if type(canaccessvalue) == "function" then
+        local ok, canAccess = pcall(canaccessvalue, value)
+        if not ok then
+            return false
+        end
+
+        accessChecked = true
+        if canAccess == false then
+            return false
+        end
+    end
+
+    if type(issecretvalue) == "function" then
+        local ok, isSecret = pcall(issecretvalue, value)
+        if not ok then
+            return false
+        end
+
+        if isSecret and not accessChecked then
+            return false
+        end
+    end
+
+    return true
 end
 
 function SQOL.clamp01(x)

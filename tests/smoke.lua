@@ -44,6 +44,20 @@ end
 UIParent = widget()
 PlayerFrame = widget()
 PlayerFrame:Show()
+-- Unit tooltip: captures the post-call and records added lines.
+local tooltipPostCalls = {}
+Enum = { TooltipDataType = { Unit = 2 } }
+TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn) tooltipPostCalls[kind] = fn end }
+GameTooltip = widget()
+GameTooltip.lines = {}
+function GameTooltip:AddLine(text)
+    local line = widget()
+    line:SetText(text)
+    self.lines[#self.lines + 1] = line
+    _G['GameTooltipTextLeft' .. #self.lines] = line
+end
+function GameTooltip:NumLines() return #self.lines end
+function GameTooltip:GetUnit() return 'Mob', self.unit end
 SlashCmdList = {}
 C_Timer = { After = function(_, fn) pending[#pending + 1] = fn end }
 C_AddOns = { IsAddOnLoaded = function() return false end,
@@ -81,12 +95,13 @@ fire('PLAYER_ENTERING_WORLD')
 assert(sqol.DB and sqol.GetProgressColor(0.5) == '|cffffff00')
 for _, command in ipairs({ 'ilvl', 'speed', 'speed', 'ilvl', 'color', 'barcolor',
     'color', 'barcolor', 'damagefont', 'damagefont', 'cursor', 'cursor',
-    'rep', 'rep', 'nameplate', 'nameplate', 'partylevel', 'partylevel',
+    'rep', 'rep', 'nameplate', 'nameplate', 'partylevel', 'partylevel', 'tt', 'tt',
     'rctest', 'lfgtest', 'help', '' }) do
     SlashCmdList.SQOL(command)
 end
 assert(not sqol.DB.ShowItemLevel and not sqol.DB.ShowMovementSpeed)
 assert(not sqol.DB.ColorProgress and not sqol.DB.ColorStatusBarProgress)
+assert(not sqol.DB.ShowTooltipTarget)
 assert(sqol.iLvlHolder and not sqol.iLvlHolder:IsShown())
 for _, event in ipairs({ 'READY_CHECK_FINISHED', 'LFG_PROPOSAL_FAILED',
     'GROUP_ROSTER_UPDATE', 'PLAYER_EQUIPMENT_CHANGED', 'QUEST_LOG_UPDATE',
@@ -202,6 +217,44 @@ assert(anchor[2] == unknown.UnitFrame.HealthBarsContainer and anchor[5] == 15, '
 widget, C_NamePlate, UnitExists, NamePlateConstants = oldWidget, nil, nil, nil
 sqol.DB.ShowNameplateObjectives = false
 sqol._npUnits.nameplate1 = nil
+
+-- Tooltip target line: off by default, "You", reaction/class colors, live refresh, secrets.
+local units = { mouseovertarget = { name = 'Gnoll', reaction = 2 } }
+function UnitExists(unit) return unit == 'mouseover' or units[unit] ~= nil end
+function UnitIsUnit(unit, other) return other == 'player' and units[unit] and units[unit].isYou or false end
+function UnitName(unit) return units[unit] and units[unit].name end
+function UnitIsPlayer(unit) return units[unit] and units[unit].class ~= nil end
+function UnitClass(unit) return 'Druid', units[unit] and units[unit].class end
+function UnitReaction(unit) return units[unit] and units[unit].reaction end
+RAID_CLASS_COLORS = { DRUID = { r = 1, g = 0.49, b = 0.04 } }
+FACTION_BAR_COLORS = { [2] = { r = 1, g = 0, b = 0 } }
+local showUnitTooltip = tooltipPostCalls[Enum.TooltipDataType.Unit]
+assert(showUnitTooltip and GameTooltip.scripts.OnUpdate, 'Tooltip hooks must be installed at load')
+local function hoverUnit()
+    GameTooltip.lines = {}
+    GameTooltip.unit = 'mouseover'
+    showUnitTooltip(GameTooltip, {})
+    return GameTooltip.lines[#GameTooltip.lines]
+end
+assert(hoverUnit() == nil, 'Disabled option must not add a line')
+SlashCmdList.SQOL('tt')
+assert(hoverUnit().text == '|cffffd100Target:|r |cffff0000Gnoll|r')
+units.mouseovertarget = { name = 'Soren', class = 'DRUID' }
+GameTooltip.scripts.OnUpdate(GameTooltip, 0.1)
+assert(GameTooltip.lines[1].text:find('Gnoll', 1, true), 'Refresh is throttled')
+GameTooltip.scripts.OnUpdate(GameTooltip, 0.1)
+assert(GameTooltip.lines[1].text == '|cffffd100Target:|r |cffff7d0aSoren|r')
+units.mouseovertarget = { name = 'Me', isYou = true }
+assert(hoverUnit().text == '|cffffd100Target:|r |cffff4040You|r')
+units.mouseovertarget = nil
+assert(hoverUnit() == nil, 'No target, no line')
+units.mouseovertarget = { name = 'Gnoll', reaction = 2 }
+issecretvalue = function() return true end
+assert(hoverUnit() == nil, 'Secret unit data must be skipped')
+issecretvalue = nil
+SlashCmdList.SQOL('tt')
+UnitExists, UnitIsUnit, UnitName, UnitIsPlayer, UnitClass, UnitReaction = nil, nil, nil, nil, nil, nil
+RAID_CLASS_COLORS, FACTION_BAR_COLORS = nil, nil
 
 local scheduled = pending
 pending = {}

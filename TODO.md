@@ -18,7 +18,7 @@
   - Farv `cur` i `cur/total` med `SQOL.GetProgressColor` (`QuestProgress.lua:6`), så 1/5 bliver rødt og 5/5 grønt.
   - Gælder også færdige objectives, som standard-UI'et ellers gråer/skjuler.
 
-- [ ] **5. Vis target i HUD-tooltip**
+- [x] **5. Vis target i HUD-tooltip**
   - Tilføj en linje med unit'ens target ("Target: <navn>") i tooltip, klassefarvet, og "You" hvis det er dig.
 
 - [x] **6. Centrér quest-tallene over nameplates og flyt dem lidt højere op**

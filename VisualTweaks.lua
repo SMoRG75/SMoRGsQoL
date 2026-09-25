@@ -318,3 +318,122 @@ function SQOL.ApplyAchievementFilter()
     end
 end
 
+------------------------------------------------------------
+-- Unit tooltip: show who the unit is targeting
+------------------------------------------------------------
+local SQOL_TOOLTIP_TARGET_LABEL = "|cffffd100Target:|r "
+local SQOL_TOOLTIP_TARGET_NONE = "|cff808080none|r"
+local SQOL_TOOLTIP_TARGET_REFRESH = 0.2
+
+-- The unit and line currently showing a target on GameTooltip.
+local tooltipTarget = { unit = nil, line = nil, text = nil, elapsed = 0 }
+
+local function SQOL_TooltipTarget_ColorCode(targetUnit)
+    local color
+    local isPlayer = UnitIsPlayer(targetUnit)
+    if SQOL.CanUseValue(isPlayer) and isPlayer then
+        local _, classFile = UnitClass(targetUnit)
+        if SQOL.CanUseValue(classFile) and classFile and RAID_CLASS_COLORS then
+            color = RAID_CLASS_COLORS[classFile]
+        end
+    else
+        local reaction = UnitReaction(targetUnit, "player")
+        if SQOL.CanUseValue(reaction) and reaction and FACTION_BAR_COLORS then
+            color = FACTION_BAR_COLORS[reaction]
+        end
+    end
+    if not color then
+        return "|cffffffff"
+    end
+    return string.format("|cff%02x%02x%02x",
+        math.floor(color.r * 255 + 0.5), math.floor(color.g * 255 + 0.5), math.floor(color.b * 255 + 0.5))
+end
+
+-- Returns the colored target name, "You", or nil when the unit has no target.
+-- Unit data can be secret in 12.x (e.g. in instances); such values are skipped.
+function SQOL.TooltipTarget_GetText(unit)
+    if type(unit) ~= "string" or not SQOL.CanUseValue(unit) then return nil end
+
+    local targetUnit = unit .. "target"
+    local exists = UnitExists(targetUnit)
+    if not SQOL.CanUseValue(exists) or not exists then return nil end
+
+    local isYou = UnitIsUnit(targetUnit, "player")
+    if SQOL.CanUseValue(isYou) and isYou then
+        return "|cffff4040" .. (YOU or "You") .. "|r"
+    end
+
+    local name = UnitName(targetUnit)
+    if not SQOL.CanUseValue(name) or type(name) ~= "string" or name == "" then return nil end
+    return SQOL_TooltipTarget_ColorCode(targetUnit) .. name .. "|r"
+end
+
+local function SQOL_TooltipTarget_SafeGetText(unit)
+    local ok, text = pcall(SQOL.TooltipTarget_GetText, unit)
+    return ok and text or nil
+end
+
+local function SQOL_TooltipTarget_Reset()
+    tooltipTarget.unit, tooltipTarget.line, tooltipTarget.text = nil, nil, nil
+end
+
+-- Runs just before Blizzard shows the unit tooltip, so the added line is sized in.
+local function SQOL_TooltipTarget_OnUnitTooltip(tooltip)
+    if tooltip ~= GameTooltip or not (SQOL.DB and SQOL.DB.ShowTooltipTarget) then return end
+
+    SQOL_TooltipTarget_Reset()
+    local ok, _, unit = pcall(tooltip.GetUnit, tooltip)
+    if not ok or type(unit) ~= "string" or not SQOL.CanUseValue(unit) then return end
+
+    tooltipTarget.unit = unit
+    tooltipTarget.text = SQOL_TooltipTarget_SafeGetText(unit)
+    if tooltipTarget.text then
+        tooltip:AddLine(SQOL_TOOLTIP_TARGET_LABEL .. tooltipTarget.text)
+        tooltipTarget.line = tooltip:NumLines()
+    end
+end
+
+-- Blizzard doesn't rebuild the tooltip when the hovered unit changes target,
+-- so poll a few times per second while it is shown.
+local function SQOL_TooltipTarget_OnUpdate(tooltip, elapsed)
+    if not tooltipTarget.unit or not (SQOL.DB and SQOL.DB.ShowTooltipTarget) then return end
+    tooltipTarget.elapsed = tooltipTarget.elapsed + (elapsed or 0)
+    if tooltipTarget.elapsed < SQOL_TOOLTIP_TARGET_REFRESH then return end
+    tooltipTarget.elapsed = 0
+
+    -- The mouseover unit is gone while the tooltip fades out; keep the last target.
+    local exists = UnitExists(tooltipTarget.unit)
+    if not SQOL.CanUseValue(exists) or not exists then return end
+
+    local text = SQOL_TooltipTarget_SafeGetText(tooltipTarget.unit)
+    if text == tooltipTarget.text then return end
+    tooltipTarget.text = text
+
+    if tooltipTarget.line then
+        local fontString = _G["GameTooltipTextLeft" .. tooltipTarget.line]
+        if not fontString then return end
+        fontString:SetText(SQOL_TOOLTIP_TARGET_LABEL .. (text or SQOL_TOOLTIP_TARGET_NONE))
+    elseif text then
+        tooltip:AddLine(SQOL_TOOLTIP_TARGET_LABEL .. text)
+        tooltipTarget.line = tooltip:NumLines()
+    end
+    -- Resize for the new text.
+    tooltip:Show()
+end
+
+function SQOL.TooltipTarget_Init()
+    if SQOL._tooltipTargetHooked then return end
+    if not (TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall
+        and Enum and Enum.TooltipDataType and GameTooltip and GameTooltip.HookScript) then
+        return
+    end
+    SQOL._tooltipTargetHooked = true
+
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, SQOL_TooltipTarget_OnUnitTooltip)
+    GameTooltip:HookScript("OnUpdate", SQOL_TooltipTarget_OnUpdate)
+    GameTooltip:HookScript("OnTooltipCleared", SQOL_TooltipTarget_Reset)
+    GameTooltip:HookScript("OnHide", SQOL_TooltipTarget_Reset)
+end
+
+SQOL.TooltipTarget_Init()
+

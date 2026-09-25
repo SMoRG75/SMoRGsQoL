@@ -6,6 +6,7 @@
 
 - WoW Forever support: the TOC now lists interface `16001` alongside Retail `120100`.
 - **Color quest progress** now also colors the current count of each objective in the objective tracker (for example, the `1` in `1/5 Boar Pelt`), for quests, campaign quests, world quests and bonus objectives. Finished objectives keep a green count while Blizzard grays them out. The rest of the line keeps Blizzard's color, and turning the option off restores the plain text.
+- Added optional **Show target in unit tooltips** (`/sqol tooltiptarget` or `/sqol tt`): a `Target:` line in unit tooltips showing who the unit is targeting, class-colored for players, reaction-colored for NPCs and a red `You` when it is you. The line updates while you hover. Disabled by default; skipped when the client hides the unit's data (secret values).
 
 ### Changed
 

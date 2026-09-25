@@ -394,6 +394,8 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL lfgtest|r     |cffcccccc- Preview the LFG queue pop timer|r")
     print("|cff00ff00/SQOL partylevel|r  |cffcccccc- Toggle party member level display|r")
     print("|cff00ff00/SQOL pl|r          |cffcccccc- Shorthand for partylevel|r")
+    print("|cff00ff00/SQOL tooltiptarget|r |cffcccccc- Toggle target line in unit tooltips|r")
+    print("|cff00ff00/SQOL tt|r          |cffcccccc- Shorthand for tooltiptarget|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
@@ -405,7 +407,9 @@ local function SQOL_Help()
     local rcState = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local lfgState = SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local plState = SQOL.DB.ShowPartyLevel and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    local ttState = SQOL.DB.ShowTooltipTarget and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState .. "  |cff33ff99ReadyCheckTimer:|r " .. rcState .. "  |cff33ff99LFGQueuePopTimer:|r " .. lfgState .. "  |cff33ff99PartyLevel:|r " .. plState)
+    print("|cff33ff99TooltipTarget:|r " .. ttState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
@@ -629,6 +633,9 @@ SlashCmdList["SQOL"] = function(msg)
 
     elseif msg == "partylevel" or msg == "pl" then
         toggle("ShowPartyLevel", "Party member level display is")
+
+    elseif msg == "tooltiptarget" or msg == "tt" then
+        toggle("ShowTooltipTarget", "Tooltip target line is")
 
     elseif msg == "lfgtest" then
         SQOL_LFGProposal_Test()
