@@ -215,6 +215,21 @@ local function SQOL_GetPlayerHealthBarFrame(playerFrame)
     return fallback
 end
 
+local function SQOL_GetPlayerManaBarFrame(playerFrame)
+    if not playerFrame then return nil end
+
+    local globalMana = rawget(_G, "PlayerFrameManaBar")
+    if globalMana then return globalMana end
+
+    local content = rawget(playerFrame, "PlayerFrameContent")
+    local main = content and rawget(content, "PlayerFrameContentMain")
+    local manaBarArea = main and rawget(main, "ManaBarArea")
+    local mainMana = manaBarArea and rawget(manaBarArea, "ManaBar")
+    if mainMana then return mainMana end
+
+    return rawget(playerFrame, "manabar") or rawget(playerFrame, "ManaBar")
+end
+
 function SQOL.UpdatePlayerFrameIlvlAnchor()
     if not SQOL.iLvlHolder or not SQOL.iLvlText then
         return false
@@ -247,7 +262,17 @@ function SQOL.UpdatePlayerFrameIlvlAnchor()
         or rawget(playerFrame, "PlayerFrameName")
         or (playerFrame and playerFrame.name)
 
-    if levelText and levelText.GetCenter then
+    -- WoW Forever puts the level in a badge at the bottom-left of the portrait, so
+    -- anchoring next to the level text pushes the line outside the frame.
+    -- Place it under the health/mana bars instead, right-aligned with them.
+    local foreverBar = SQOL.IsForever
+        and (SQOL_GetPlayerManaBarFrame(playerFrame) or SQOL_GetPlayerHealthBarFrame(playerFrame))
+
+    if foreverBar and foreverBar.GetCenter then
+        SQOL.iLvlHolder:SetSize(240, 14)
+        SQOL.iLvlText:SetWidth(240)
+        SQOL.iLvlHolder:SetPoint("TOPRIGHT", foreverBar, "BOTTOMRIGHT", 0, -2)
+    elseif levelText and levelText.GetCenter then
         -- Build to the left: iLvl + speed will be right-justified and won't get covered by the level badge.
         -- Use RIGHT/LEFT anchoring (not TOP/BOTTOM) to stay on the same line as the level text.
         local padding = 6
