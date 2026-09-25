@@ -5,9 +5,12 @@
 ### Added
 
 - WoW Forever support: the TOC now lists interface `16001` alongside Retail `120100`.
+- **Color quest progress** now also colors the current count of each objective in the objective tracker (for example, the `1` in `1/5 Boar Pelt`), for quests, campaign quests, world quests and bonus objectives. Finished objectives keep a green count while Blizzard grays them out. The rest of the line keeps Blizzard's color, and turning the option off restores the plain text.
 
 ### Changed
 
+- The PlayerFrame item level/speed line now sits just above the name and level on Retail, so it no longer overlaps long names, druid mana or class resources. On WoW Forever it sits under the health/mana bars.
+- Nameplate objective counts now sit just above the unit name when Blizzard's nameplate style shows the name above the health bar, instead of overlapping it. With the name inside the health bar, the position is unchanged.
 - **Hide completed achievements** is hidden from the options and shown as `N/A` in `/sqol` output on clients without `Blizzard_AchievementUI` (such as WoW Forever, which uses the Legacy system instead of achievements). `/sqol ha` explains that the option is unavailable there.
 
 ## [1.0.24] - 2026-09-06

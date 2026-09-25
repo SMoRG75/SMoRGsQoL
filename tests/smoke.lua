@@ -145,10 +145,63 @@ assert(questBlock.usedLines[3].Text.text == 'Speak to Marshal')
 assert(questBlock.usedLines.QuestComplete.Text.text == '0/1 extra line')
 sqol.RefreshQuestTrackerColors()
 assert(questBlock.usedLines[1].Text.text == '|cffff66001|r/5 Boar Pelt', 'Coloring must be idempotent')
+-- World quests use BonusObjectiveTrackerMixin:SetUpQuestBlock instead.
+local wqBlock = { usedLines = { [1] = trackerLine('4/5 Mana Spores gathered'), TimeLeft = trackerLine('1/2 h') } }
+WorldQuestObjectiveTracker = { usedBlocks = { WQBlock = { [7] = wqBlock } } }
+function WorldQuestObjectiveTracker:SetUpQuestBlock(block) end
+sqol.HookQuestTrackerColors()
+WorldQuestObjectiveTracker:SetUpQuestBlock(wqBlock)
+assert(wqBlock.usedLines[1].Text.text == '|cff66ff004|r/5 Mana Spores gathered')
+assert(wqBlock.usedLines.TimeLeft.Text.text == '1/2 h')
 sqol.SetOption('ColorProgress', false)
 assert(questBlock.usedLines[1].Text.text == '1/5 Boar Pelt' and questBlock.usedLines[2].Text.text == '5/5 Wolf Fang')
-QuestObjectiveTracker = nil
+assert(wqBlock.usedLines[1].Text.text == '4/5 Mana Spores gathered')
+QuestObjectiveTracker, WorldQuestObjectiveTracker = nil, nil
 hooksecurefunc = oldHook
+
+-- Nameplate counts: above the name when Blizzard's style puts it above the bar,
+-- otherwise above the health bar (Retail's name-inside-bar style).
+-- Nameplate regions are restricted in-game, so the mock name has no anchor data.
+NamePlateConstants = { NAME_ANCHOR_STYLES = { InsideHealthBar = 1, CenteredAboveHealthBar = 2, AboveHealthBar = 3 } }
+NamePlateSetupOptions = {}
+local function nameplateWith(style)
+    NamePlateSetupOptions.unitNameAnchorStyle = style
+    local name = widget()
+    function name:GetStringWidth() return 50 end
+    local unitFrame = widget()
+    unitFrame.name, unitFrame.HealthBarsContainer = name, widget()
+    return { UnitFrame = unitFrame }
+end
+local function objectiveAnchor(nameplate)
+    C_NamePlate = { GetNamePlateForUnit = function() return nameplate end }
+    function UnitExists() return true end
+    sqol.DB.ShowNameplateObjectives = true
+    sqol.NameplateObjectives_UpdateUnit('nameplate1')
+    local text = nameplate.SQOLObjectiveText
+    assert(text, 'Nameplate objective text must be created')
+    return text.anchor
+end
+local oldWidget = widget
+widget = function()
+    local w = oldWidget()
+    function w:SetPoint(point, relativeTo, relativePoint, x, y) self.anchor = { point, relativeTo, relativePoint, x, y } end
+    return w
+end
+for _, style in ipairs({ 2, 3 }) do
+    local above = nameplateWith(style)
+    local anchor = objectiveAnchor(above)
+    assert(anchor[1] == 'BOTTOM' and anchor[2] == above.UnitFrame.name and anchor[3] == 'TOP' and anchor[5] == 3)
+end
+local inside = nameplateWith(1)
+local anchor = objectiveAnchor(inside)
+assert(anchor[2] == inside.UnitFrame.HealthBarsContainer and anchor[5] == 15)
+local unknown = nameplateWith(nil)
+NamePlateSetupOptions = nil
+anchor = objectiveAnchor(unknown)
+assert(anchor[2] == unknown.UnitFrame.HealthBarsContainer and anchor[5] == 15, 'Unknown style keeps the old anchor')
+widget, C_NamePlate, UnitExists, NamePlateConstants = oldWidget, nil, nil, nil
+sqol.DB.ShowNameplateObjectives = false
+sqol._npUnits.nameplate1 = nil
 
 local scheduled = pending
 pending = {}

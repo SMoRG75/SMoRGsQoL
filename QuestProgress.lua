@@ -186,10 +186,16 @@ function SQOL.GetQuestLogSnapshot()
     return snapshot
 end
 
--- Quest and campaign quest trackers share QuestObjectiveTrackerMixin, whose
--- DoQuestObjectives() writes each objective line (keyed by objective index),
--- including finished lines that Blizzard grays out before fading them.
-local SQOL_QUEST_TRACKER_NAMES = { "QuestObjectiveTracker", "CampaignQuestObjectiveTracker" }
+-- Each tracker module writes its objective lines (keyed by objective index),
+-- including finished lines that Blizzard grays out before fading them:
+-- quest and campaign trackers in DoQuestObjectives(), world quest and bonus
+-- objective trackers (BonusObjectiveTrackerMixin) in SetUpQuestBlock().
+local SQOL_QUEST_TRACKERS = {
+    { name = "QuestObjectiveTracker",         method = "DoQuestObjectives" },
+    { name = "CampaignQuestObjectiveTracker", method = "DoQuestObjectives" },
+    { name = "WorldQuestObjectiveTracker",    method = "SetUpQuestBlock" },
+    { name = "BonusObjectiveTracker",         method = "SetUpQuestBlock" },
+}
 
 -- Color only the current count in "1/5 Boar Pelt", leaving the rest of the
 -- line in Blizzard's own color. Lines we already colored contain "|c" and are
@@ -239,19 +245,19 @@ local function SQOL_ColorTrackerBlock(block, lineFunc)
 end
 
 local function SQOL_ForEachQuestTracker(func)
-    for _, name in ipairs(SQOL_QUEST_TRACKER_NAMES) do
-        local tracker = rawget(_G, name)
+    for _, info in ipairs(SQOL_QUEST_TRACKERS) do
+        local tracker = rawget(_G, info.name)
         if type(tracker) == "table" then
-            func(tracker)
+            func(tracker, info.method)
         end
     end
 end
 
 function SQOL.HookQuestTrackerColors()
-    SQOL_ForEachQuestTracker(function(tracker)
-        if tracker._sqolColorHooked or type(tracker.DoQuestObjectives) ~= "function" then return end
+    SQOL_ForEachQuestTracker(function(tracker, method)
+        if tracker._sqolColorHooked or type(tracker[method]) ~= "function" then return end
         tracker._sqolColorHooked = true
-        hooksecurefunc(tracker, "DoQuestObjectives", function(_, block)
+        hooksecurefunc(tracker, method, function(_, block)
             if SQOL.DB and SQOL.DB.ColorProgress then
                 SQOL_ColorTrackerBlock(block)
             end
@@ -1176,6 +1182,27 @@ local function SQOL_NameplateObjectives_GetUnitToken(nameplate)
     return unit
 end
 
+local function SQOL_NameplateObjectives_GetNameText(unitFrame)
+    if not unitFrame then
+        return nil
+    end
+
+    local nameText = rawget(unitFrame, "name")
+        or rawget(unitFrame, "Name")
+        or rawget(unitFrame, "nameText")
+        or rawget(unitFrame, "NameText")
+        or rawget(unitFrame, "nameplateName")
+        or rawget(unitFrame, "NamePlateName")
+        or rawget(unitFrame, "UnitName")
+        or rawget(unitFrame, "NameLabel")
+        or rawget(unitFrame, "nameLabel")
+
+    if nameText and nameText.GetStringWidth then
+        return nameText
+    end
+    return nil
+end
+
 local function SQOL_NameplateObjectives_GetAnchor(nameplate)
     if not nameplate then
         return nil
@@ -1193,21 +1220,41 @@ local function SQOL_NameplateObjectives_GetAnchor(nameplate)
         return healthBar
     end
 
-    local nameText = rawget(unitFrame, "name")
-        or rawget(unitFrame, "Name")
-        or rawget(unitFrame, "nameText")
-        or rawget(unitFrame, "NameText")
-        or rawget(unitFrame, "nameplateName")
-        or rawget(unitFrame, "NamePlateName")
-        or rawget(unitFrame, "UnitName")
-        or rawget(unitFrame, "NameLabel")
-        or rawget(unitFrame, "nameLabel")
-
-    if nameText and nameText.GetStringWidth then
+    local nameText = SQOL_NameplateObjectives_GetNameText(unitFrame)
+    if nameText then
         return nameText
     end
 
     return unitFrame
+end
+
+-- Nameplate regions are restricted in 12.x (they can't be measured and report
+-- no anchor points), so read Blizzard's own nameplate style instead: the name
+-- sits above the health bar unless the style puts it inside the bar.
+local function SQOL_NameplateObjectives_IsNameAboveBar()
+    local options = rawget(_G, "NamePlateSetupOptions")
+    local constants = rawget(_G, "NamePlateConstants")
+    local styles = type(constants) == "table" and constants.NAME_ANCHOR_STYLES
+    local style = type(options) == "table" and options.unitNameAnchorStyle
+    if type(styles) ~= "table" or style == nil then
+        return false
+    end
+    return style == styles.CenteredAboveHealthBar or style == styles.AboveHealthBar
+end
+
+-- Put the count 3 px above the name when the name is above the bar; otherwise
+-- (name inside the bar, or unknown style) keep it above the health bar as before.
+local function SQOL_NameplateObjectives_AnchorText(text, nameplate, unitFrame)
+    text:ClearAllPoints()
+    local nameText = SQOL_NameplateObjectives_GetNameText(unitFrame)
+    if nameText and SQOL_NameplateObjectives_IsNameAboveBar()
+        and pcall(text.SetPoint, text, "BOTTOM", nameText, "TOP", 0, 3) then
+        return
+    end
+
+    text:ClearAllPoints()
+    local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
+    text:SetPoint("BOTTOM", anchor, "TOP", 0, 15)
 end
 
 local function SQOL_NameplateObjectives_GetText(unit)
@@ -1230,22 +1277,18 @@ local function SQOL_NameplateObjectives_GetText(unit)
     if not text then
 ---@diagnostic disable-next-line: undefined-field
         local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
-        local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
 
         text = unitFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        text:SetPoint("BOTTOM", anchor, "TOP", 0, 15)
         text:SetJustifyH("CENTER")
         text:SetWordWrap(false)
         if text.SetMaxLines then text:SetMaxLines(1) end
 ---@diagnostic disable-next-line: inject-field
         nameplate.SQOLObjectiveText = text
-    else
----@diagnostic disable-next-line: undefined-field
-        local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
-        local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
-        text:ClearAllPoints()
-        text:SetPoint("BOTTOM", anchor, "TOP", 0, 15)
     end
+
+    -- Re-anchor on every update: Blizzard moves the name when the nameplate style changes.
+---@diagnostic disable-next-line: undefined-field
+    SQOL_NameplateObjectives_AnchorText(text, nameplate, nameplate.UnitFrame or nameplate.unitFrame or nameplate)
 
     return text, nameplate
 end

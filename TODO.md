@@ -21,7 +21,7 @@
 - [ ] **5. Vis target i HUD-tooltip**
   - Tilføj en linje med unit'ens target ("Target: <navn>") i tooltip, klassefarvet, og "You" hvis det er dig.
 
-- [ ] **6. Centrér quest-tallene over nameplates og flyt dem lidt højere op**
+- [x] **6. Centrér quest-tallene over nameplates og flyt dem lidt højere op**
   - "2/14" står i dag til venstre for midten og overlapper navnet (fx "Frostmane Troll Whelp").
   - Placeres i `SQOL_NameplateObjectives_GetText` (`QuestProgress.lua:1236`): `SetPoint("BOTTOM", anchor, "TOP", 0, 15)` mod health-bar-ankeret fra `SQOL_NameplateObjectives_GetAnchor`.
   - Centrér over hele nameplaten/health-baren, og læg teksten over navnet i stedet for oven i det.
