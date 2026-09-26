@@ -3,18 +3,27 @@
 A small collection of **individually toggleable** quality-of-life tweaks for World of Warcraft (Retail and WoW Forever).
 
 Everything is toggleable:
+- 🪟 via the options window (LibDataBroker displays such as Bazooka, the addon compartment menu, the optional minimap button or `/sqol config`),
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.0.24
+## What's new in 1.1.0
 
-- **Floating reputation gains** — simple green `+25 Rep — Valarjar` text near the screen center, floating upward and fading out. Enable with `/sqol reptext` (`rt`) or **Floating reputation gains** in Settings. Disabled by default, independent of auto-watch; shows gains from kills and quests using English reputation messages. Preview with `/sqol reptexttest`, even while disabled.
-- 🎨 **XP/reputation number colors** — the current number changes from red through yellow to green, with outlined text. Labels and maximum values stay white, and the bars keep their existing colors. Enable it with `/sqol barcolor` (`bc`); it is disabled by default and independent of quest colors.
-- 🧾 **Separate item level and speed settings** — show either value alone or both on your PlayerFrame. Use `/sqol ilvl` for item level and `/sqol speed` for movement speed. `/sqol stats` now toggles only item level.
-- ⚙️ **Your previous display is preserved** — the old combined item level/speed preference carries over to both new settings, which you can then change independently.
+- 🪟 **Options window** — all settings in one movable window, grouped into Quests, Character, Reputation & XP, Group, Interface and Advanced. Open it from Bazooka/Titan Panel and other LibDataBroker displays, the addon compartment menu, the optional minimap button (`/sqol minimap`) or `/sqol config`. Right-click the launcher for Blizzard's Settings page, which now uses the same sections.
+- 🎨 **Colored objective counts in the quest tracker** — with **Color quest progress** on, the current count (the `1` in `1/5 Boar Pelt`) is colored red → yellow → green for quests, campaign quests, world quests and bonus objectives, and finished objectives keep a green count.
+- 🎯 **Target in unit tooltips** — a `Target:` line showing who the unit is targeting, class- or reaction-colored, with a red `You` when it is you. `/sqol tooltiptarget` (`tt`).
+- 🏹 **Out-of-range icon** — a pulsing icon next to the target portrait when none of the offensive abilities on your bars can reach your target. `/sqol range` (`rng`).
+- 🧾 **Better placement** — the item level/speed line sits above your name on Retail (clear of long names, druid mana and class resources), and nameplate objective counts sit above the unit name instead of overlapping it.
+- 🌍 **WoW Forever support** — the addon loads in WoW Forever, with the item level/speed line placed for its player frame.
+
+After updating, **restart the game** (a `/reload` is not enough), because this release adds new files. See the [changelog](CHANGELOG.md) for the full release history.
+
+### 1.0.24
+
+- **Floating reputation gains** — simple green `+25 Rep — Valarjar` text near the screen center, floating upward and fading out. Enable with `/sqol reptext` (`rt`). Preview with `/sqol reptexttest`.
+- 🎨 **XP/reputation number colors** — the current number changes from red through yellow to green, with outlined text. Enable it with `/sqol barcolor` (`bc`).
+- 🧾 **Separate item level and speed settings** — show either value alone or both on your PlayerFrame (`/sqol ilvl`, `/sqol speed`). The old combined preference carries over.
 - 🛠️ **Modular code structure** — feature code is now organized into dedicated files for easier maintenance.
-
-See the [changelog](CHANGELOG.md) for the full release history.
 
 ### 1.0.23
 
@@ -146,12 +155,12 @@ Type `/sqol` to see current status, or use:
 Settings are stored per account in:
 - 💾 `SQOL_DB`
 
-## Updating to 1.0.24
+## Updating to 1.1.0
 
-Install the complete addon folder, including all Lua files listed in
-`SMoRGsQoL.toc`. This release introduces additional modules, so replacing only
-`SMoRGsQoL.lua` is not sufficient. Keep your saved variables; existing settings
-are preserved and the old combined item level/speed setting migrates automatically.
+Install the complete addon folder, including the new `Libs` folder and all Lua
+files listed in `SMoRGsQoL.toc`, then restart the game (a `/reload` does not load
+new files). Keep your saved variables; existing settings are preserved, and the
+new features (tooltip target, out-of-range icon, minimap button) start disabled.
 
 ## Code structure
 

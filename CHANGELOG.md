@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.1.0] - 2026-09-26
 
 ### Added
 
@@ -17,6 +17,12 @@
 - The PlayerFrame item level/speed line now sits just above the name and level on Retail, so it no longer overlaps long names, druid mana or class resources. On WoW Forever it sits under the health/mana bars.
 - Nameplate objective counts now sit just above the unit name when Blizzard's nameplate style shows the name above the health bar, instead of overlapping it. With the name inside the health bar, the position is unchanged.
 - **Hide completed achievements** is hidden from the options and shown as `N/A` in `/sqol` output on clients without `Blizzard_AchievementUI` (such as WoW Forever, which uses the Legacy system instead of achievements). `/sqol ha` explains that the option is unavailable there.
+
+### Developer notes
+
+- Embeds LibStub, CallbackHandler-1.0, LibDataBroker-1.1 and LibDBIcon-1.0 under `Libs/`. The TOC loads new files, so a full client restart is needed after updating (a `/reload` is not enough).
+- All options are defined once in `SQOL.OptionSections` (`Options.lua`); the Settings page and the options window are both built from it.
+- The smoke test now also covers tracker count colors, nameplate count anchoring, the tooltip target line, the launcher, minimap button, options window and the out-of-range icon.
 
 ## [1.0.24] - 2026-09-06
 
