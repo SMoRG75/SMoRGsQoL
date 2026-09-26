@@ -36,7 +36,7 @@ local function widget()
         'SetFading', 'SetTimeVisible', 'SetFadeDuration', 'SetMaxLines',
         'SetInsertMode', 'SetSpacing', 'AddMessage', 'SetToplevel', 'SetClampedToScreen',
         'SetMovable', 'RegisterForDrag', 'StartMoving', 'StopMovingOrSizing', 'SetHitRectInsets',
-        'SetFontObject', 'SetColorTexture', 'SetHeight', 'SetOwner', 'SetTexCoord' }) do
+        'SetFontObject', 'SetColorTexture', 'SetHeight', 'SetOwner', 'SetTexCoord', 'SetShadowOffset' }) do
         w[method] = function() end
     end
     return w
@@ -324,7 +324,8 @@ SlashCmdList.SQOL('tt')
 UnitExists, UnitIsUnit, UnitName, UnitIsPlayer, UnitClass, UnitReaction = nil, nil, nil, nil, nil, nil
 RAID_CLASS_COLORS, FACTION_BAR_COLORS = nil, nil
 
--- Out-of-range icon: shown only when some action is range-checked and none reach.
+-- Range icon and distance: the icon shows only when some offensive action is
+-- range-checked and none reach; the distance comes from the actions' max ranges.
 local target = { exists = true, attackable = true, dead = false }
 local actionRange = {}         -- slot -> true/false/nil (nil: no range check)
 function UnitExists(unit) return unit == 'target' and target.exists end
@@ -340,42 +341,92 @@ function GetActionInfo(slot)
     if slot == 7 then return 'macro', 700, 'spell' end
     return 'spell', slot * 100
 end
-C_Spell = { IsSpellHarmful = function(spellID) return not selfSpells[spellID] end }
+-- Max ranges: slot 1 is melee (0, counted as 5 yd), the slot 7 macro reaches 40 yd.
+local maxRanges = { [100] = 0, [700] = 40 }
+C_Spell = {
+    IsSpellHarmful = function(spellID) return not selfSpells[spellID] end,
+    GetSpellInfo = function(spellID) return { maxRange = maxRanges[spellID] or 0 } end,
+}
+local cvars = { SoftTargetIconEnemy = '1' }
+C_CVar = { GetCVar = function(name) return cvars[name] end, SetCVar = function(name, value) cvars[name] = value end }
 local meleeButton, healButton, playDeadButton = widget(), widget(), widget()
 meleeButton.action, healButton.action, playDeadButton.action = 1, 3, 65
 meleeButton:Show(); healButton:Show(); playDeadButton:Show()
 ActionBarButtonEventsFrame = { frames = { meleeButton, healButton, playDeadButton } }
 TargetFrame = widget()
 TargetFrame:Show()
-local function rangeIconShown()
+-- Returns whether the icon shows and the distance text (nil when nothing is shown).
+local function rangeDisplay()
     fire('PLAYER_TARGET_CHANGED')
-    return SQOL_RangeIndicator ~= nil and SQOL_RangeIndicator:IsShown()
+    local frame = SQOL_RangeIndicator
+    if not frame or not frame:IsShown() then return false, nil end
+    return frame.Icon:IsShown(), frame.Text.text
 end
 actionRange[1] = false
-assert(not rangeIconShown(), 'Off by default')
+local icon, distance = rangeDisplay()
+assert(not icon and not distance, 'Off by default')
+assert(cvars.SoftTargetIconEnemy == '1', 'The sword icon is untouched while off')
 SlashCmdList.SQOL('range')
-assert(rangeIconShown(), 'Melee out of range; the heal has no range check and Play Dead is not offensive')
+assert(cvars.SoftTargetIconEnemy == '0' and sqol.DB.RangeHidSoftTargetIcon, 'Enabling hides Blizzard\'s sword icon')
+icon, distance = rangeDisplay()
+assert(icon and distance == '> 5 yd', 'Melee out of range; the heal has no range check and Play Dead is not offensive')
 actionRange[1] = true
-assert(not rangeIconShown(), 'An action in range hides the icon')
+icon, distance = rangeDisplay()
+assert(not icon and distance == '< 5 yd', 'In melee range: distance only')
 actionRange[1] = nil
-assert(not rangeIconShown(), 'Nothing range-checked, nothing to show')
+icon, distance = rangeDisplay()
+assert(not icon and not distance, 'Nothing range-checked, nothing to show')
 actionRange[1] = false
 target.dead = true
-assert(not rangeIconShown(), 'Dead targets are ignored')
+icon, distance = rangeDisplay()
+assert(not icon and not distance, 'Dead targets are ignored')
 target.dead = false
 meleeButton:Hide(); healButton:Hide(); playDeadButton:Hide()
 actionRange[7] = false
-assert(rangeIconShown(), 'Falls back to all action slots without visible Blizzard buttons')
+icon, distance = rangeDisplay()
+assert(icon and distance == '> 40 yd', 'Falls back to all action slots without visible Blizzard buttons')
 actionRange[7] = true
-assert(not rangeIconShown(), 'Fallback finds the in-range slot')
+icon, distance = rangeDisplay()
+assert(not icon and distance == '5-40 yd', 'Out of melee but within 40 yd')
+-- Placement: where Blizzard's sword icon sits on the target's nameplate, above
+-- our quest count when it is shown there, else by the target frame.
+local softTarget = widget()
+local rangePlate = { UnitFrame = { SoftTargetFrame = softTarget } }
+C_NamePlate = { GetNamePlateForUnit = function(unit) return unit == 'target' and rangePlate or nil end }
+local function rangeAnchor()
+    function SQOL_RangeIndicator:SetPoint(point, relativeTo) self.pointTo = { point, relativeTo } end
+    rangeDisplay()
+    return SQOL_RangeIndicator.pointTo
+end
+local anchor = rangeAnchor()
+assert(anchor[1] == 'CENTER' and anchor[2] == softTarget, 'On the sword icon spot')
+local questCount = widget()
+questCount:Show()
+rangePlate.SQOLObjectiveText = questCount
+anchor = rangeAnchor()
+assert(anchor[1] == 'BOTTOM' and anchor[2] == questCount, 'Above the quest count')
+C_NamePlate = nil
+anchor = rangeAnchor()
+assert(anchor[2] == TargetFrame, 'Target frame without a nameplate')
+TargetFrame:Hide()
+icon, distance = rangeDisplay()
+assert(not icon and not distance, 'Nowhere to show it')
+TargetFrame:Show()
 issecretvalue = function() return true end
-assert(not rangeIconShown(), 'Secret values never show the icon')
+icon, distance = rangeDisplay()
+assert(not icon and not distance, 'Secret values never show anything')
 issecretvalue = nil
 SlashCmdList.SQOL('range')
 actionRange[7] = false
-assert(not rangeIconShown(), 'Turning the option off hides the icon')
+icon, distance = rangeDisplay()
+assert(not icon and not distance, 'Turning the option off hides everything')
+assert(cvars.SoftTargetIconEnemy == '1' and not sqol.DB.RangeHidSoftTargetIcon, 'Disabling restores the sword icon')
+cvars.SoftTargetIconEnemy = '0'
+SlashCmdList.SQOL('range')
+SlashCmdList.SQOL('range')
+assert(cvars.SoftTargetIconEnemy == '0', 'A sword icon the user turned off stays off')
 UnitExists, UnitCanAttack, UnitIsDeadOrGhost, HasAction, C_ActionBar = nil, nil, nil, nil, nil
-GetActionInfo, C_Spell = nil, nil
+GetActionInfo, C_Spell, C_CVar = nil, nil, nil
 ActionBarButtonEventsFrame, TargetFrame = nil, nil
 
 local scheduled = pending

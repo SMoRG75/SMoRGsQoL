@@ -12,7 +12,7 @@ Everything is toggleable:
 - 🪟 **Options window** — all settings in one movable window, grouped into Quests, Character, Reputation & XP, Group, Interface and Advanced. Open it from Bazooka/Titan Panel and other LibDataBroker displays, the addon compartment menu, the optional minimap button (`/sqol minimap`) or `/sqol config`. Right-click the launcher for Blizzard's Settings page, which now uses the same sections.
 - 🎨 **Colored objective counts in the quest tracker** — with **Color quest progress** on, the current count (the `1` in `1/5 Boar Pelt`) is colored red → yellow → green for quests, campaign quests, world quests and bonus objectives, and finished objectives keep a green count.
 - 🎯 **Target in unit tooltips** — a `Target:` line showing who the unit is targeting, class- or reaction-colored, with a red `You` when it is you. `/sqol tooltiptarget` (`tt`).
-- 🏹 **Out-of-range icon** — a pulsing icon next to the target portrait when none of the offensive abilities on your bars can reach your target. `/sqol range` (`rng`).
+- 🏹 **Range icon and distance** — on your target's nameplate, where Blizzard's soft target sword icon sits, the distance to your target in yards (e.g. `8-30 yd`), and a pulsing icon when none of the offensive abilities on your bars can reach it. `/sqol range` (`rng`).
 - 🧾 **Better placement** — the item level/speed line sits above your name on Retail (clear of long names, druid mana and class resources), and nameplate objective counts sit above the unit name instead of overlapping it.
 - 🌍 **WoW Forever support** — the addon loads in WoW Forever, with the item level/speed line placed for its player frame.
 
@@ -91,8 +91,10 @@ After updating, **restart the game** (a `/reload` is not enough), because this r
 - 🎯 **Target in unit tooltips**
   - Adds a `Target:` line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red `You` when it is you. Updates live while you hover.
   - Toggle with `/sqol tooltiptarget` (`tt`). Disabled by default. Skipped when the client hides the unit's data (secret values in 12.x).
-- 🏹 **Out-of-range icon**
-  - Shows a pulsing icon next to the target portrait when none of the offensive abilities on your action bars can reach your target. Uses the same range check that tints action buttons red, so it follows druid forms and bonus bars, and needs no class-specific spell lists.
+- 🏹 **Range icon and distance**
+  - Shows the distance to an attackable target on its nameplate (where Blizzard's soft target sword icon sits, just above the quest objective count when one is shown), or next to the target frame portrait when the target has no nameplate, as a range in yards (`< 5 yd`, `8-30 yd`, `> 40 yd`). The client has no exact distance for enemies, so the range comes from the abilities on your action bars that do and don't reach.
+  - Adds a pulsing icon when none of your offensive abilities can reach the target. Uses the same range check that tints action buttons red, so it follows druid forms and bonus bars, and needs no class-specific spell lists.
+  - While enabled, Blizzard's soft target sword icon over enemy nameplates (`SoftTargetIconEnemy`) is turned off so the two aren't confused; it is turned back on when you disable the feature.
   - Toggle with `/sqol range` (`rng`). Disabled by default.
 - 🖋️ **Custom damage text font**
   - Replaces floating combat text damage numbers with a custom font.
@@ -160,7 +162,7 @@ Settings are stored per account in:
 Install the complete addon folder, including the new `Libs` folder and all Lua
 files listed in `SMoRGsQoL.toc`, then restart the game (a `/reload` does not load
 new files). Keep your saved variables; existing settings are preserved, and the
-new features (tooltip target, out-of-range icon, minimap button) start disabled.
+new features (tooltip target, range icon and distance, minimap button) start disabled.
 
 ## Code structure
 
@@ -174,7 +176,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
 | `PlayerStats.lua` | Independent item level and movement speed displays |
 | `PartyLevels.lua` | Levels on default and raid-style party frames |
-| `RangeIndicator.lua` | Out-of-range icon on the target frame |
+| `RangeIndicator.lua` | Range icon and distance for the target |
 | `Reputation.lua` | Reputation watching, faction lookup and header preservation |
 | `Countdowns.lua` | Shared countdown implementation, ready checks and queue pops |
 | `SMoRGsQoL.lua` | Saved settings/migration, option side effects, commands, events, auto-tracking and quest completion notifications |

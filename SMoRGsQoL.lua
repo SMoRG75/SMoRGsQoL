@@ -398,7 +398,7 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL pl|r          |cffcccccc- Shorthand for partylevel|r")
     print("|cff00ff00/SQOL tooltiptarget|r |cffcccccc- Toggle target line in unit tooltips|r")
     print("|cff00ff00/SQOL tt|r          |cffcccccc- Shorthand for tooltiptarget|r")
-    print("|cff00ff00/SQOL range|r       |cffcccccc- Toggle out-of-range icon on the target frame|r")
+    print("|cff00ff00/SQOL range|r       |cffcccccc- Toggle range icon and distance for your target|r")
     print("|cff00ff00/SQOL rng|r         |cffcccccc- Shorthand for range|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
@@ -552,7 +552,7 @@ function SQOL.ApplyOption(key)
         SQOL.UpdateMinimapButton()
 
     elseif key == "ShowRangeIndicator" then
-        SQOL.RangeIndicator_Refresh()
+        SQOL.RangeIndicator_OnOptionChanged()
 
     end
 
@@ -653,7 +653,7 @@ SlashCmdList["SQOL"] = function(msg)
         toggle("ShowTooltipTarget", "Tooltip target line is")
 
     elseif msg == "range" or msg == "rng" then
-        toggle("ShowRangeIndicator", "Out-of-range icon is")
+        toggle("ShowRangeIndicator", "Range icon and distance are")
 
     elseif msg == "lfgtest" then
         SQOL_LFGProposal_Test()
@@ -669,6 +669,10 @@ SlashCmdList["SQOL"] = function(msg)
         end
 
     elseif msg == "reset" then
+        -- Turn the range icon off first so it restores Blizzard's soft target icon.
+        if SQOL.DB and SQOL.DB.ShowRangeIndicator then
+            SQOL.SetOption("ShowRangeIndicator", false)
+        end
         SQOL.Init(true)
         if SQOL.SyncAllSettingsObjects then
             SQOL.SyncAllSettingsObjects()

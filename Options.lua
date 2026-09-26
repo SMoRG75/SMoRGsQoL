@@ -71,8 +71,8 @@ SQOL.OptionSections = {
         options = {
             { key = "ShowTooltipTarget", label = "Show target in unit tooltips",
               tooltip = "Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover." },
-            { key = "ShowRangeIndicator", label = "Out-of-range icon on target frame",
-              tooltip = "Show a pulsing icon next to the target portrait when none of the offensive abilities on your action bars can reach your target. Uses the same range check that tints action buttons red, so it follows forms and bonus bars." },
+            { key = "ShowRangeIndicator", label = "Range icon and distance for your target",
+              tooltip = "On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this." },
             { key = "DamageTextFont", label = "Custom damage text font",
               tooltip = "Use the TrashHand damage text font for floating combat text." },
             { key = "CursorShakeHighlight", label = "Highlight cursor on shake",
