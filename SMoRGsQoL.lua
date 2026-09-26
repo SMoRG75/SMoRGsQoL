@@ -398,6 +398,8 @@ local function SQOL_Help()
     print("|cff00ff00/SQOL pl|r          |cffcccccc- Shorthand for partylevel|r")
     print("|cff00ff00/SQOL tooltiptarget|r |cffcccccc- Toggle target line in unit tooltips|r")
     print("|cff00ff00/SQOL tt|r          |cffcccccc- Shorthand for tooltiptarget|r")
+    print("|cff00ff00/SQOL range|r       |cffcccccc- Toggle out-of-range icon on the target frame|r")
+    print("|cff00ff00/SQOL rng|r         |cffcccccc- Shorthand for range|r")
     print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
     print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
     print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
@@ -411,7 +413,8 @@ local function SQOL_Help()
     local plState = SQOL.DB.ShowPartyLevel and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     local ttState = SQOL.DB.ShowTooltipTarget and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState .. "  |cff33ff99ReadyCheckTimer:|r " .. rcState .. "  |cff33ff99LFGQueuePopTimer:|r " .. lfgState .. "  |cff33ff99PartyLevel:|r " .. plState)
-    print("|cff33ff99TooltipTarget:|r " .. ttState)
+    local rangeState = SQOL.DB.ShowRangeIndicator and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    print("|cff33ff99TooltipTarget:|r " .. ttState .. "  |cff33ff99RangeIndicator:|r " .. rangeState)
     print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
@@ -548,6 +551,9 @@ function SQOL.ApplyOption(key)
     elseif key == "ShowMinimapButton" then
         SQOL.UpdateMinimapButton()
 
+    elseif key == "ShowRangeIndicator" then
+        SQOL.RangeIndicator_Refresh()
+
     end
 
     SQOL.SyncSettingObject(key)
@@ -645,6 +651,9 @@ SlashCmdList["SQOL"] = function(msg)
 
     elseif msg == "tooltiptarget" or msg == "tt" then
         toggle("ShowTooltipTarget", "Tooltip target line is")
+
+    elseif msg == "range" or msg == "rng" then
+        toggle("ShowRangeIndicator", "Out-of-range icon is")
 
     elseif msg == "lfgtest" then
         SQOL_LFGProposal_Test()

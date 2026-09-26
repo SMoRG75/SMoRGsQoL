@@ -10,10 +10,10 @@
   - Fælles option-liste (`SQOL.OptionSections` i `Options.lua`) bruges af både popup og Settings-side.
   - Skal virke både i Retail og Forever.
 
-- [ ] **3. Ikon når target er uden for rækkevidde**
+- [x] **3. Ikon når target er uden for rækkevidde**
   - Vis et ikon, når våben eller spell ikke kan nå den aktuelle NPC.
-  - Undersøg hvilke range-API'er der stadig må bruges i 12.x (`C_Spell.IsSpellInRange`, `IsItemInRange`, `CheckInteractDistance`) — nogle er begrænset i combat.
-  - Afgør: hvilken spell tjekkes (auto-attack/klassens standardspell eller valgfri?) og hvor ikonet placeres.
+  - `RangeIndicator.lua`: ikon til højre for target-portrættet, når ingen offensive evner på de synlige action bars rækker (`C_ActionBar.IsActionInRange`, ikke secret i 12.x).
+  - `IsItemInRange`/`CheckInteractDistance` er begrænset mod fjender i combat og bruges ikke.
 
 - [x] **4. Farv det første tal i quest-tracker-objectives**
   - Farv `cur` i `cur/total` med `SQOL.GetProgressColor` (`QuestProgress.lua:6`), så 1/5 bliver rødt og 5/5 grønt.

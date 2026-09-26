@@ -25,6 +25,7 @@ VisualTweaks.lua
 QuestProgress.lua
 PlayerStats.lua
 PartyLevels.lua
+RangeIndicator.lua
 Reputation.lua
 Countdowns.lua
 SMoRGsQoL.lua

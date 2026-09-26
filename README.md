@@ -82,6 +82,9 @@ See the [changelog](CHANGELOG.md) for the full release history.
 - 🎯 **Target in unit tooltips**
   - Adds a `Target:` line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red `You` when it is you. Updates live while you hover.
   - Toggle with `/sqol tooltiptarget` (`tt`). Disabled by default. Skipped when the client hides the unit's data (secret values in 12.x).
+- 🏹 **Out-of-range icon**
+  - Shows a pulsing icon next to the target portrait when none of the offensive abilities on your action bars can reach your target. Uses the same range check that tints action buttons red, so it follows druid forms and bonus bars, and needs no class-specific spell lists.
+  - Toggle with `/sqol range` (`rng`). Disabled by default.
 - 🖋️ **Custom damage text font**
   - Replaces floating combat text damage numbers with a custom font.
 - 🖱️ **Cursor shake highlight**
@@ -134,6 +137,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol lfgtest` — preview the queue pop countdown without a queue
 - `/sqol partylevel` (or `/sqol pl`)
 - `/sqol tooltiptarget` (or `/sqol tt`)
+- `/sqol range` (or `/sqol rng`)
 - `/sqol debugtrack` (or `/sqol dbg`)
 - `/sqol reset`
 
@@ -161,6 +165,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
 | `PlayerStats.lua` | Independent item level and movement speed displays |
 | `PartyLevels.lua` | Levels on default and raid-style party frames |
+| `RangeIndicator.lua` | Out-of-range icon on the target frame |
 | `Reputation.lua` | Reputation watching, faction lookup and header preservation |
 | `Countdowns.lua` | Shared countdown implementation, ready checks and queue pops |
 | `SMoRGsQoL.lua` | Saved settings/migration, option side effects, commands, events, auto-tracking and quest completion notifications |

@@ -36,7 +36,7 @@ local function widget()
         'SetFading', 'SetTimeVisible', 'SetFadeDuration', 'SetMaxLines',
         'SetInsertMode', 'SetSpacing', 'AddMessage', 'SetToplevel', 'SetClampedToScreen',
         'SetMovable', 'RegisterForDrag', 'StartMoving', 'StopMovingOrSizing', 'SetHitRectInsets',
-        'SetFontObject', 'SetColorTexture', 'SetHeight', 'SetOwner' }) do
+        'SetFontObject', 'SetColorTexture', 'SetHeight', 'SetOwner', 'SetTexCoord' }) do
         w[method] = function() end
     end
     return w
@@ -323,6 +323,60 @@ issecretvalue = nil
 SlashCmdList.SQOL('tt')
 UnitExists, UnitIsUnit, UnitName, UnitIsPlayer, UnitClass, UnitReaction = nil, nil, nil, nil, nil, nil
 RAID_CLASS_COLORS, FACTION_BAR_COLORS = nil, nil
+
+-- Out-of-range icon: shown only when some action is range-checked and none reach.
+local target = { exists = true, attackable = true, dead = false }
+local actionRange = {}         -- slot -> true/false/nil (nil: no range check)
+function UnitExists(unit) return unit == 'target' and target.exists end
+function UnitCanAttack() return target.attackable end
+function UnitIsDeadOrGhost() return target.dead end
+function HasAction(slot) return actionRange[slot] ~= nil or slot == 3 or slot == 65 end
+C_ActionBar = { IsActionInRange = function(slot) return slot == 65 or actionRange[slot] end }
+-- Slot 65 is a self spell (Play Dead): "in range" for any target, but not offensive.
+-- Slot 7 is an offensive macro.
+local selfSpells = { [209997] = true }
+function GetActionInfo(slot)
+    if slot == 65 then return 'spell', 209997 end
+    if slot == 7 then return 'macro', 700, 'spell' end
+    return 'spell', slot * 100
+end
+C_Spell = { IsSpellHarmful = function(spellID) return not selfSpells[spellID] end }
+local meleeButton, healButton, playDeadButton = widget(), widget(), widget()
+meleeButton.action, healButton.action, playDeadButton.action = 1, 3, 65
+meleeButton:Show(); healButton:Show(); playDeadButton:Show()
+ActionBarButtonEventsFrame = { frames = { meleeButton, healButton, playDeadButton } }
+TargetFrame = widget()
+TargetFrame:Show()
+local function rangeIconShown()
+    fire('PLAYER_TARGET_CHANGED')
+    return SQOL_RangeIndicator ~= nil and SQOL_RangeIndicator:IsShown()
+end
+actionRange[1] = false
+assert(not rangeIconShown(), 'Off by default')
+SlashCmdList.SQOL('range')
+assert(rangeIconShown(), 'Melee out of range; the heal has no range check and Play Dead is not offensive')
+actionRange[1] = true
+assert(not rangeIconShown(), 'An action in range hides the icon')
+actionRange[1] = nil
+assert(not rangeIconShown(), 'Nothing range-checked, nothing to show')
+actionRange[1] = false
+target.dead = true
+assert(not rangeIconShown(), 'Dead targets are ignored')
+target.dead = false
+meleeButton:Hide(); healButton:Hide(); playDeadButton:Hide()
+actionRange[7] = false
+assert(rangeIconShown(), 'Falls back to all action slots without visible Blizzard buttons')
+actionRange[7] = true
+assert(not rangeIconShown(), 'Fallback finds the in-range slot')
+issecretvalue = function() return true end
+assert(not rangeIconShown(), 'Secret values never show the icon')
+issecretvalue = nil
+SlashCmdList.SQOL('range')
+actionRange[7] = false
+assert(not rangeIconShown(), 'Turning the option off hides the icon')
+UnitExists, UnitCanAttack, UnitIsDeadOrGhost, HasAction, C_ActionBar = nil, nil, nil, nil, nil
+GetActionInfo, C_Spell = nil, nil
+ActionBarButtonEventsFrame, TargetFrame = nil, nil
 
 local scheduled = pending
 pending = {}
