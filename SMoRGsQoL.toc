@@ -11,6 +11,14 @@
 ## X-Website: https://github.com/SMoRG75/SMoRGsQoL
 ## X-Feedback: https://www.curseforge.com/wow/addons/smorgsqol
 ## X-Localizations: enUS
+## AddonCompartmentFunc: SMoRGsQoL_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: SMoRGsQoL_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: SMoRGsQoL_OnAddonCompartmentLeave
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
 Core.lua
 VisualTweaks.lua
@@ -21,4 +29,6 @@ Reputation.lua
 Countdowns.lua
 SMoRGsQoL.lua
 Options.lua
+OptionsPopup.lua
+Launcher.lua
 StatusBarProgress.lua

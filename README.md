@@ -91,16 +91,28 @@ See the [changelog](CHANGELOG.md) for the full release history.
 
 ## Configuration
 
+### Options window
+
+A standalone, movable window with all settings grouped into sections (Quests, Character, Reputation & XP, Group, Interface, Advanced). Open it from:
+- 🧩 **LibDataBroker displays** such as Bazooka, Titan Panel or ChocolateBar — left-click the SMoRG's QoL icon (right-click opens Blizzard's Settings page).
+- 📋 **The addon compartment** menu by the minimap (Retail and WoW Forever).
+- 🗺️ **The minimap button** — off by default; enable it with `/sqol minimap` (`mm`) or **Show minimap button**.
+- 💬 `/sqol config` (or `/sqol options`).
+
 ### Settings UI
 
 Open:
 - ⚙️ **Esc → Options → AddOns → SMoRG's QoL**
+
+Both show the same settings and stay in sync with each other and the slash commands.
 
 ### Slash commands
 
 Type `/sqol` to see current status, or use:
 
 - `/sqol help`
+- `/sqol config` (or `/sqol options`) — open the options window
+- `/sqol minimap` (or `/sqol mm`) — toggle the minimap button
 - `/sqol autotrack` (or `/sqol at`)
 - `/sqol color` (or `/sqol col`) — toggle quest progress colors
 - `/sqol barcolor` (or `/sqol bc`) — independently toggle XP/reputation number colors
@@ -152,8 +164,13 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `Reputation.lua` | Reputation watching, faction lookup and header preservation |
 | `Countdowns.lua` | Shared countdown implementation, ready checks and queue pops |
 | `SMoRGsQoL.lua` | Saved settings/migration, option side effects, commands, events, auto-tracking and quest completion notifications |
-| `Options.lua` | In-game Settings controls |
+| `Options.lua` | Shared option list (sections, labels, tooltips) and Blizzard's Settings page |
+| `OptionsPopup.lua` | Standalone options window built from the shared option list |
+| `Launcher.lua` | LibDataBroker launcher, LibDBIcon minimap button and addon compartment entry |
 | `StatusBarProgress.lua` | Independent XP/reputation number colors |
+
+`Libs/` embeds LibStub (public domain), CallbackHandler-1.0 (Ace3), LibDataBroker-1.1
+(public domain) and LibDBIcon-1.0, each under its own license.
 
 Quest progress and nameplate logic remain together because they share quest parsing
 and cached data. New feature modules should keep private state/helpers local and

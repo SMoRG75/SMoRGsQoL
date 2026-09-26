@@ -4,9 +4,10 @@
   - `SQOL.UpdatePlayerFrameIlvlAnchor()` i `PlayerStats.lua:218` er lavet til Retail-PlayerFrame; Forever har et andet layout.
   - Brug `SQOL.IsForever` (`Core.lua:15`) til at vælge egne anchors/offsets for ilvl og speed.
 
-- [ ] **2. Flot brugergrænseflade i addon-options**
-  - `Options.lua` bruger i dag kun `Settings.RegisterVerticalLayoutCategory` med checkboxes/dropdowns.
-  - Grupper indstillingerne i sektioner (Quests, Stats, Reputation, Countdowns, Visuelt) med overskrifter, beskrivelser og evt. logo.
+- [x] **2. Flot brugergrænseflade i addon-options**
+  - Selvstændigt popup-vindue (`OptionsPopup.lua`) med sektioner, åbnes fra LDB-launcher (Bazooka), Addon Compartment, valgfri minimap-knap og `/sqol config`.
+  - Venstreklik åbner popuppen, højreklik Blizzards Settings-side; den eksisterende Settings-side bevares og får samme sektionsoverskrifter.
+  - Fælles option-liste (`SQOL.OptionSections` i `Options.lua`) bruges af både popup og Settings-side.
   - Skal virke både i Retail og Forever.
 
 - [ ] **3. Ikon når target er uden for rækkevidde**

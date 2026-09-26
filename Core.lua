@@ -66,6 +66,9 @@ SQOL.defaults = {
     -- Add a "Target:" line to unit tooltips showing who the unit is targeting.
     ShowTooltipTarget = false,
 
+    -- LibDBIcon minimap button (the LDB launcher and addon compartment are always there).
+    ShowMinimapButton = false,
+
 }
 
 ------------------------------------------------------------

@@ -360,6 +360,8 @@ local function SQOL_Help()
     print("|cff33ff99-----------------------------------|r")
     print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
     print("|cff33ff99-----------------------------------|r")
+    print("|cff00ff00/SQOL config|r      |cffcccccc- Open the options window (alias: options)|r")
+    print("|cff00ff00/SQOL minimap|r     |cffcccccc- Toggle the minimap button (alias: mm)|r")
     print("|cff00ff00/SQOL autotrack|r   |cffcccccc- Toggle automatic quest tracking|r")
     print("|cff00ff00/SQOL at|r          |cffcccccc- Shorthand for autotrack|r")
     print("|cff00ff00/SQOL color|r       |cffcccccc- Toggle quest progress colorization|r")
@@ -425,6 +427,10 @@ function SQOL.RegisterSettingObject(key, settingObj)
 end
 
 function SQOL.SyncSettingObject(key)
+    if SQOL.OptionsPopup_Refresh then
+        SQOL.OptionsPopup_Refresh()
+    end
+
     local settingObj = SQOL._settingsObjects and SQOL._settingsObjects[key]
     if not settingObj or not SQOL.DB then return end
     if type(settingObj.GetValue) ~= "function" or type(settingObj.SetValue) ~= "function" then return end
@@ -538,6 +544,9 @@ function SQOL.ApplyOption(key)
 
     elseif key == "ShowPartyLevel" then
         SQOL.RefreshPartyMemberLevels()
+
+    elseif key == "ShowMinimapButton" then
+        SQOL.UpdateMinimapButton()
 
     end
 
@@ -655,9 +664,16 @@ SlashCmdList["SQOL"] = function(msg)
         if SQOL.SyncAllSettingsObjects then
             SQOL.SyncAllSettingsObjects()
         end
+        SQOL.UpdateMinimapButton()
 
     elseif msg == "help" then
         SQOL_Help()
+
+    elseif msg == "config" or msg == "options" or msg == "opt" then
+        SQOL.OptionsPopup_Toggle()
+
+    elseif msg == "minimap" or msg == "mm" then
+        toggle("ShowMinimapButton", "Minimap button is")
 
     else
         local version, at, sp, co, qs, lo, rep, stats, np, dmg, cursor = SQOL_GetStateStrings()

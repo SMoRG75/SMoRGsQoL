@@ -26,11 +26,17 @@ local function widget()
     function w:CreateTexture() return widget() end
     function w:GetEffectiveScale() return 1 end
     function w:GetCenter() return 100, 100 end
+    function w:SetChecked(value) self.checked = value end
+    function w:GetChecked() return self.checked end
+    function w:GetStringWidth() return 100 end
+    function w:GetPoint() return 'CENTER', nil, 'CENTER', 0, 0 end
     for _, method in ipairs({ 'SetSize', 'SetPoint', 'ClearAllPoints', 'SetWidth',
         'SetFrameStrata', 'SetJustifyH', 'SetWordWrap', 'SetMaxLines', 'SetTextColor',
         'SetTexture', 'SetBlendMode', 'SetAlpha', 'SetAllPoints', 'EnableMouse', 'SetVertexColor',
         'SetFading', 'SetTimeVisible', 'SetFadeDuration', 'SetMaxLines',
-        'SetInsertMode', 'SetSpacing', 'AddMessage' }) do
+        'SetInsertMode', 'SetSpacing', 'AddMessage', 'SetToplevel', 'SetClampedToScreen',
+        'SetMovable', 'RegisterForDrag', 'StartMoving', 'StopMovingOrSizing', 'SetHitRectInsets',
+        'SetFontObject', 'SetColorTexture', 'SetHeight', 'SetOwner' }) do
         w[method] = function() end
     end
     return w
@@ -69,6 +75,20 @@ function GetCursorPosition() return 100, 100 end
 function InCombatLockdown() return false end
 function hooksecurefunc() end
 function print(...) messages[#messages + 1] = table.concat({...}, ' ') end
+UISpecialFrames = {}
+-- The embedded libraries need the real client; stand-ins record what the launcher does.
+local ldbObjects, minimapButton = {}, {}
+local fakeLibs = {
+    ['LibDataBroker-1.1'] = { NewDataObject = function(_, name, obj) ldbObjects[name] = obj return obj end },
+    ['LibDBIcon-1.0'] = {
+        IsRegistered = function() return minimapButton.db ~= nil end,
+        Register = function(_, _, _, db) minimapButton.db = db end,
+        Refresh = function(_, _, db) minimapButton.db = db end,
+        Show = function() minimapButton.shown = true end,
+        Hide = function() minimapButton.shown = false end,
+    },
+}
+LibStub = setmetatable({}, { __call = function(_, name) return fakeLibs[name] end })
 
 local sqol = {}
 local files = {}
@@ -78,7 +98,7 @@ if arg[1] then
 else
     for line in io.lines('SMoRGsQoL.toc') do
         local file = line:match('^([^#].-%.lua)%s*$')
-        if file then files[#files + 1] = file end
+        if file and not file:find('^Libs[\\/]') then files[#files + 1] = file end
     end
 end
 for _, file in ipairs(files) do assert(loadfile(file))('SMoRGsQoL', sqol) end
@@ -103,6 +123,54 @@ assert(not sqol.DB.ShowItemLevel and not sqol.DB.ShowMovementSpeed)
 assert(not sqol.DB.ColorProgress and not sqol.DB.ColorStatusBarProgress)
 assert(not sqol.DB.ShowTooltipTarget)
 assert(sqol.iLvlHolder and not sqol.iLvlHolder:IsShown())
+
+-- Launcher: LDB object, minimap button (off by default) and addon compartment.
+local launcher = ldbObjects.SMoRGsQoL
+assert(launcher and launcher.type == 'launcher' and launcher.icon:find('smorgsqol', 1, true))
+assert(minimapButton.db and minimapButton.db.hide == true and not minimapButton.shown, 'Minimap button is off by default')
+SlashCmdList.SQOL('minimap')
+assert(minimapButton.shown and sqol.DB.MinimapIcon.hide == false)
+SlashCmdList.SQOL('mm')
+assert(not minimapButton.shown and sqol.DB.MinimapIcon.hide == true)
+assert(SMoRGsQoL_OnAddonCompartmentClick and SMoRGsQoL_OnAddonCompartmentEnter and SMoRGsQoL_OnAddonCompartmentLeave)
+GameTooltip.lines = {}
+launcher.OnTooltipShow(GameTooltip)
+assert(GameTooltip.lines[1].text == "SMoRG's QoL" and GameTooltip.lines[2].text:find('features enabled', 1, true))
+
+-- Options popup: one control per available option, changes go through SetOption
+-- and changes made elsewhere show up while it is open.
+launcher.OnClick(nil, 'LeftButton')
+local popup = SQOL_OptionsPopup
+assert(popup and popup:IsShown() and UISpecialFrames[1] == 'SQOL_OptionsPopup')
+local popupControls, expectedControls = {}, 0
+sqol.ForEachOption(function() expectedControls = expectedControls + 1 end)
+for _, frame in ipairs(frames) do
+    if frame.option then popupControls[frame.option.key] = frame end
+end
+local controlCount = 0
+for _ in pairs(popupControls) do controlCount = controlCount + 1 end
+assert(controlCount == expectedControls, 'Every available option needs a control')
+local partyBox = popupControls.ShowPartyLevel
+partyBox:SetChecked(true)
+partyBox.scripts.OnClick(partyBox)
+assert(sqol.DB.ShowPartyLevel == true)
+SlashCmdList.SQOL('pl')
+assert(sqol.DB.ShowPartyLevel == false and partyBox.checked == false, 'Popup follows slash commands')
+local profileRow = popupControls.QuestSoundProfile
+local cycleButton
+for _, frame in ipairs(frames) do
+    if frame.scripts.OnClick and frame.text == sqol.QuestSoundProfiles.Horde.label then cycleButton = frame end
+end
+assert(profileRow and cycleButton, 'Dropdown falls back to a cycle button')
+cycleButton.scripts.OnClick(cycleButton)
+assert(sqol.DB.QuestSoundProfile == 'Alliance' and cycleButton.text == sqol.QuestSoundProfiles.Alliance.label)
+sqol.SetOption('QuestSoundProfile', 'Horde')
+SMoRGsQoL_OnAddonCompartmentClick('SMoRGsQoL', 'LeftButton')
+assert(not popup:IsShown())
+SlashCmdList.SQOL('config')
+assert(popup:IsShown())
+SlashCmdList.SQOL('config')
+assert(not popup:IsShown())
 for _, event in ipairs({ 'READY_CHECK_FINISHED', 'LFG_PROPOSAL_FAILED',
     'GROUP_ROSTER_UPDATE', 'PLAYER_EQUIPMENT_CHANGED', 'QUEST_LOG_UPDATE',
     'UPDATE_FACTION', 'EDIT_MODE_LAYOUTS_UPDATED' }) do fire(event) end
