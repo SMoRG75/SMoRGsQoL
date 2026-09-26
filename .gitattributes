@@ -1,0 +1,15 @@
+# Text files are stored with LF in git and checked out with CRLF.
+* text=auto eol=crlf
+
+# Shell scripts must keep LF so bash can run them.
+*.sh text eol=lf
+
+# Binary assets are never converted.
+*.png binary
+*.jpg binary
+*.tga binary
+*.blp binary
+*.ttf binary
+*.mp3 binary
+*.ogg binary
+*.zip binary
