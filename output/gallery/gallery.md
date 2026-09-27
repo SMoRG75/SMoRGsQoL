@@ -11,49 +11,55 @@ header); the source screenshots are in `screenshots/`.
 
 **Description:** Small tweaks for a smoother World of Warcraft, for Retail and WoW Forever. Every feature can be turned on or off.
 
-## 1. 01-options-window.png
+## 1. 01-quest-sounds.png
+
+**Title:** Hear your progress
+
+**Description:** A worker voice line for every finished objective, and another when the whole quest is ready to turn in. Choose the Horde Peon ("Work, work." / "Work complete.") or the Alliance worker ("More work?" / "Job's done!"), and toggle each sound on its own.
+
+## 2. 02-options-window.png
 
 **Title:** Every setting in one window
 
 **Description:** All options in one window, grouped into Quests, Character, Reputation & XP, Group, Interface and Advanced. Open it from Bazooka, Titan Panel and other LibDataBroker displays, the addon compartment, the optional minimap button or /sqol config. Changes apply immediately.
 
-## 2. 02-quest-progress.png
+## 3. 03-quest-progress.png
 
 **Title:** Quest progress at a glance
 
 **Description:** Objective counts in the tracker turn from red to green, for quests, campaign quests, world quests and bonus objectives, and progress messages are colored the same way.
 
-## 3. 03-range.png
+## 4. 04-range.png
 
 **Title:** Know your range
 
 **Description:** The distance to your target in yards, shown on its nameplate, with an icon when none of the offensive abilities on your action bars can reach it. Quest objective counts sit just above the name.
 
-## 4. 04-tooltip-target.png
+## 5. 05-tooltip-target.png
 
 **Title:** See who they target
 
 **Description:** Unit tooltips get a Target line: class-colored for players, reaction-colored for NPCs, and a red "You" when the unit is targeting you. It updates while you hover.
 
-## 5. 05-player-stats.png
+## 6. 06-player-stats.png
 
 **Title:** Item level and speed
 
 **Description:** Your equipped item level and movement speed on the player frame, each with its own toggle. Placed above your name on Retail and below the bars on WoW Forever.
 
-## 6. 06-xp-reputation.png
+## 7. 07-xp-reputation.png
 
 **Title:** XP and reputation, colored
 
 **Description:** The current XP and reputation values change from red to green, and reputation also shows the percentage left and your standing. Optional floating reputation gains and a custom combat text font.
 
-## 7. 07-group.png
+## 8. 08-group.png
 
 **Title:** Ready for the group
 
 **Description:** A countdown on queue pops and ready checks, and each party member's level on the party frames.
 
-## 8. 08-wow-forever.png
+## 9. 09-wow-forever.png
 
 **Title:** Also in WoW Forever
 

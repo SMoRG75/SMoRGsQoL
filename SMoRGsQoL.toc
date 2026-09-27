@@ -1,6 +1,6 @@
 ## Interface: 120100, 16001
 ## Title: SMoRG's QoL
-## Notes: Toggleable quality-of-life tweaks: quest tracking, alerts and colored objective counts, XP/reputation text colors, item level and movement speed, tooltip targets, an out-of-range icon, party levels, reputation watching, cursor highlight, and ready check/queue countdowns. Options window via LDB, the addon compartment or /sqol config.
+## Notes: Hear your quest progress: a worker voice line when you complete a quest objective, and another when the whole quest is done (Horde Peon or Alliance worker). Plus toggleable quality-of-life tweaks: colored quest progress, quest auto-tracking, a range icon and distance, tooltip targets, item level and movement speed, XP/reputation colors, party levels, reputation watching, cursor highlight, and ready check/queue countdowns. Options window via LDB, the addon compartment or /sqol config.
 ## Author: SMoRG75
 ## Version: 1.1.0
 ## IconTexture: Interface\AddOns\SMoRGsQoL\smorgsqol.png

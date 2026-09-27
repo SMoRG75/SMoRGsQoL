@@ -2,6 +2,8 @@
 
 A small collection of **individually toggleable** quality-of-life tweaks for World of Warcraft (Retail and WoW Forever).
 
+🔊 It started with one idea: **hear your quest progress**. A worker voice line plays when you finish a quest objective (*"Work, work."*), and another when the whole quest is ready to turn in (*"Work complete."*). Prefer the Alliance? Switch to the Human worker (*"More work?"* / *"Job's done!"*).
+
 Everything is toggleable:
 - 🪟 via the options window (LibDataBroker displays such as Bazooka, the addon compartment menu, the optional minimap button or `/sqol config`),
 - ⚙️ via the in-game Settings UI, or
@@ -56,12 +58,12 @@ After updating, **restart the game** (a `/reload` is not enough), because this r
 
 ## Features
 
+- 🔊 **Quest sounds: objective and quest completion**
+  - Plays a worker voice line when an individual objective is completed before the full quest is done (Peon: *"Work, work."*).
+  - Plays another voice line and prints a chat message when the whole quest is ready to turn in, or done for bonus/world quests (Peon: *"Work complete."*).
+  - Choose the Horde (Peon) or Alliance (Human worker: *"More work?"* / *"Job's done!"*) sound profile, and toggle each sound on its own (`/sqol objectivesound`, `/sqol questsound`, `/sqol soundprofile`).
 - 🧭 **Auto-track newly accepted quests**
   - Automatically tracks new quests in the Objective Tracker (with sanity checks to avoid unsupported edge cases).
-- 🔔 **Quest completion alert**
-  - Plays a sound (toggleable) and prints a chat message when a quest is ready to turn in (or done for bonus/world quests).
-  - Optionally plays a separate worker voice line when an individual objective is completed before the full quest is done.
-  - Supports selectable Horde (Peon) and Alliance (Human worker) sound profiles.
 - 🎨 **Colorized progress messages**
   - Colorizes common progress patterns like `3/10` or `45%` and quest objective progress (red → yellow → green).
   - Also covers progress-bar quest objectives and scenario weighted-progress bars, which the default UI reports silently.
