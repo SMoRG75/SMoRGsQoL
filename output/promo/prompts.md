@@ -6,7 +6,8 @@ earlier images, but shows the 1.1.0 features and both supported clients.
 
 Save the results as `smorgsqol-banner.png` (about 16:9, e.g. 1672 x 941) and
 `smorgsqol-social.png` (square, e.g. 1254 x 1254) in this folder, replacing
-the old images.
+the old images. Keep each PNG below 2,000,000 bytes for CurseForge; optimize
+after generation without reducing text readability.
 
 Check each result before using it: all text must be spelled exactly as in the
 prompt, with no extra words, logos or garbled lettering.
