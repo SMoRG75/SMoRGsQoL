@@ -4,6 +4,9 @@
 # Shell scripts must keep LF so bash can run them.
 *.sh text eol=lf
 
+# ffmpeg drawtext draws a CR as a glyph, so video captions keep LF.
+output/video/build/*.txt text eol=lf
+
 # Binary assets are never converted.
 *.png binary
 *.jpg binary
@@ -13,3 +16,4 @@
 *.mp3 binary
 *.ogg binary
 *.zip binary
+*.mp4 binary

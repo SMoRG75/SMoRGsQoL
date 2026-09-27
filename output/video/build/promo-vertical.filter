@@ -1,0 +1,13 @@
+[0:v]trim=start=5.8:end=8.5,setpts=PTS-STARTPTS,crop=608:1080:656:0,scale=1080:1920:flags=lanczos,format=yuv420p,setsar=1,drawtext=fontfile='C\:/Windows/Fonts/palab.ttf':textfile='build/cap1.txt':fontsize=120:fontcolor=0xE8C46A:borderw=7:bordercolor=black@0.9:shadowx=4:shadowy=4:shadowcolor=black@0.6:x=(w-tw)/2:y=h*0.2:enable='between(t,1.55,2.7)'[v1];
+[0:a]atrim=start=5.8:end=8.5,asetpts=PTS-STARTPTS,afade=t=in:d=0.05,afade=t=out:st=2.64:d=0.06[a1];
+[1:v]trim=start=0.9,setpts=PTS-STARTPTS,crop=608:1080:656:0,scale=1080:1920:flags=lanczos,format=yuv420p,setsar=1,drawtext=fontfile='C\:/Windows/Fonts/palab.ttf':textfile='build/cap2.txt':fontsize=110:fontcolor=0xE8C46A:borderw=7:bordercolor=black@0.9:shadowx=4:shadowy=4:shadowcolor=black@0.6:x=(w-tw)/2:y=h*0.2:enable='between(t,1.17,2.97)'[v2];
+[1:a]atrim=start=0.9,asetpts=PTS-STARTPTS,afade=t=in:d=0.05,afade=t=out:st=2.9:d=0.06[a2];
+[0:v]trim=start=2.6:end=4.8,setpts=PTS-STARTPTS,crop=340:604:630:60,scale=1080:1920:flags=lanczos,format=yuv420p,setsar=1,drawbox=x=52:y=975:w=968:h=300:color=0xE8C46A@0.95:t=9:enable='gte(t,0.3)',drawtext=fontfile='C\:/Windows/Fonts/palab.ttf':textfile='build/cap3v.txt':fontsize=64:line_spacing=14:fontcolor=0xE8C46A:borderw=4:bordercolor=black@0.9:box=1:boxcolor=black@0.6:boxborderw=22:text_align=center:x=(w-tw)/2:y=150:enable='gte(t,0.3)'[v3];
+[0:a]atrim=start=2.6:end=4.8,asetpts=PTS-STARTPTS,afade=t=in:d=0.05,afade=t=out:st=2.14:d=0.06[a3];
+[3:v]split[sbg][sfg];
+[sbg]scale=3400:3400,crop=1080:1920,boxblur=30:2,eq=brightness=-0.08:saturation=0.9[sblur];
+[sfg]scale=1080:1080[ssq];
+[sblur][ssq]overlay=x=0:y=(H-h)/2-120,setsar=1,fps=30,format=yuv420p,fade=t=in:st=0:d=0.4[v4];
+[4:a]anull[a4];
+[v1][a1][v2][a2][v3][a3][v4][a4]concat=n=4:v=1:a=1[v][acat];
+[acat]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]

@@ -1,3 +1,5 @@
 /.vscode
 .codex
 .claude/settings.local.json
+# Raw recordings for the promo videos (large; only the finished videos are kept)
+output/video/Addon part *
