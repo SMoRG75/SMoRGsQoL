@@ -159,6 +159,10 @@ Type `/sqol` to see current status, or use:
 Settings are stored per account in:
 - 💾 `SQOL_DB`
 
+## Support
+
+SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor its development on [GitHub Sponsors](https://github.com/sponsors/SMoRG75). Bug reports and ideas are just as welcome on [CurseForge](https://www.curseforge.com/wow/addons/smorgsqol) or [GitHub](https://github.com/SMoRG75/SMoRGsQoL/issues).
+
 ## Updating to 1.1.0
 
 Install the complete addon folder, including the new `Libs` folder and all Lua
