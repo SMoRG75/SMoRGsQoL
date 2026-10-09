@@ -1,0 +1,17 @@
+# BigWigs packager settings (https://github.com/BigWigsMods/packager).
+# The libraries in Libs/ are committed, so there are no externals.
+# Files and folders starting with a dot (.claude, .github, .vscode, .codex,
+# .luarc.json, .gitattributes, .gitignore, this file) are never packaged.
+
+package-as: SMoRGsQoL
+
+# Upload the hand-written changelog instead of one generated from commits.
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+ignore:
+  - tests
+  - output
+  - TODO.md
+  - RELEASING.md
