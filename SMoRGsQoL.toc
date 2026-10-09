@@ -16,9 +16,8 @@
 ## IconTexture: Interface\AddOns\SMoRGsQoL\smorgsqol.png
 ## SavedVariables: SQOL_DB
 ## X-Curse-Project-ID: 1418599
-# Fill in the Wago and WoWInterface IDs once those project pages exist (see RELEASING.md).
-## X-Wago-ID:
-## X-WoWI-ID:
+## X-Wago-ID: 5NRgMx63
+## X-WoWI-ID: 27251
 ## X-Category: Quests & Leveling
 ## X-License: MIT
 ## X-Website: https://github.com/SMoRG75/SMoRGsQoL
