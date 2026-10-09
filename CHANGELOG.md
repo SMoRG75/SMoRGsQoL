@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- The addon description in the in-game AddOns list and addon managers is now translated into German, French, Spanish (Spain and Latin America), Brazilian Portuguese, Italian, Russian, Korean and Simplified and Traditional Chinese. The quest voice lines stay in English, and the options and chat messages are still English only.
+
 ## [1.1.0] - 2026-09-26
 
 ### Added
