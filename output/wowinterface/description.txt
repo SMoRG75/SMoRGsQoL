@@ -1,0 +1,112 @@
+[center][img]https://raw.githubusercontent.com/SMoRG75/SMoRGsQoL/master/output/promo/smorgsqol-banner.png[/img][/center]
+
+[size=5][b]SMoRG's QoL[/b][/size]
+
+A small collection of [b]individually toggleable[/b] quality-of-life tweaks for World of Warcraft (Retail and WoW Forever).
+
+It started with one idea: [b]hear your quest progress[/b]. A worker voice line plays when you finish a quest objective ([i]"Work, work."[/i]), and another when the whole quest is ready to turn in ([i]"Work complete."[/i]). Prefer the Alliance? Switch to the Human worker ([i]"More work?"[/i] / [i]"Job's done!"[/i]).
+
+Everything can be turned on and off from the options window, the in-game Settings UI or [b]/sqol[/b] chat commands.
+
+[img]https://raw.githubusercontent.com/SMoRG75/SMoRGsQoL/master/output/gallery/01-quest-sounds.png[/img]
+
+
+[size=4][b]Features[/b][/size]
+
+[b]Quest sounds: objective and quest completion[/b]
+[list]
+[*]Plays a worker voice line when a single objective is completed before the full quest is done (Peon: [i]"Work, work."[/i]).
+[*]Plays another voice line and prints a chat message when the whole quest is ready to turn in, or done for bonus and world quests (Peon: [i]"Work complete."[/i]).
+[*]Choose the Horde (Peon) or Alliance (Human worker) sound profile, and toggle each sound on its own.
+[/list]
+
+[b]Quests[/b]
+[list]
+[*][b]Auto-track new quests[/b] - newly accepted quests are added to the Objective Tracker.
+[*][b]Colored quest progress[/b] - progress like 3/10 or 45% is colored red -> yellow -> green in chat messages and in the quest tracker. Also covers progress-bar objectives and scenario progress bars that the default UI reports silently.
+[*][b]Nameplate objective counts[/b] - shows quest progress (e.g. 0/10 or 45%) above the nameplates of quest mobs.
+[/list]
+
+[b]Character[/b]
+[list]
+[*][b]Item level and movement speed[/b] on your player frame, each toggled on its own.
+[*][b]Range icon and distance[/b] - the distance to your target in yards (e.g. 8-30 yd) on its nameplate, plus a pulsing icon when none of the offensive abilities on your bars can reach it. Works for every class with no spell lists to set up.
+[*][b]Target in unit tooltips[/b] - a "Target:" line showing who the unit is targeting, class- or reaction-colored, with a red "You" when it is you.
+[/list]
+
+[b]Reputation and XP[/b]
+[list]
+[*][b]Colored XP/reputation numbers[/b] - the current number on the standard bars goes red -> yellow -> green, and reputation shows the percentage left and your current standing.
+[*][b]Auto-watch reputation[/b] - switches your watched faction to the one you just gained reputation with.
+[*][b]Floating reputation gains[/b] - a short "+25 Rep - Valarjar" text that floats up and fades out.
+[/list]
+
+[b]Group[/b]
+[list]
+[*][b]Ready check countdown[/b] - the seconds left on a ready check, turning red for the last 5.
+[*][b]Queue pop countdown[/b] - how many of your 40 seconds are left to accept a group finder pop.
+[*][b]Party member levels[/b] on both default and raid-style party frames.
+[/list]
+
+[b]Interface[/b]
+[list]
+[*][b]Hide completed achievements[/b] - the Achievement UI opens on incomplete achievements (Retail only).
+[*][b]Custom damage text font[/b] for floating combat text.
+[*][b]Cursor shake highlight[/b] - find your cursor by shaking the mouse.
+[*][b]Login splash[/b] showing which features are on.
+[/list]
+
+
+[size=4][b]Options[/b][/size]
+
+All settings are in one movable window, grouped into Quests, Character, Reputation & XP, Group, Interface and Advanced. Open it from:
+[list]
+[*]LibDataBroker displays such as Bazooka, Titan Panel or ChocolateBar (left-click; right-click opens Blizzard's Settings page)
+[*]the addon compartment menu by the minimap
+[*]the minimap button (off by default, enable it with [b]/sqol minimap[/b])
+[*][b]/sqol config[/b]
+[/list]
+
+The same settings are also under [b]Esc -> Options -> AddOns -> SMoRG's QoL[/b], and they stay in sync with the window and the slash commands.
+
+[img]https://raw.githubusercontent.com/SMoRG75/SMoRGsQoL/master/output/gallery/02-options-window.png[/img]
+
+
+[size=4][b]Slash commands[/b][/size]
+
+Type [b]/sqol[/b] to see the current status, or [b]/sqol help[/b] for the full list.
+
+[code]
+/sqol config           open the options window
+/sqol minimap   (mm)   minimap button
+/sqol questsound (qs)  quest complete sound
+/sqol objectivesound (os)  objective complete sound
+/sqol soundprofile     Horde or Alliance voice lines
+/sqol autotrack (at)   auto-track new quests
+/sqol color     (col)  quest progress colors
+/sqol barcolor  (bc)   XP/reputation number colors
+/sqol nameplate (np)   nameplate objective counts
+/sqol ilvl             item level
+/sqol speed     (spd)  movement speed
+/sqol range     (rng)  range icon and distance
+/sqol tooltiptarget (tt)  target in tooltips
+/sqol rep       (rw)   auto-watch reputation
+/sqol reptext   (rt)   floating reputation gains
+/sqol readycheck (rc)  ready check countdown
+/sqol lfgtimer  (lfg)  queue pop countdown
+/sqol partylevel (pl)  party member levels
+/sqol hideach   (ha)   hide completed achievements
+/sqol damagefont (df)  damage text font
+/sqol cursor    (cs)   cursor shake highlight
+/sqol splash           login splash
+/sqol reset            reset all settings
+[/code]
+
+
+[size=4][b]Support[/b][/size]
+
+SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor it on [url=https://github.com/sponsors/SMoRG75]GitHub Sponsors[/url].
+
+Bug reports and ideas are very welcome in the comments here or on [url=https://github.com/SMoRG75/SMoRGsQoL/issues]GitHub[/url].
+
+Source code: [url=https://github.com/SMoRG75/SMoRGsQoL]github.com/SMoRG75/SMoRGsQoL[/url] (MIT license)
