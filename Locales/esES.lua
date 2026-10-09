@@ -1,0 +1,105 @@
+-- Spanish (esES and esMX)
+local _, SQOL = ...
+if SQOL.Locale ~= "esES" and SQOL.Locale ~= "esMX" then return end
+local L = SQOL.L
+
+-- Sound profiles
+L["Horde (Peon)"] = "Horda (peón)"
+L["Alliance (Human worker)"] = "Alianza (campesino humano)"
+
+-- On-screen text
+L["Target:"] = "Objetivo:"
+L["none"] = "ninguno"
+L["iLvl:"] = "Niv:"
+L["Spd:"] = "Vel.:"
+L["> %d yd"] = "> %d m"
+L["%d-%d yd"] = "%d-%d m"
+L["< %d yd"] = "< %d m"
+L["+%d Rep — %s"] = "+%d rep. — %s"
+L["%.1f%% left"] = "faltan %.1f%%"
+L["ON"] = "ACTIVADO"
+L["OFF"] = "DESACTIVADO"
+
+-- Chat messages
+L["Settings have been reset to defaults."] = "Se han restablecido los valores predeterminados."
+L["%s is OFF. Enable it with %s."] = "%s está DESACTIVADO. Actívalo con %s."
+L["%s is not available in this client."] = "%s no está disponible en este cliente."
+L["Type %s for the command list."] = "Escribe %s para ver la lista de comandos."
+L["Type %s to see which features are on."] = "Escribe %s para ver qué funciones están activadas."
+L["Could not auto-track quest %s."] = "No se pudo seguir automáticamente la misión %s."
+L["And |cff33ff99SQoL|r auto-tracked it"] = "Y |cff33ff99SQoL|r la sigue automáticamente"
+L["%s is done!"] = "¡%s completada!"
+L["%s is ready to turn in!"] = "¡%s lista para entregar!"
+
+-- Slash command help
+L["Open the options window"] = "Abrir la ventana de opciones"
+L["Switch between the Horde and Alliance quest sounds"] = "Alternar entre los sonidos de misión de la Horda y de la Alianza"
+L["Preview floating reputation gains"] = "Vista previa de las ganancias de reputación flotantes"
+L["Preview the ready check countdown (add 'popup' to show the frame)"] = "Vista previa de la cuenta atrás de listos (añade 'popup' para mostrar la ventana)"
+L["Preview the queue pop countdown"] = "Vista previa de la cuenta atrás de la cola"
+L["Flash the cursor highlight once"] = "Hacer parpadear una vez el resaltado del cursor"
+L["Reset all settings to defaults"] = "Restablecer todos los valores predeterminados"
+L["Show this command list"] = "Mostrar esta lista de comandos"
+
+-- Options window and Settings page
+L["Quality-of-life tweaks. Changes apply immediately."] = "Mejoras de calidad de vida. Los cambios se aplican al instante."
+L["Blizzard Settings"] = "Configuración de Blizzard"
+L["%d of %d features enabled"] = "%d de %d funciones activadas"
+L["|cffeda55fLeft-click|r to open options"] = "|cffeda55fClic izquierdo|r para abrir las opciones"
+L["|cffeda55fRight-click|r to open Blizzard Settings"] = "|cffeda55fClic derecho|r para abrir la configuración de Blizzard"
+
+L["Quests"] = "Misiones"
+L["Auto-track newly accepted quests"] = "Seguir automáticamente las misiones nuevas"
+L["Automatically track newly accepted quests in the objective tracker."] = "Añade automáticamente las misiones aceptadas al seguimiento de objetivos."
+L["Color quest progress"] = "Progreso de misiones en color"
+L["Colorize quest and scenario progress messages, the current count of quest objectives in the objective tracker, and quest objective counts on nameplates (red → yellow → green)."] = "Colorea los mensajes de progreso de misiones y gestas, el recuento actual de los objetivos en el seguimiento de objetivos y los contadores sobre las placas de nombre (rojo → amarillo → verde)."
+L["Show objective counts on nameplates"] = "Objetivos sobre las placas de nombre"
+L["Show quest objective counts (e.g., 0/10) above relevant nameplates."] = "Muestra el progreso de los objetivos de misión (p. ej., 0/10) sobre las placas de nombre correspondientes."
+L["Quest completion sound"] = "Sonido de misión completada"
+L["Play a sound when a quest is ready to turn in (or done for bonus/world quests)."] = "Reproduce un sonido cuando una misión está lista para entregar (o completada, en objetivos de bonificación y misiones de mundo)."
+L["Quest objective completion sound"] = "Sonido de objetivo completado"
+L["Play a worker voice line when one objective is completed but the quest is not yet done."] = "Reproduce una frase de trabajador al completar un objetivo cuando la misión aún no está terminada."
+L["Quest sound profile"] = "Perfil de sonido de misiones"
+L["Choose the worker voice used for objective and full quest completion."] = "Elige la voz de trabajador para los objetivos y las misiones completadas."
+
+L["Character"] = "Personaje"
+L["Show item level on PlayerFrame"] = "Nivel de objeto en el marco del jugador"
+L["Show your equipped item level on the player frame, independently of movement speed."] = "Muestra tu nivel de objeto equipado en el marco del jugador, independientemente de la velocidad de movimiento."
+L["Show movement speed on PlayerFrame"] = "Velocidad en el marco del jugador"
+L["Show movement speed on the player frame, independently of item level."] = "Muestra la velocidad de movimiento en el marco del jugador, independientemente del nivel de objeto."
+
+L["Reputation & XP"] = "Reputación y PE"
+L["Color XP/reputation numbers"] = "Cifras de PE/reputación en color"
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "Colorea la cifra actual de PE/reputación (rojo → amarillo → verde), con texto contorneado. La reputación también muestra el porcentaje restante y el nivel actual después del total. Las etiquetas y los máximos siguen en blanco y los colores de las barras no cambian. Independiente de los colores del progreso de misiones."
+L["Auto-watch reputation gains"] = "Seguir la reputación automáticamente"
+L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "Cuando cambia tu reputación con una facción, esa facción pasa a ser la que sigues."
+L["Floating reputation gains"] = "Ganancias de reputación flotantes"
+L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "Muestra las ganancias de reputación como texto verde junto a tu personaje que sube y se desvanece. Independiente del seguimiento automático."
+
+L["Group"] = "Grupo"
+L["Ready check countdown timer"] = "Cuenta atrás de listos"
+L["Show a live countdown on the ready check popup for how long until it expires."] = "Muestra en la ventana de comprobación de listos el tiempo que falta para que caduque."
+L["LFG queue pop countdown timer"] = "Cuenta atrás del buscador de grupos"
+L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."] = "Muestra en la propuesta del buscador de grupos el tiempo que te queda para aceptar (40 segundos)."
+L["Show party member levels"] = "Niveles de los miembros del grupo"
+L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] = "Muestra el nivel de cada miembro en los marcos de grupo (estándar y estilo banda), útil en instancias de 5 jugadores."
+
+L["Interface"] = "Interfaz"
+L["Show target in unit tooltips"] = "Objetivo en las descripciones emergentes"
+L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover."] = "Añade una línea \"Objetivo:\" a las descripciones emergentes de unidades que muestra a quién apunta la unidad: con color de clase para jugadores, color de reacción para PNJ y un \"Tú\" en rojo cuando eres tú. Se actualiza mientras pasas el cursor por encima."
+L["Range icon and distance for your target"] = "Icono de alcance y distancia al objetivo"
+L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "En la placa de nombre de tu objetivo, donde está el icono de espada del objetivo suave de Blizzard (o junto al retrato del marco de objetivo si no hay placa), muestra la distancia a un objetivo atacable en metros (p. ej., \"8-30 m\", según el alcance de las facultades de tus barras de acción) y un icono que parpadea cuando ninguna de tus facultades ofensivas llega. Usa la misma comprobación de alcance que tiñe de rojo los botones de acción, así que sigue las formas y las barras de bonificación. Mientras está activado, el icono de espada de Blizzard (SoftTargetIconEnemy) se desactiva; vuelve a activarse al desactivar esta opción."
+L["Custom damage text font"] = "Fuente personalizada para el daño"
+L["Use the TrashHand damage text font for floating combat text."] = "Usa la fuente TrashHand para las cifras de daño del texto flotante de combate."
+L["Highlight cursor on shake"] = "Resaltar el cursor al agitar"
+L["Highlight the cursor when you shake the mouse."] = "Resalta el cursor cuando agitas el ratón."
+L["Hide completed achievements"] = "Ocultar logros completados"
+L["Achievement UI will default to showing incomplete achievements only."] = "La ventana de logros mostrará por defecto solo los logros incompletos."
+L["Show minimap button"] = "Botón en el minimapa"
+L["Show a SMoRG's QoL button on the minimap. The addon is also available from the addon compartment menu and from LibDataBroker displays such as Bazooka or Titan Panel."] = "Muestra un botón de SMoRG's QoL en el minimapa. El addon también está disponible en el menú de addons y en visores de LibDataBroker como Bazooka o Titan Panel."
+L["Show splash on login"] = "Resumen al iniciar sesión"
+L["Show the status splash message when you log in."] = "Muestra al iniciar sesión un resumen de las funciones activadas."
+
+L["Advanced"] = "Avanzado"
+L["Debug tracking"] = "Depuración"
+L["Print verbose debug information (for troubleshooting)."] = "Muestra información de depuración detallada (para resolver problemas)."

@@ -4,7 +4,18 @@
 
 ### Added
 
-- The addon description in the in-game AddOns list and addon managers is now translated into German, French, Spanish (Spain and Latin America), Brazilian Portuguese, Italian, Russian, Korean and Simplified and Traditional Chinese. The quest voice lines stay in English, and the options and chat messages are still English only.
+- **Translations** — the addon now speaks German, French, Spanish (Spain and Latin America), Brazilian Portuguese, Italian, Russian, Korean and Simplified and Traditional Chinese: the options window, Blizzard's Settings page, tooltips, chat messages, `/sqol help`, the launcher tooltip and on-screen text (item level/speed line, range in meters or 码/碼, tooltip target, floating reputation gains). The addon description in the in-game AddOns list is translated too. The quest voice lines stay in English, and slash commands are the same in every language. **The translations have not been checked by native speakers yet**, so corrections are very welcome on CurseForge or GitHub.
+
+### Changed
+
+- `/sqol`, `/sqol help` and the login splash now use the same names as the options window, list every option, and show aliases next to each command (e.g. `/sqol autotrack (at)`). Toggling a feature prints its name and the new state, e.g. `Show party member levels: ON`.
+- Long option names are cut off with "..." in the options window instead of running past the column; the tooltip shows the full name.
+
+### Fixed
+
+- Floating reputation gains and auto-watch reputation now work on non-English clients. Reputation messages are read with Blizzard's own localized templates instead of English text patterns.
+
+After updating, **restart the game** (a `/reload` is not enough), because this release adds new files.
 
 ## [1.1.0] - 2026-09-26
 

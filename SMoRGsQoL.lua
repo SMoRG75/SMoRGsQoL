@@ -1,7 +1,10 @@
 local ADDON_NAME, SQOL = ...
 -- Feature modules are loaded first by the TOC. This file owns saved settings,
 -- commands and event routing; shared entry points live on the SQOL namespace.
+local L = SQOL.L
 local f = CreateFrame("Frame")
+
+local SQOL_CHAT_PREFIX = "|cff33ff99SQoL:|r "
 
 ------------------------------------------------------------
 -- SQOL_Init & Reset: ensure saved variables exist
@@ -37,7 +40,7 @@ function SQOL.Init(reset)
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         SQOL.RepGains_Hide()
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
-        print("|cff33ff99SQoL:|r Settings have been reset to defaults.")
+        print(SQOL_CHAT_PREFIX .. L["Settings have been reset to defaults."])
 
         -- 🟢 Apply Achievement filter after reset
         if SQOL.EnsureAchievementUILoaded() then
@@ -66,23 +69,41 @@ local function SQOL_GetVersion()
     return "?.?.?"
 end
 
-local function SQOL_GetStateStrings()
-    local version = SQOL_GetVersion()
-    local atState = SQOL.DB.AutoTrack     and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local spState = SQOL.DB.ShowSplash    and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local coState = SQOL.DB.ColorProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local qsState = SQOL.DB.QuestCompleteSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local loState = SQOL.DB.HideDoneAchievements and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    if not SQOL.IsAchievementFilterSupported() then
-        loState = "|cff888888N/A|r"
+------------------------------------------------------------
+-- Status output (splash and /sqol), built from the option list
+------------------------------------------------------------
+local SQOL_RULE = "|cff33ff99------------------------------------------------------------------------------|r"
+
+local function SQOL_PrintHeader()
+    print(SQOL_RULE)
+    print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. SQOL_GetVersion() .. "|r")
+    print(SQOL_RULE)
+end
+
+-- "<label>: ON" in chat, e.g. after a slash command toggled it.
+function SQOL.PrintOptionState(key)
+    local option = SQOL.GetOption(key)
+    if option then
+        print(SQOL_CHAT_PREFIX .. option.label .. ": " .. SQOL.GetOptionStateText(option))
     end
-    local repState = SQOL.DB.RepWatch and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local statsState = "iLvl " .. (SQOL.DB.ShowItemLevel and "|cff00ff00ON|r" or "|cffff0000OFF|r")
-        .. " / Speed " .. (SQOL.DB.ShowMovementSpeed and "|cff00ff00ON|r" or "|cffff0000OFF|r")
-    local npState = SQOL.DB.ShowNameplateObjectives and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local dmgState = SQOL.DB.DamageTextFont and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local cursorState = SQOL.DB.CursorShakeHighlight and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    return version, atState, spState, coState, qsState, loState, repState, statsState, npState, dmgState, cursorState
+end
+
+-- "<label> is OFF. Enable it with <command>."
+function SQOL.PrintOptionOff(key, command)
+    local option = SQOL.GetOption(key)
+    if option then
+        print(SQOL_CHAT_PREFIX .. string.format(L["%s is OFF. Enable it with %s."],
+            option.label, "|cff00ff00" .. command .. "|r"))
+    end
+end
+
+local function SQOL_PrintStatus()
+    SQOL_PrintHeader()
+    SQOL.ForEachOption(function(_, option)
+        print("|cff33ff99" .. option.label .. ":|r " .. SQOL.GetOptionStateText(option))
+    end)
+    print("|cffcccccc" .. string.format(L["Type %s for the command list."], "|cff00ff00/sqol help|cffcccccc") .. "|r")
+    print(SQOL_RULE)
 end
 
 ------------------------------------------------------------
@@ -119,7 +140,7 @@ local function SQOL_TryAutoTrack(questID, retries)
 
     retries = retries or 0
     if retries > 5 then
-        print("|cffff0000SQOL:|r Failed to auto-track quest after multiple attempts:", questID)
+        print("|cffff0000SQOL:|r " .. string.format(L["Could not auto-track quest %s."], tostring(questID)))
         return
     end
 
@@ -143,7 +164,7 @@ local function SQOL_TryAutoTrack(questID, retries)
     SQOL.dprint("Attempting to track:", title)
 
     C_QuestLog.AddQuestWatch(questID)
-    print("And |cff33ff99SQoL|r auto-tracked it")
+    print(L["And |cff33ff99SQoL|r auto-tracked it"])
 
 end
 
@@ -151,29 +172,7 @@ end
 -- Splash
 ------------------------------------------------------------
 local function SQOL_Splash()
-    local version, atState, spState, coState, qsState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
-    local qoState = SQOL.DB.QuestObjectiveSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local questSoundProfile = SQOL.DB.QuestSoundProfile or SQOL.defaults.QuestSoundProfile
-    print("|cff33ff99-----------------------------------|r")
-    print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
-    print("|cff33ff99------------------------------------------------------------------------------|r")
-    print("|cff33ff99AutoTrack:|r " .. atState)
-    print("|cff33ff99Splash:|r " .. spState)
-    print("|cff33ff99ColorProgress:|r " .. coState)
-    print("|cff33ff99XP/Rep colors:|r " .. (SQOL.DB.ColorStatusBarProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
-    print("|cff33ff99QuestSound:|r " .. qsState)
-    print("|cff33ff99ObjectiveSound:|r " .. qoState)
-    print("|cff33ff99QuestSoundProfile:|r " .. questSoundProfile)
-    print("|cff33ff99HideDoneAchievements:|r " .. loState)
-    print("|cff33ff99RepWatch:|r " .. repState)
-    print("|cff33ff99NameplateObjectives:|r " .. npState)
-    print("|cff33ff99StatsLine:|r " .. statsState)
-    print("|cff33ff99DamageTextFont:|r " .. dmgState)
-    print("|cff33ff99CursorShake:|r " .. cursorState)
-    print("|cff33ff99ReadyCheckTimer:|r " .. (SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
-    print("|cff33ff99LFGQueuePopTimer:|r " .. (SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
-    print("|cffccccccType |cff00ff00/SQOL help|r for command list.|r")
-    print("|cff33ff99------------------------------------------------------------------------------|r")
+    SQOL_PrintStatus()
 end
 
 ------------------------------------------------------------
@@ -228,14 +227,10 @@ local function SQOL_NotifyQuestCompletion(questID, title, isTask, isWorld)
         SQOL_PlayQuestSound("complete")
     end
 
-    local displayTitle = title or questID
-    if isTask or isWorld then
-        print("|cff33ff99SQoL:|r |cffffff00" ..
-            displayTitle .. "|r |cff00ff00is done!|r")
-    else
-        print("|cff33ff99SQoL:|r |cffffff00" ..
-            displayTitle .. "|r |cff00ff00is ready to turn in!|r")
-    end
+    -- Yellow title inside a green sentence.
+    local displayTitle = "|cffffff00" .. tostring(title or questID) .. "|cff00ff00"
+    local text = (isTask or isWorld) and L["%s is done!"] or L["%s is ready to turn in!"]
+    print(SQOL_CHAT_PREFIX .. "|cff00ff00" .. string.format(text, displayTitle) .. "|r")
 end
 
 local function SQOL_CheckQuestProgress()
@@ -348,74 +343,6 @@ local function SQOL_MarkQuestHandledTemporarily(questID)
             SQOL.fullyCompleted[questID] = nil
         end
     end)
-end
-
-------------------------------------------------------------
--- Help
-------------------------------------------------------------
-local function SQOL_Help()
-    local version, atState, spState, coState, qsState, loState, repState, statsState, npState, dmgState, cursorState = SQOL_GetStateStrings()
-    local qoState = SQOL.DB.QuestObjectiveSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local questSoundProfile = SQOL.DB.QuestSoundProfile or SQOL.defaults.QuestSoundProfile
-    print("|cff33ff99-----------------------------------|r")
-    print("|cff33ff99" .. (SQOL.ADDON_NAME or "SMoRGsQoL") .. " (SQOL)|r |cffffffffv" .. version .. "|r")
-    print("|cff33ff99-----------------------------------|r")
-    print("|cff00ff00/SQOL config|r      |cffcccccc- Open the options window (alias: options)|r")
-    print("|cff00ff00/SQOL minimap|r     |cffcccccc- Toggle the minimap button (alias: mm)|r")
-    print("|cff00ff00/SQOL autotrack|r   |cffcccccc- Toggle automatic quest tracking|r")
-    print("|cff00ff00/SQOL at|r          |cffcccccc- Shorthand for autotrack|r")
-    print("|cff00ff00/SQOL color|r       |cffcccccc- Toggle quest progress colorization|r")
-    print("|cff00ff00/SQOL barcolor|r    |cffcccccc- Toggle XP/reputation number colors|r")
-    print("|cff00ff00/SQOL col|r         |cffcccccc- Shorthand for color|r")
-    print("|cff00ff00/SQOL questsound|r  |cffcccccc- Toggle quest completion sound|r")
-    print("|cff00ff00/SQOL qs|r          |cffcccccc- Shorthand for questsound|r")
-    print("|cff00ff00/SQOL objectivesound|r |cffcccccc- Toggle objective completion sound|r")
-    print("|cff00ff00/SQOL os|r          |cffcccccc- Shorthand for objectivesound|r")
-    print("|cff00ff00/SQOL soundprofile|r |cffcccccc- Switch Horde/Alliance quest sounds|r")
-    print("|cff00ff00/SQOL hideach|r     |cffcccccc- Toggle hiding completed achievements|r")
-    print("|cff00ff00/SQOL ha|r          |cffcccccc- Shorthand for hideach|r")
-    print("|cff00ff00/SQOL splash|r      |cffcccccc- Toggle splash on login|r")
-    print("|cff00ff00/SQOL rep|r         |cffcccccc- Toggle watched reputation auto-switch on rep gain|r")
-    print("|cff00ff00/SQOL reptext|r     |cffcccccc- Toggle floating reputation gains (rt); reptexttest previews it|r")
-    print("|cff00ff00/SQOL rw|r          |cffcccccc- Shorthand for rep|r")
-    print("|cff00ff00/SQOL nameplate|r   |cffcccccc- Toggle nameplate objective counts|r")
-    print("|cff00ff00/SQOL np|r          |cffcccccc- Shorthand for nameplate|r")
-    print("|cff00ff00/SQOL ilvl|r        |cffcccccc- Toggle PlayerFrame item level (alias: stats)|r")
-    print("|cff00ff00/SQOL speed|r       |cffcccccc- Toggle PlayerFrame movement speed|r")
-    print("|cff00ff00/SQOL damagefont|r  |cffcccccc- Toggle custom damage text font|r")
-    print("|cff00ff00/SQOL df|r          |cffcccccc- Shorthand for damagefont|r")
-    print("|cff00ff00/SQOL cursor|r      |cffcccccc- Highlight cursor when you shake the mouse|r")
-    print("|cff00ff00/SQOL cs|r          |cffcccccc- Shorthand for cursor|r")
-    print("|cff00ff00/SQOL cursorflash|r |cffcccccc- Flash cursor ring once (debug)|r")
-    print("|cff00ff00/SQOL cf|r          |cffcccccc- Shorthand for cursorflash|r")
-    print("|cff00ff00/SQOL readycheck|r  |cffcccccc- Toggle ready check countdown timer|r")
-    print("|cff00ff00/SQOL rc|r          |cffcccccc- Shorthand for readycheck|r")
-    print("|cff00ff00/SQOL rctest|r      |cffcccccc- Preview the ready check timer (add 'popup' for the frame)|r")
-    print("|cff00ff00/SQOL lfgtimer|r    |cffcccccc- Toggle LFG queue pop countdown timer|r")
-    print("|cff00ff00/SQOL lfg|r         |cffcccccc- Shorthand for lfgtimer|r")
-    print("|cff00ff00/SQOL lfgtest|r     |cffcccccc- Preview the LFG queue pop timer|r")
-    print("|cff00ff00/SQOL partylevel|r  |cffcccccc- Toggle party member level display|r")
-    print("|cff00ff00/SQOL pl|r          |cffcccccc- Shorthand for partylevel|r")
-    print("|cff00ff00/SQOL tooltiptarget|r |cffcccccc- Toggle target line in unit tooltips|r")
-    print("|cff00ff00/SQOL tt|r          |cffcccccc- Shorthand for tooltiptarget|r")
-    print("|cff00ff00/SQOL range|r       |cffcccccc- Toggle range icon and distance for your target|r")
-    print("|cff00ff00/SQOL rng|r         |cffcccccc- Shorthand for range|r")
-    print("|cff00ff00/SQOL debugtrack|r  |cffcccccc- Toggle verbose tracking debug|r")
-    print("|cff00ff00/SQOL dbg|r         |cffcccccc- Shorthand for debugtrack|r")
-    print("|cff00ff00/SQOL reset|r       |cffcccccc- Reset all settings to defaults|r")
-    print("|cff33ff99------------------------------------------------------------------------------|r")
-    print("|cff33ff99AutoTrack:|r " .. atState .. "  |cff33ff99Splash:|r " .. spState .. "  |cff33ff99ColorProgress:|r " .. coState .. "  |cff33ff99QuestSound:|r " .. qsState)
-    print("|cff33ff99ObjectiveSound:|r " .. qoState .. "  |cff33ff99QuestSoundProfile:|r " .. questSoundProfile)
-    print("|cff33ff99HideDoneAchievements:|r " .. loState .. "  |cff33ff99RepWatch:|r " .. repState .. "  |cff33ff99NameplateObjectives:|r " .. npState)
-    print("|cff33ff99StatsLine:|r " .. statsState)
-    local rcState = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local lfgState = SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local plState = SQOL.DB.ShowPartyLevel and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    local ttState = SQOL.DB.ShowTooltipTarget and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    print("|cff33ff99DamageTextFont:|r " .. dmgState .. "  |cff33ff99CursorShake:|r " .. cursorState .. "  |cff33ff99ReadyCheckTimer:|r " .. rcState .. "  |cff33ff99LFGQueuePopTimer:|r " .. lfgState .. "  |cff33ff99PartyLevel:|r " .. plState)
-    local rangeState = SQOL.DB.ShowRangeIndicator and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-    print("|cff33ff99TooltipTarget:|r " .. ttState .. "  |cff33ff99RangeIndicator:|r " .. rangeState)
-    print("|cff33ff99------------------------------------------------------------------------------|r")
 end
 
 ------------------------------------------------------------
@@ -573,130 +500,117 @@ end
 ------------------------------------------------------------
 -- Slash commands
 ------------------------------------------------------------
+-- Each command lists its names (the first is shown in help) and either the
+-- option it toggles (help and feedback use the option's label) or its own
+-- description and handler. The order here is the order in /sqol help.
+local SQOL_Help
+
+local SQOL_COMMANDS = {
+    { names = { "config", "options", "opt" }, desc = L["Open the options window"],
+      run = function() SQOL.OptionsPopup_Toggle() end },
+    { names = { "minimap", "mm" }, key = "ShowMinimapButton" },
+    { names = { "autotrack", "at" }, key = "AutoTrack" },
+    { names = { "color", "col" }, key = "ColorProgress" },
+    { names = { "nameplate", "np" }, key = "ShowNameplateObjectives" },
+    { names = { "questsound", "qs" }, key = "QuestCompleteSound" },
+    { names = { "objectivesound", "os" }, key = "QuestObjectiveSound" },
+    { names = { "soundprofile", "soundset" }, desc = L["Switch between the Horde and Alliance quest sounds"],
+      run = function()
+          SQOL.SetOption("QuestSoundProfile", SQOL.DB.QuestSoundProfile == "Alliance" and "Horde" or "Alliance")
+          SQOL.PrintOptionState("QuestSoundProfile")
+      end },
+    { names = { "ilvl", "stats" }, key = "ShowItemLevel" },
+    { names = { "speed", "spd" }, key = "ShowMovementSpeed" },
+    { names = { "barcolor", "bc" }, key = "ColorStatusBarProgress" },
+    { names = { "rep", "rw" }, key = "RepWatch" },
+    { names = { "reptext", "rt" }, key = "ShowRepGains" },
+    { names = { "reptexttest" }, desc = L["Preview floating reputation gains"],
+      run = function() SQOL.RepGains_Show("Valarjar", 25) end },
+    { names = { "readycheck", "rc" }, key = "ShowReadyCheckTimer" },
+    { names = { "rctest" }, desc = L["Preview the ready check countdown (add 'popup' to show the frame)"],
+      run = function(rest)
+          if SQOL.DB.ShowReadyCheckTimer then
+              SQOL_ReadyCheck_Test(nil, rest == "popup")
+          else
+              SQOL.PrintOptionOff("ShowReadyCheckTimer", "/sqol rc")
+          end
+      end },
+    { names = { "lfgtimer", "lfg" }, key = "ShowLFGProposalTimer" },
+    { names = { "lfgtest" }, desc = L["Preview the queue pop countdown"],
+      run = function() SQOL_LFGProposal_Test() end },
+    { names = { "partylevel", "pl" }, key = "ShowPartyLevel" },
+    { names = { "tooltiptarget", "tt" }, key = "ShowTooltipTarget" },
+    { names = { "range", "rng" }, key = "ShowRangeIndicator" },
+    { names = { "damagefont", "df" }, key = "DamageTextFont" },
+    { names = { "cursor", "cs" }, key = "CursorShakeHighlight" },
+    { names = { "cursorflash", "cf" }, desc = L["Flash the cursor highlight once"],
+      run = function() SQOL.CursorShake_FlashNow(0.8) end },
+    { names = { "hideach", "ha" }, key = "HideDoneAchievements" },
+    { names = { "splash" }, key = "ShowSplash" },
+    { names = { "debugtrack", "dbg" }, key = "DebugTrack" },
+    { names = { "reset" }, desc = L["Reset all settings to defaults"],
+      run = function()
+          -- Turn the range icon off first so it restores Blizzard's soft target icon.
+          if SQOL.DB and SQOL.DB.ShowRangeIndicator then
+              SQOL.SetOption("ShowRangeIndicator", false)
+          end
+          SQOL.Init(true)
+          if SQOL.SyncAllSettingsObjects then
+              SQOL.SyncAllSettingsObjects()
+          end
+          SQOL.UpdateMinimapButton()
+      end },
+    { names = { "help" }, desc = L["Show this command list"],
+      run = function() SQOL_Help() end },
+}
+
+-- Toggles the option behind a command, or explains why it can't.
+local function SQOL_RunOptionCommand(key)
+    local option = SQOL.GetOption(key)
+    if option and option.isAvailable and not option.isAvailable() then
+        print(SQOL_CHAT_PREFIX .. string.format(L["%s is not available in this client."], option.label))
+        return
+    end
+    SQOL.ToggleOption(key)
+    SQOL.PrintOptionState(key)
+end
+
+SQOL_Help = function()
+    SQOL_PrintHeader()
+    for _, command in ipairs(SQOL_COMMANDS) do
+        local option = command.key and SQOL.GetOption(command.key)
+        if not (option and option.isAvailable and not option.isAvailable()) then
+            local text = "|cff00ff00/sqol " .. command.names[1] .. "|r"
+            if command.names[2] then
+                text = text .. " |cff888888(" .. table.concat(command.names, ", ", 2) .. ")|r"
+            end
+            local desc = option and option.label or command.desc
+            print(text .. " |cffcccccc- " .. desc .. "|r")
+        end
+    end
+    print("|cffcccccc" .. string.format(L["Type %s to see which features are on."], "|cff00ff00/sqol|cffcccccc") .. "|r")
+    print(SQOL_RULE)
+end
+
+local SQOL_CommandByName = {}
+for _, command in ipairs(SQOL_COMMANDS) do
+    for _, name in ipairs(command.names) do
+        SQOL_CommandByName[name] = command
+    end
+end
+
 SLASH_SQOL1 = "/SQOL"
 SlashCmdList["SQOL"] = function(msg)
     msg = (msg or ""):lower():match("^%s*(.-)%s*$")
+    local name, rest = msg:match("^(%S*)%s*(.-)$")
 
-    local function toggle(key, label)
-        SQOL.ToggleOption(key)
-        local s = SQOL.DB[key] and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        print("|cff33ff99SQoL:|r " .. label .. " " .. s)
-    end
-
-    if msg == "autotrack" or msg == "at" then
-        toggle("AutoTrack", "Auto-track is")
-
-    elseif msg == "color" or msg == "col" then
-        toggle("ColorProgress", "Quest progress colorization is")
-
-    elseif msg == "barcolor" or msg == "bc" then
-        toggle("ColorStatusBarProgress", "XP/reputation number colorization is")
-
-    elseif msg == "questsound" or msg == "qs" then
-        toggle("QuestCompleteSound", "Quest completion sound is")
-
-    elseif msg == "objectivesound" or msg == "os" then
-        toggle("QuestObjectiveSound", "Objective completion sound is")
-
-    elseif msg == "soundprofile" or msg == "soundset" then
-        local profile = SQOL.DB.QuestSoundProfile == "Alliance" and "Horde" or "Alliance"
-        SQOL.SetOption("QuestSoundProfile", profile)
-        print("|cff33ff99SQoL:|r Quest sound profile is now |cffffff00" .. profile .. "|r")
-
-    elseif msg == "splash" then
-        toggle("ShowSplash", "Splash is")
-
-    elseif msg == "rep" or msg == "rw" then
-        toggle("RepWatch", "RepWatch is")
-
-    elseif msg == "reptext" or msg == "rt" then
-        toggle("ShowRepGains", "Floating reputation gains are")
-
-    elseif msg == "reptexttest" then
-        SQOL.RepGains_Show("Valarjar", 25)
-
-    elseif msg == "nameplate" or msg == "np" then
-        toggle("ShowNameplateObjectives", "Nameplate objectives are")
-
-    elseif msg == "stats" or msg == "ilvl" then
-        toggle("ShowItemLevel", "PlayerFrame item level is")
-
-    elseif msg == "speed" or msg == "spd" then
-        toggle("ShowMovementSpeed", "PlayerFrame movement speed is")
-
-    elseif msg == "damagefont" or msg == "df" then
-        toggle("DamageTextFont", "Damage text font is")
-
-    elseif msg == "cursor" or msg == "cs" then
-        toggle("CursorShakeHighlight", "Cursor shake highlight is")
-
-    elseif msg == "cursorflash" or msg == "cf" then
-        SQOL.CursorShake_FlashNow(0.8)
-
-    elseif msg == "readycheck" or msg == "rc" then
-        toggle("ShowReadyCheckTimer", "Ready check timer is")
-
-    elseif msg == "rctest" or msg == "rctest popup" then
-        if SQOL.DB.ShowReadyCheckTimer then
-            SQOL_ReadyCheck_Test(nil, msg == "rctest popup")
-        else
-            print("|cff33ff99SQoL:|r Ready check timer is |cffff0000OFF|r - enable it with /sqol rc")
-        end
-
-    elseif msg == "lfgtimer" or msg == "lfg" then
-        toggle("ShowLFGProposalTimer", "LFG queue pop timer is")
-
-    elseif msg == "partylevel" or msg == "pl" then
-        toggle("ShowPartyLevel", "Party member level display is")
-
-    elseif msg == "tooltiptarget" or msg == "tt" then
-        toggle("ShowTooltipTarget", "Tooltip target line is")
-
-    elseif msg == "range" or msg == "rng" then
-        toggle("ShowRangeIndicator", "Range icon and distance are")
-
-    elseif msg == "lfgtest" then
-        SQOL_LFGProposal_Test()
-
-    elseif msg == "debugtrack" or msg == "dbg" then
-        toggle("DebugTrack", "Debug tracking")
-
-    elseif msg == "hideach" or msg == "ha" then
-        if SQOL.IsAchievementFilterSupported() then
-            toggle("HideDoneAchievements", "Hide completed achievements is")
-        else
-            print("|cff33ff99SQoL:|r Hide completed achievements is not available in this client (no achievement UI).")
-        end
-
-    elseif msg == "reset" then
-        -- Turn the range icon off first so it restores Blizzard's soft target icon.
-        if SQOL.DB and SQOL.DB.ShowRangeIndicator then
-            SQOL.SetOption("ShowRangeIndicator", false)
-        end
-        SQOL.Init(true)
-        if SQOL.SyncAllSettingsObjects then
-            SQOL.SyncAllSettingsObjects()
-        end
-        SQOL.UpdateMinimapButton()
-
-    elseif msg == "help" then
-        SQOL_Help()
-
-    elseif msg == "config" or msg == "options" or msg == "opt" then
-        SQOL.OptionsPopup_Toggle()
-
-    elseif msg == "minimap" or msg == "mm" then
-        toggle("ShowMinimapButton", "Minimap button is")
-
+    local command = SQOL_CommandByName[name]
+    if not command then
+        SQOL_PrintStatus()
+    elseif command.key then
+        SQOL_RunOptionCommand(command.key)
     else
-        local version, at, sp, co, qs, lo, rep, stats, np, dmg, cursor = SQOL_GetStateStrings()
-        local qo = SQOL.DB.QuestObjectiveSound and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        local profile = SQOL.DB.QuestSoundProfile or SQOL.defaults.QuestSoundProfile
-        local rc = SQOL.DB.ShowReadyCheckTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        local lfg = SQOL.DB.ShowLFGProposalTimer and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-        print("|cff33ff99SQoL|r v" .. version .. " - AutoTrackQuests:" .. at .. " Splash:" .. sp .. " ColorProgress:" .. co .. " QuestSound:" .. qs .. " ObjectiveSound:" .. qo .. " QuestSoundProfile:" .. profile .. " HideDoneAchievements:" .. lo .. " RepWatch:" .. rep .. " NameplateObjectives:" .. np .. " StatsLine:" .. stats .. " DamageTextFont:" .. dmg .. " CursorShake:" .. cursor .. " ReadyCheckTimer:" .. rc .. " LFGQueuePopTimer:" .. lfg)
-        print("|cff33ff99XP/Rep colors:|r " .. (SQOL.DB.ColorStatusBarProgress and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
-        print("|cffccccccCommands:|r help for more info")
+        command.run(rest)
     end
 end
 

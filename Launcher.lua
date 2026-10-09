@@ -8,6 +8,7 @@
 
 local ADDON_NAME, SQOL = ...
 ADDON_NAME = ADDON_NAME or "SMoRGsQoL"
+local L = SQOL.L
 
 local ICON = "Interface\\AddOns\\SMoRGsQoL\\smorgsqol.png"
 local LibStub = rawget(_G, "LibStub")
@@ -35,10 +36,10 @@ function SQOL.Launcher_AddTooltip(tooltip)
             end
         end
     end)
-    tooltip:AddLine(string.format("%d of %d features enabled", enabled, total), 1, 1, 1)
+    tooltip:AddLine(string.format(L["%d of %d features enabled"], enabled, total), 1, 1, 1)
     tooltip:AddLine(" ")
-    tooltip:AddLine("|cffeda55fLeft-click|r to open options", 0.2, 1, 0.2)
-    tooltip:AddLine("|cffeda55fRight-click|r to open Blizzard Settings", 0.2, 1, 0.2)
+    tooltip:AddLine(L["|cffeda55fLeft-click|r to open options"], 0.2, 1, 0.2)
+    tooltip:AddLine(L["|cffeda55fRight-click|r to open Blizzard Settings"], 0.2, 1, 0.2)
 end
 
 local dataObject = LDB and LDB:NewDataObject(ADDON_NAME, {

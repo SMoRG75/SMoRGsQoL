@@ -103,6 +103,13 @@ Type [b]/sqol[/b] to see the current status, or [b]/sqol help[/b] for the full l
 [/code]
 
 
+[size=4][b]Translations[/b][/size]
+
+SMoRG's QoL follows your game language: English, German, French, Spanish, Brazilian Portuguese, Italian, Russian, Korean, and Simplified and Traditional Chinese. The quest voice lines are always in English, and the slash commands are the same in every language.
+
+[b]The translations have not been checked by native speakers.[/b] They use Blizzard's own terms where possible, but some wording may be clumsy or wrong. If something reads oddly in your language, please post a better text in the comments or on [url=https://github.com/SMoRG75/SMoRGsQoL/issues]GitHub[/url]. Corrections are very welcome.
+
+
 [size=4][b]Support[/b][/size]
 
 SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor it on [url=https://github.com/sponsors/SMoRG75]GitHub Sponsors[/url].

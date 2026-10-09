@@ -1,4 +1,5 @@
 local ADDON_NAME, SQOL = ...
+local L = SQOL.L
 
 ------------------------------------------------------------
 -- RepWatch: auto-switch watched reputation on rep gain
@@ -412,7 +413,132 @@ local function SQOL_Rep_StripChatCodes(msg)
     msg = string.gsub(msg, "|T.-|t", "")
     msg = string.gsub(msg, "|A.-|a", "")
     msg = string.gsub(msg, "|H.-|h(.-)|h", "%1")
+    msg = string.gsub(msg, "|3%-%d+%((.-)%)", "%1")
     return msg
+end
+
+-- Blizzard's localized reputation chat templates, most specific first.
+-- "INCREASED" in the name marks a gain.
+local SQOL_REP_TEMPLATE_NAMES = {
+    "FACTION_STANDING_INCREASED_ACH_BONUS_ACCOUNT_WIDE",
+    "FACTION_STANDING_INCREASED_ACH_BONUS",
+    "FACTION_STANDING_INCREASED_DOUBLE_BONUS",
+    "FACTION_STANDING_INCREASED_BONUS",
+    "FACTION_STANDING_INCREASED_ACCOUNT_WIDE",
+    "FACTION_STANDING_INCREASED",
+    "FACTION_STANDING_INCREASED_GENERIC_ACCOUNT_WIDE",
+    "FACTION_STANDING_INCREASED_GENERIC",
+    "FACTION_STANDING_DECREASED_ACCOUNT_WIDE",
+    "FACTION_STANDING_DECREASED",
+    "FACTION_STANDING_DECREASED_GENERIC_ACCOUNT_WIDE",
+    "FACTION_STANDING_DECREASED_GENERIC",
+}
+
+-- enUS fallbacks for clients without the templates above.
+-- Each capture is the faction name ("s") or the amount ("d").
+local SQOL_REP_FALLBACK_PATTERNS = {
+    { pattern = "^Reputation with (.-) increased by ([%d,%.]+)", kinds = { "s", "d" }, increased = true },
+    { pattern = "^Your reputation with (.-) has increased by ([%d,%.]+)", kinds = { "s", "d" }, increased = true },
+    -- Account-wide factions: "Your Warband's reputation with X increased by N."
+    { pattern = "^Your [^']-'s reputation with (.-) increased by ([%d,%.]+)", kinds = { "s", "d" }, increased = true },
+    { pattern = "^Reputation with (.-) increased", kinds = { "s" }, increased = true },
+    { pattern = "^Your reputation with (.-) has increased", kinds = { "s" }, increased = true },
+    { pattern = "^Your [^']-'s reputation with (.-) increased", kinds = { "s" }, increased = true },
+    { pattern = "^Reputation with (.-) decreased", kinds = { "s" }, increased = false },
+    { pattern = "^Your reputation with (.-) has decreased", kinds = { "s" }, increased = false },
+    { pattern = "^Your [^']-'s reputation with (.-) decreased", kinds = { "s" }, increased = false },
+}
+
+local function SQOL_Rep_EscapePattern(text)
+    return (string.gsub(text, "[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%0"))
+end
+
+-- Turns a format string such as "Reputation with %s increased by %d." into a
+-- Lua pattern. Handles %s, %d, %.1f and reordered arguments (%2$d), plus the
+-- grammar codes of some locales: ruRU declines the name with "|3-7(%s)"
+-- (unwrapped here and in SQOL_Rep_StripChatCodes), and frFR picks a plural
+-- with "|4point:points;" (matched loosely, raw or already resolved).
+local function SQOL_Rep_TemplateToPattern(template)
+    template = string.gsub(template, "|3%-%d+%((.-)%)", "%1")
+    template = string.gsub(template, "|4[^;]*;", "\001")
+    local parts, kinds = {}, {}
+    local pos = 1
+    while pos <= #template do
+        local s, e, conv = string.find(template, "%%%d*%$?[%-%d%.]*([sdf%%])", pos)
+        if not s then
+            parts[#parts + 1] = SQOL_Rep_EscapePattern(string.sub(template, pos))
+            break
+        end
+        parts[#parts + 1] = SQOL_Rep_EscapePattern(string.sub(template, pos, s - 1))
+        if conv == "%" then
+            parts[#parts + 1] = "%%"
+        else
+            kinds[#kinds + 1] = conv == "s" and "s" or "d"
+            parts[#parts + 1] = conv == "s" and "(.-)" or "([%d,%.]+)"
+        end
+        pos = e + 1
+    end
+    if #kinds == 0 then return nil end
+    local pattern = "^" .. string.gsub(table.concat(parts), "\001", ".-")
+    -- A lazy capture at the very end would match nothing.
+    if string.sub(pattern, -4) == "(.-)" then
+        pattern = pattern .. "$"
+    end
+    return pattern, kinds
+end
+
+local SQOL_RepPatterns
+local function SQOL_Rep_GetPatterns()
+    if SQOL_RepPatterns then return SQOL_RepPatterns end
+    SQOL_RepPatterns = {}
+    for _, globalName in ipairs(SQOL_REP_TEMPLATE_NAMES) do
+        local template = rawget(_G, globalName)
+        if type(template) == "string" and template ~= "" then
+            local pattern, kinds = SQOL_Rep_TemplateToPattern(template)
+            if pattern then
+                SQOL_RepPatterns[#SQOL_RepPatterns + 1] = {
+                    pattern = pattern,
+                    kinds = kinds,
+                    increased = string.find(globalName, "INCREASED", 1, true) ~= nil,
+                }
+            end
+        end
+    end
+    for _, entry in ipairs(SQOL_REP_FALLBACK_PATTERNS) do
+        SQOL_RepPatterns[#SQOL_RepPatterns + 1] = entry
+    end
+    return SQOL_RepPatterns
+end
+
+-- Returns faction name, amount (or nil) and whether it was a gain,
+-- for a reputation chat message with the chat codes already stripped.
+local function SQOL_Rep_ParseMessage(msg)
+    for _, entry in ipairs(SQOL_Rep_GetPatterns()) do
+        local captures = { string.match(msg, entry.pattern) }
+        if captures[1] then
+            local name, amount
+            for i, kind in ipairs(entry.kinds) do
+                if kind == "s" and not name then
+                    name = captures[i]
+                elseif kind == "d" and not amount then
+                    amount = tonumber((string.gsub(captures[i], "[,%.]", "")))
+                end
+            end
+            if name then
+                return name, amount, entry.increased
+            end
+        end
+    end
+end
+
+-- For tests: parse a raw chat message, and rebuild the patterns after the
+-- templates change.
+function SQOL.Rep_ParseMessage(msg)
+    return SQOL_Rep_ParseMessage(SQOL_Rep_StripChatCodes(msg))
+end
+
+function SQOL.Rep_ResetPatterns()
+    SQOL_RepPatterns = nil
 end
 
 local function SQOL_Rep_ParseFactionNameFromMessage(msg)
@@ -422,16 +548,7 @@ local function SQOL_Rep_ParseFactionNameFromMessage(msg)
 
     msg = SQOL_Rep_StripChatCodes(msg)
 
-    -- enUS patterns (Retail default). If you ever play another locale,
-    -- we can switch this over to use global string templates instead.
-    local name =
-        string.match(msg, "^Reputation with (.-) increased") or
-        string.match(msg, "^Reputation with (.-) decreased") or
-        string.match(msg, "^Your reputation with (.-) has increased") or
-        string.match(msg, "^Your reputation with (.-) has decreased") or
-        -- Account-wide factions: "Your Warband's reputation with X increased by N."
-        string.match(msg, "^Your [^']-'s reputation with (.-) increased") or
-        string.match(msg, "^Your [^']-'s reputation with (.-) decreased")
+    local name = SQOL_Rep_ParseMessage(msg)
 
     if type(name) ~= "string" then
         return nil
@@ -504,7 +621,7 @@ function SQOL.RepGains_Show(name, amount)
     end
     local line = available or oldest
     line.age, line.offset = 0, 0
-    line:SetText("+" .. amount .. " Rep — " .. name)
+    line:SetText(string.format(L["+%d Rep — %s"], amount, name))
     line:SetPoint("CENTER", repGainFrame, "CENTER", 0, 65)
     line:SetAlpha(1)
     line:Show()
@@ -515,11 +632,8 @@ function SQOL.RepGains_HandleMessage(msg)
     if not SQOL.DB or not SQOL.DB.ShowRepGains then return end
     if issecretvalue and issecretvalue(msg) then return end
     if type(msg) ~= "string" then return end
-    -- The addon currently supports enUS, matching RepWatch's parser above.
-    msg = SQOL_Rep_StripChatCodes(msg)
-    local amount = string.match(msg, "increased by ([%d,]+)")
-    amount = amount and tonumber((string.gsub(amount, ",", "")))
-    if not amount or amount <= 0 then return end
+    local _, amount, increased = SQOL_Rep_ParseMessage(SQOL_Rep_StripChatCodes(msg))
+    if not increased or not amount or amount <= 0 then return end
     local name = SQOL_Rep_ParseFactionNameFromMessage(msg)
     if name then SQOL.RepGains_Show(name, amount) end
 end

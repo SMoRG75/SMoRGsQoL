@@ -1,4 +1,5 @@
 local ADDON_NAME, SQOL = ...
+local L = SQOL.L
 
 ------------------------------------------------------------
 -- Damage text font
@@ -239,7 +240,7 @@ end
 
 function SQOL.CursorShake_FlashNow(duration)
     if not SQOL.DB or not SQOL.DB.CursorShakeHighlight then
-        print("|cff33ff99SQoL:|r Cursor shake highlight is OFF. Enable it with /sqol cursor.")
+        SQOL.PrintOptionOff("CursorShakeHighlight", "/sqol cursor")
         return
     end
 
@@ -321,8 +322,8 @@ end
 ------------------------------------------------------------
 -- Unit tooltip: show who the unit is targeting
 ------------------------------------------------------------
-local SQOL_TOOLTIP_TARGET_LABEL = "|cffffd100Target:|r "
-local SQOL_TOOLTIP_TARGET_NONE = "|cff808080none|r"
+local SQOL_TOOLTIP_TARGET_LABEL = "|cffffd100" .. L["Target:"] .. "|r "
+local SQOL_TOOLTIP_TARGET_NONE = "|cff808080" .. L["none"] .. "|r"
 local SQOL_TOOLTIP_TARGET_REFRESH = 0.2
 
 -- The unit and line currently showing a target on GameTooltip.

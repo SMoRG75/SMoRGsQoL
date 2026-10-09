@@ -1,4 +1,5 @@
 local ADDON_NAME, SQOL = ...
+local L = SQOL.L
 
 ------------------------------------------------------------
 -- PlayerFrame: show equipped iLvl
@@ -138,8 +139,8 @@ function SQOL.UpdateCharacterIlvlText(forceIlvlRefresh)
     end
 
     local parts = {}
-    if SQOL.DB.ShowItemLevel then parts[#parts + 1] = "iLvl: " .. ilvlText end
-    if SQOL.DB.ShowMovementSpeed then parts[#parts + 1] = "Spd: " .. speedText end
+    if SQOL.DB.ShowItemLevel then parts[#parts + 1] = L["iLvl:"] .. " " .. ilvlText end
+    if SQOL.DB.ShowMovementSpeed then parts[#parts + 1] = L["Spd:"] .. " " .. speedText end
     local line = table.concat(parts, "  ")
     if SQOL._lastStatLineText ~= line then
         SQOL._lastStatLineText = line

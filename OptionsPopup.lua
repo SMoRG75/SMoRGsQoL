@@ -8,6 +8,7 @@
 
 local ADDON_NAME, SQOL = ...
 ADDON_NAME = ADDON_NAME or "SMoRGsQoL"
+local L = SQOL.L
 
 local POPUP_NAME = "SQOL_OptionsPopup"
 local ICON = "Interface\\AddOns\\SMoRGsQoL\\smorgsqol.png"
@@ -54,6 +55,11 @@ local function SQOL_Popup_CreateCheckbox(parent, option)
         label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
     end
     label:SetFontObject("GameFontHighlight")
+    -- Translations can be longer than the column; cut them off with "..."
+    -- (the tooltip shows the full label).
+    label:SetWidth(COLUMN_WIDTH - 30)
+    label:SetJustifyH("LEFT")
+    label:SetWordWrap(false)
     label:SetText(option.label)
     -- Let the label toggle the checkbox too.
     checkbox:SetHitRectInsets(0, -math.min(COLUMN_WIDTH - 30, (label:GetStringWidth() or 0) + 6), 0, 0)
@@ -72,15 +78,6 @@ local function SQOL_Popup_CreateCheckbox(parent, option)
     return checkbox
 end
 
-local function SQOL_Popup_ValueLabel(option, value)
-    for _, entry in ipairs(option.values) do
-        if entry.value == value then
-            return entry.label
-        end
-    end
-    return tostring(value)
-end
-
 local function SQOL_Popup_CreateDropdown(parent, option)
     local row = CreateFrame("Frame", nil, parent)
     row:SetSize(COLUMN_WIDTH, ROW_HEIGHT)
@@ -90,6 +87,9 @@ local function SQOL_Popup_CreateDropdown(parent, option)
 
     local label = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     label:SetPoint("LEFT", row, "LEFT", 4, 0)
+    label:SetPoint("RIGHT", row, "RIGHT", -160, 0) -- leave room for the dropdown
+    label:SetJustifyH("LEFT")
+    label:SetWordWrap(false)
     label:SetText(option.label)
 
     -- Blizzard's menu dropdown (11.0+); fall back to a button that cycles the values.
@@ -120,7 +120,7 @@ local function SQOL_Popup_CreateDropdown(parent, option)
             SQOL.SetOption(option.key, option.values[index % #option.values + 1].value)
         end)
         function row:Refresh()
-            button:SetText(SQOL_Popup_ValueLabel(option, SQOL.DB and SQOL.DB[option.key]))
+            button:SetText(SQOL.GetOptionValueLabel(option, SQOL.DB and SQOL.DB[option.key]))
         end
     end
     return row
@@ -285,7 +285,7 @@ local function SQOL_Popup_Create()
 
     local subtitle = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     subtitle:SetPoint("TOPLEFT", frame, "TOPLEFT", 70, -36)
-    subtitle:SetText("Quality-of-life tweaks. Changes apply immediately.")
+    subtitle:SetText(L["Quality-of-life tweaks. Changes apply immediately."])
 
     SQOL_Popup_BuildContent(frame)
 
@@ -296,7 +296,7 @@ local function SQOL_Popup_Create()
     local settingsButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     settingsButton:SetSize(160, 22)
     settingsButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PADDING_X, 12)
-    settingsButton:SetText("Blizzard Settings")
+    settingsButton:SetText(L["Blizzard Settings"])
     settingsButton:SetScript("OnClick", function()
         frame:Hide()
         SQOL.OpenBlizzardSettings()

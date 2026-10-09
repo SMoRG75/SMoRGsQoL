@@ -1,0 +1,105 @@
+-- German (deDE)
+local _, SQOL = ...
+if SQOL.Locale ~= "deDE" then return end
+local L = SQOL.L
+
+-- Sound profiles
+L["Horde (Peon)"] = "Horde (Peon)"
+L["Alliance (Human worker)"] = "Allianz (menschlicher Arbeiter)"
+
+-- On-screen text
+L["Target:"] = "Ziel:"
+L["none"] = "keins"
+L["iLvl:"] = "GS:"
+L["Spd:"] = "Tempo:"
+L["> %d yd"] = "> %d m"
+L["%d-%d yd"] = "%d-%d m"
+L["< %d yd"] = "< %d m"
+L["+%d Rep — %s"] = "+%d Ruf — %s"
+L["%.1f%% left"] = "noch %.1f%%"
+L["ON"] = "AN"
+L["OFF"] = "AUS"
+
+-- Chat messages
+L["Settings have been reset to defaults."] = "Die Einstellungen wurden auf die Standardwerte zurückgesetzt."
+L["%s is OFF. Enable it with %s."] = "%s ist AUS. Aktiviere es mit %s."
+L["%s is not available in this client."] = "%s ist in diesem Client nicht verfügbar."
+L["Type %s for the command list."] = "Gib %s ein, um alle Befehle zu sehen."
+L["Type %s to see which features are on."] = "Gib %s ein, um zu sehen, welche Funktionen aktiv sind."
+L["Could not auto-track quest %s."] = "Quest %s konnte nicht automatisch verfolgt werden."
+L["And |cff33ff99SQoL|r auto-tracked it"] = "Und |cff33ff99SQoL|r verfolgt sie automatisch"
+L["%s is done!"] = "%s ist abgeschlossen!"
+L["%s is ready to turn in!"] = "%s kann abgegeben werden!"
+
+-- Slash command help
+L["Open the options window"] = "Optionsfenster öffnen"
+L["Switch between the Horde and Alliance quest sounds"] = "Zwischen den Quest-Sounds der Horde und der Allianz wechseln"
+L["Preview floating reputation gains"] = "Vorschau der schwebenden Rufgewinne"
+L["Preview the ready check countdown (add 'popup' to show the frame)"] = "Vorschau des Bereitschaftscheck-Countdowns ('popup' anhängen, um das Fenster zu zeigen)"
+L["Preview the queue pop countdown"] = "Vorschau des Countdowns für die Warteschlange"
+L["Flash the cursor highlight once"] = "Cursor-Hervorhebung einmal aufblinken lassen"
+L["Reset all settings to defaults"] = "Alle Einstellungen auf die Standardwerte zurücksetzen"
+L["Show this command list"] = "Diese Befehlsliste anzeigen"
+
+-- Options window and Settings page
+L["Quality-of-life tweaks. Changes apply immediately."] = "Komfortfunktionen. Änderungen gelten sofort."
+L["Blizzard Settings"] = "Blizzard-Optionen"
+L["%d of %d features enabled"] = "%d von %d Funktionen aktiv"
+L["|cffeda55fLeft-click|r to open options"] = "|cffeda55fLinksklick|r öffnet die Optionen"
+L["|cffeda55fRight-click|r to open Blizzard Settings"] = "|cffeda55fRechtsklick|r öffnet die Blizzard-Optionen"
+
+L["Quests"] = "Quests"
+L["Auto-track newly accepted quests"] = "Neue Quests automatisch verfolgen"
+L["Automatically track newly accepted quests in the objective tracker."] = "Neu angenommene Quests automatisch in der Zielverfolgung anzeigen."
+L["Color quest progress"] = "Questfortschritt einfärben"
+L["Colorize quest and scenario progress messages, the current count of quest objectives in the objective tracker, and quest objective counts on nameplates (red → yellow → green)."] = "Färbt Fortschrittsmeldungen von Quests und Szenarien, den aktuellen Stand der Questziele in der Zielverfolgung und die Questzähler über Namensplaketten ein (rot → gelb → grün)."
+L["Show objective counts on nameplates"] = "Questzähler über Namensplaketten"
+L["Show quest objective counts (e.g., 0/10) above relevant nameplates."] = "Zeigt den Fortschritt von Questzielen (z. B. 0/10) über den passenden Namensplaketten."
+L["Quest completion sound"] = "Sound bei abgeschlossener Quest"
+L["Play a sound when a quest is ready to turn in (or done for bonus/world quests)."] = "Spielt einen Sound, wenn eine Quest abgegeben werden kann (oder eine Bonus-/Weltquest erledigt ist)."
+L["Quest objective completion sound"] = "Sound bei erfülltem Questziel"
+L["Play a worker voice line when one objective is completed but the quest is not yet done."] = "Spielt eine Arbeiter-Sprachzeile, wenn ein Questziel erfüllt ist, die Quest aber noch nicht abgeschlossen ist."
+L["Quest sound profile"] = "Quest-Soundprofil"
+L["Choose the worker voice used for objective and full quest completion."] = "Wähle die Arbeiterstimme für erfüllte Questziele und abgeschlossene Quests."
+
+L["Character"] = "Charakter"
+L["Show item level on PlayerFrame"] = "Gegenstandsstufe am Spielerrahmen"
+L["Show your equipped item level on the player frame, independently of movement speed."] = "Zeigt deine angelegte Gegenstandsstufe am Spielerrahmen, unabhängig vom Bewegungstempo."
+L["Show movement speed on PlayerFrame"] = "Bewegungstempo am Spielerrahmen"
+L["Show movement speed on the player frame, independently of item level."] = "Zeigt dein Bewegungstempo am Spielerrahmen, unabhängig von der Gegenstandsstufe."
+
+L["Reputation & XP"] = "Ruf & EP"
+L["Color XP/reputation numbers"] = "EP-/Rufzahlen einfärben"
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "Färbt die aktuelle EP-/Rufzahl ein (rot → gelb → grün), mit umrandetem Text. Beim Ruf werden zusätzlich der verbleibende Prozentsatz und der aktuelle Rang angezeigt. Beschriftungen und Maximalwerte bleiben weiß, die Leistenfarben bleiben unverändert. Unabhängig von den Farben des Questfortschritts."
+L["Auto-watch reputation gains"] = "Ruf automatisch beobachten"
+L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "Wenn sich dein Ruf bei einer Fraktion ändert, wird automatisch diese Fraktion beobachtet."
+L["Floating reputation gains"] = "Schwebende Rufgewinne"
+L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "Zeigt Rufgewinne als grünen Text in der Nähe deines Charakters, der nach oben schwebt und verblasst. Unabhängig vom automatischen Beobachten."
+
+L["Group"] = "Gruppe"
+L["Ready check countdown timer"] = "Countdown für Bereitschaftscheck"
+L["Show a live countdown on the ready check popup for how long until it expires."] = "Zeigt im Fenster des Bereitschaftschecks einen Countdown bis zum Ablauf."
+L["LFG queue pop countdown timer"] = "Countdown für die Gruppensuche"
+L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."] = "Zeigt bei einer Einladung aus der Gruppensuche einen Countdown, wie lange du noch annehmen kannst (40 Sekunden)."
+L["Show party member levels"] = "Stufen der Gruppenmitglieder"
+L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] = "Zeigt die Stufe jedes Gruppenmitglieds an den Gruppenrahmen (Standard und Schlachtzugsstil), praktisch in 5-Spieler-Instanzen."
+
+L["Interface"] = "Interface"
+L["Show target in unit tooltips"] = "Ziel im Tooltip anzeigen"
+L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover."] = "Fügt Einheiten-Tooltips eine Zeile \"Ziel:\" hinzu, die zeigt, wen die Einheit anvisiert: in Klassenfarbe bei Spielern, in Reaktionsfarbe bei NPCs und ein rotes \"Ihr\", wenn Ihr es seid. Aktualisiert sich live, solange der Mauszeiger darauf ist."
+L["Range icon and distance for your target"] = "Reichweitensymbol und Entfernung zum Ziel"
+L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "Zeigt auf der Namensplakette deines Ziels, wo Blizzards Schwertsymbol der weichen Zielerfassung sitzt (ohne Namensplakette neben dem Porträt des Zielrahmens), die Entfernung zu einem angreifbaren Ziel in Metern (z. B. \"8-30 m\", aus der Reichweite der Fähigkeiten auf deinen Aktionsleisten) und ein pulsierendes Symbol, wenn keine deiner offensiven Fähigkeiten es erreicht. Nutzt dieselbe Reichweitenprüfung, die Aktionstasten rot färbt, und folgt daher Gestalten und Bonusleisten. Solange die Option aktiv ist, ist Blizzards Schwertsymbol (SoftTargetIconEnemy) ausgeschaltet; es wird wieder eingeschaltet, wenn du sie deaktivierst."
+L["Custom damage text font"] = "Eigene Schriftart für Schadenszahlen"
+L["Use the TrashHand damage text font for floating combat text."] = "Verwendet die Schriftart TrashHand für die Schadenszahlen im schwebenden Kampftext."
+L["Highlight cursor on shake"] = "Cursor beim Schütteln hervorheben"
+L["Highlight the cursor when you shake the mouse."] = "Hebt den Mauszeiger hervor, wenn du die Maus schüttelst."
+L["Hide completed achievements"] = "Abgeschlossene Erfolge ausblenden"
+L["Achievement UI will default to showing incomplete achievements only."] = "Das Erfolgsfenster zeigt standardmäßig nur unvollständige Erfolge."
+L["Show minimap button"] = "Minikartenknopf anzeigen"
+L["Show a SMoRG's QoL button on the minimap. The addon is also available from the addon compartment menu and from LibDataBroker displays such as Bazooka or Titan Panel."] = "Zeigt einen Knopf für SMoRG's QoL an der Minikarte. Das Addon ist auch über das Addon-Menü an der Minikarte und über LibDataBroker-Anzeigen wie Bazooka oder Titan Panel erreichbar."
+L["Show splash on login"] = "Statusübersicht beim Einloggen"
+L["Show the status splash message when you log in."] = "Zeigt beim Einloggen eine Übersicht, welche Funktionen aktiv sind."
+
+L["Advanced"] = "Erweitert"
+L["Debug tracking"] = "Debug-Ausgabe"
+L["Print verbose debug information (for troubleshooting)."] = "Gibt ausführliche Debug-Informationen im Chat aus (zur Fehlersuche)."

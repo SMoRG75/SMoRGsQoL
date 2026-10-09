@@ -457,6 +457,19 @@ for _, fs in ipairs(repFrame.fontStrings) do
     if fs.text == '+30 Rep — The Wild Hunt' then warbandShown = true end
 end
 assert(warbandShown, 'Account-wide (Warband) gains must be shown')
+-- Other client languages: patterns come from Blizzard's localized templates.
+FACTION_STANDING_INCREASED = "Euer Ruf bei der Fraktion '%s' hat sich um %d verbessert."
+FACTION_STANDING_DECREASED = "Réputation auprès de la faction %s baissée de %d |4point:points;."
+FACTION_STANDING_INCREASED_ACCOUNT_WIDE = "Отношение |3-7(%s) к вашему отряду улучшилось на %d."
+sqol.Rep_ResetPatterns()
+local function parsed(msg) return table.concat({ tostring((sqol.Rep_ParseMessage(msg))), tostring(select(2, sqol.Rep_ParseMessage(msg))), tostring(select(3, sqol.Rep_ParseMessage(msg))) }, '|') end
+assert(parsed("Euer Ruf bei der Fraktion 'Valdrakken' hat sich um 250 verbessert.") == 'Valdrakken|250|true')
+assert(parsed('Réputation auprès de la faction Hurlevent baissée de 10 |4point:points;.') == 'Hurlevent|10|false')
+assert(parsed('Réputation auprès de la faction Hurlevent baissée de 10 points.') == 'Hurlevent|10|false')
+assert(parsed('Отношение |3-7(Орда) к вашему отряду улучшилось на 30.') == 'Орда|30|true')
+assert(parsed('Reputation with Valarjar increased by 25.') == 'Valarjar|25|true', 'enUS fallback stays')
+FACTION_STANDING_INCREASED, FACTION_STANDING_DECREASED, FACTION_STANDING_INCREASED_ACCOUNT_WIDE = nil, nil, nil
+sqol.Rep_ResetPatterns()
 repFrame.scripts.OnUpdate(repFrame, 3)
 assert(not repFrame:IsShown(), 'Floating labels must expire')
 SlashCmdList.SQOL('reptexttest')

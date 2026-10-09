@@ -7,6 +7,7 @@ local ADDON_NAME, SQOL = ...
 ADDON_NAME = ADDON_NAME or "SMoRGsQoL"
 
 SQOL = SQOL or {}        -- addon namespace table (shared across files)
+local L = SQOL.L
 SQOL.ADDON_NAME = ADDON_NAME
 
 -- WoW Forever runs the Mainline client (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
@@ -16,12 +17,12 @@ SQOL.IsForever = type(interfaceVersion) == "number" and interfaceVersion < 10000
 
 SQOL.QuestSoundProfiles = {
     Horde = {
-        label = "Horde (Peon)",
+        label = L["Horde (Peon)"],
         objective = 6197, -- B_PeonYes3: "Work, work."
         complete = 6199,  -- B_PeonBuildingComplete1: "Work complete."
     },
     Alliance = {
-        label = "Alliance (Human worker)",
+        label = L["Alliance (Human worker)"],
         objective = 6288, -- B_PeasantWhat3: "More work?"
         complete = "Interface\\AddOns\\SMoRGsQoL\\Sounds\\Peasant_job_done.mp3",
     },

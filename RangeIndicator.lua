@@ -14,6 +14,7 @@
 ------------------------------------------------------------
 
 local ADDON_NAME, SQOL = ...
+local L = SQOL.L
 
 local ICON_TEXTURE = "Interface\\AddOns\\SMoRGsQoL\\Media\\range.png"
 local ICON_SIZE = 24
@@ -166,12 +167,12 @@ end
 function SQOL.RangeIndicator_FormatDistance(state)
     if not state then return nil end
     if state.outOfRange then
-        return state.minYards and string.format("> %d yd", state.minYards) or nil
+        return state.minYards and string.format(L["> %d yd"], state.minYards) or nil
     end
     if state.minYards and state.maxYards then
-        return string.format("%d-%d yd", state.minYards, state.maxYards)
+        return string.format(L["%d-%d yd"], state.minYards, state.maxYards)
     end
-    return state.maxYards and string.format("< %d yd", state.maxYards) or nil
+    return state.maxYards and string.format(L["< %d yd"], state.maxYards) or nil
 end
 
 ------------------------------------------------------------

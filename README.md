@@ -159,6 +159,12 @@ Type `/sqol` to see current status, or use:
 Settings are stored per account in:
 - 💾 `SQOL_DB`
 
+## Translations
+
+SMoRG's QoL follows your game language: English, German, French, Spanish (Spain and Latin America), Brazilian Portuguese, Italian, Russian, Korean, and Simplified and Traditional Chinese. The quest voice lines are always in English, and the slash commands are the same in every language.
+
+⚠️ **The translations have not been checked by native speakers.** They use Blizzard's own terms where possible, but some wording may be clumsy or wrong. If something reads oddly in your language, please suggest a better text on [CurseForge](https://www.curseforge.com/wow/addons/smorgsqol) or [GitHub](https://github.com/SMoRG75/SMoRGsQoL/issues). Corrections are very welcome.
+
 ## Support
 
 SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor its development on [GitHub Sponsors](https://github.com/sponsors/SMoRG75). Bug reports and ideas are just as welcome on [CurseForge](https://www.curseforge.com/wow/addons/smorgsqol) or [GitHub](https://github.com/SMoRG75/SMoRGsQoL/issues).
@@ -177,6 +183,8 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 
 | File | Responsibility |
 | --- | --- |
+| `Locales/Locales.lua` | The `SQOL.L` translation table (English text is the key and the fallback) |
+| `Locales/<locale>.lua` | Translations for one client language (`esES.lua` also serves esMX) |
 | `Core.lua` | Defaults, sound profiles, shared utilities and namespace setup |
 | `VisualTweaks.lua` | Damage font, cursor highlight, achievement filter and tooltip target line |
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
@@ -201,3 +209,8 @@ expose only the entry points needed by the controller through `SQOL`.
 Run `lua tests/smoke.lua` from the repository root for a mocked load/event/command
 smoke test. It reads the real TOC order. In-game testing is still needed for frame
 layout, protected UI behavior and real quest/reputation data.
+
+All visible text goes through `L["English text"]`. Run `lua tests/locales.lua` after
+changing any of it: it fails when a translation's English key is no longer used in
+the code or its `%s`/`%d` or color codes don't match, and lists missing translations
+(those fall back to English).

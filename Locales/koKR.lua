@@ -1,0 +1,105 @@
+-- Korean (koKR)
+local _, SQOL = ...
+if SQOL.Locale ~= "koKR" then return end
+local L = SQOL.L
+
+-- Sound profiles
+L["Horde (Peon)"] = "호드 (일꾼)"
+L["Alliance (Human worker)"] = "얼라이언스 (인간 농부)"
+
+-- On-screen text
+L["Target:"] = "대상:"
+L["none"] = "없음"
+L["iLvl:"] = "아이템 레벨:"
+L["Spd:"] = "속도:"
+L["> %d yd"] = "> %d미터"
+L["%d-%d yd"] = "%d-%d미터"
+L["< %d yd"] = "< %d미터"
+L["+%d Rep — %s"] = "평판 +%d — %s"
+L["%.1f%% left"] = "%.1f%% 남음"
+L["ON"] = "켜짐"
+L["OFF"] = "꺼짐"
+
+-- Chat messages
+L["Settings have been reset to defaults."] = "설정을 기본값으로 초기화했습니다."
+L["%s is OFF. Enable it with %s."] = "%s: 꺼짐. %s 명령어로 켤 수 있습니다."
+L["%s is not available in this client."] = "%s: 이 클라이언트에서는 사용할 수 없습니다."
+L["Type %s for the command list."] = "명령어 목록을 보려면 %s 를 입력하세요."
+L["Type %s to see which features are on."] = "켜진 기능을 보려면 %s 를 입력하세요."
+L["Could not auto-track quest %s."] = "퀘스트 %s 자동 추적에 실패했습니다."
+L["And |cff33ff99SQoL|r auto-tracked it"] = "|cff33ff99SQoL|r에서 자동으로 추적합니다"
+L["%s is done!"] = "%s 완료!"
+L["%s is ready to turn in!"] = "%s 완료! 보고할 수 있습니다!"
+
+-- Slash command help
+L["Open the options window"] = "설정 창 열기"
+L["Switch between the Horde and Alliance quest sounds"] = "호드와 얼라이언스 퀘스트 소리 전환"
+L["Preview floating reputation gains"] = "떠오르는 평판 획득 미리 보기"
+L["Preview the ready check countdown (add 'popup' to show the frame)"] = "전투 준비 확인 카운트다운 미리 보기 ('popup'을 붙이면 창도 표시)"
+L["Preview the queue pop countdown"] = "대기열 수락 카운트다운 미리 보기"
+L["Flash the cursor highlight once"] = "커서 강조 한 번 표시"
+L["Reset all settings to defaults"] = "모든 설정을 기본값으로 초기화"
+L["Show this command list"] = "이 명령어 목록 표시"
+
+-- Options window and Settings page
+L["Quality-of-life tweaks. Changes apply immediately."] = "편의 기능 모음. 변경 사항은 즉시 적용됩니다."
+L["Blizzard Settings"] = "블리자드 설정"
+L["%d of %d features enabled"] = "기능 %d/%d개 사용 중"
+L["|cffeda55fLeft-click|r to open options"] = "|cffeda55f왼쪽 클릭|r: 설정 열기"
+L["|cffeda55fRight-click|r to open Blizzard Settings"] = "|cffeda55f오른쪽 클릭|r: 블리자드 설정 열기"
+
+L["Quests"] = "퀘스트"
+L["Auto-track newly accepted quests"] = "새 퀘스트 자동 추적"
+L["Automatically track newly accepted quests in the objective tracker."] = "새로 수락한 퀘스트를 임무 추적기에 자동으로 추가합니다."
+L["Color quest progress"] = "퀘스트 진행 색상"
+L["Colorize quest and scenario progress messages, the current count of quest objectives in the objective tracker, and quest objective counts on nameplates (red → yellow → green)."] = "퀘스트와 시나리오 진행 메시지, 임무 추적기의 현재 목표 수치, 이름표 위의 퀘스트 목표 수치에 색을 입힙니다 (빨강 → 노랑 → 초록)."
+L["Show objective counts on nameplates"] = "이름표에 퀘스트 목표 표시"
+L["Show quest objective counts (e.g., 0/10) above relevant nameplates."] = "관련된 이름표 위에 퀘스트 목표 진행도(예: 0/10)를 표시합니다."
+L["Quest completion sound"] = "퀘스트 완료 소리"
+L["Play a sound when a quest is ready to turn in (or done for bonus/world quests)."] = "퀘스트를 보고할 수 있을 때(보너스 목표와 전역 퀘스트는 완료했을 때) 소리를 재생합니다."
+L["Quest objective completion sound"] = "퀘스트 목표 완료 소리"
+L["Play a worker voice line when one objective is completed but the quest is not yet done."] = "목표 하나를 완료했지만 퀘스트가 아직 끝나지 않았을 때 일꾼 대사를 재생합니다."
+L["Quest sound profile"] = "퀘스트 소리 프로필"
+L["Choose the worker voice used for objective and full quest completion."] = "목표 완료와 퀘스트 완료에 사용할 일꾼 목소리를 고릅니다."
+
+L["Character"] = "캐릭터"
+L["Show item level on PlayerFrame"] = "플레이어 창에 아이템 레벨 표시"
+L["Show your equipped item level on the player frame, independently of movement speed."] = "착용한 아이템 레벨을 플레이어 창에 표시합니다. 이동 속도와 따로 설정합니다."
+L["Show movement speed on PlayerFrame"] = "플레이어 창에 이동 속도 표시"
+L["Show movement speed on the player frame, independently of item level."] = "이동 속도를 플레이어 창에 표시합니다. 아이템 레벨과 따로 설정합니다."
+
+L["Reputation & XP"] = "평판 및 경험치"
+L["Color XP/reputation numbers"] = "경험치/평판 수치 색상"
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "현재 경험치/평판 수치에 색을 입히고 테두리를 넣습니다 (빨강 → 노랑 → 초록). 평판은 전체 수치 뒤에 남은 비율과 현재 평판 등급도 표시합니다. 이름과 최댓값은 흰색 그대로이며 바 색상은 바뀌지 않습니다. 퀘스트 진행 색상과 따로 설정합니다."
+L["Auto-watch reputation gains"] = "평판 자동 추적"
+L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "어떤 진영의 평판이 바뀌면 그 진영을 자동으로 추적합니다."
+L["Floating reputation gains"] = "떠오르는 평판 획득"
+L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "획득한 평판을 캐릭터 근처에 초록색 글자로 띄워 위로 떠오르며 사라지게 합니다. 평판 자동 추적과 따로 설정합니다."
+
+L["Group"] = "파티"
+L["Ready check countdown timer"] = "전투 준비 확인 카운트다운"
+L["Show a live countdown on the ready check popup for how long until it expires."] = "전투 준비 확인 창에 만료까지 남은 시간을 표시합니다."
+L["LFG queue pop countdown timer"] = "파티 찾기 수락 카운트다운"
+L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."] = "파티 찾기 수락 창에 수락할 수 있는 남은 시간(40초)을 표시합니다."
+L["Show party member levels"] = "파티원 레벨 표시"
+L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] = "파티 창(기본 및 공격대 스타일)에 각 파티원의 레벨을 표시합니다. 5인 던전에서 유용합니다."
+
+L["Interface"] = "인터페이스"
+L["Show target in unit tooltips"] = "툴팁에 대상 표시"
+L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover."] = "개체 툴팁에 \"대상:\" 줄을 추가해 그 개체가 누구를 대상으로 잡았는지 보여 줍니다. 플레이어는 직업 색상, NPC는 반응 색상으로 표시하고, 당신이면 빨간색 \"당신\"으로 표시합니다. 마우스를 올려 둔 동안 계속 갱신됩니다."
+L["Range icon and distance for your target"] = "대상 사거리 아이콘과 거리"
+L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "대상의 이름표에서 블리자드의 소프트 타겟 칼 아이콘 자리에(이름표가 없으면 대상 창 초상화 옆에) 공격 가능한 대상까지의 거리를 미터로 표시하고(예: \"8-30미터\", 행동 단축바에 있는 기술의 사거리 기준), 공격 기술이 하나도 닿지 않으면 깜빡이는 아이콘을 표시합니다. 행동 단축 버튼을 빨갛게 바꾸는 것과 같은 사거리 검사를 사용하므로 변신과 보너스 단축바도 따라갑니다. 켜져 있는 동안 블리자드의 칼 아이콘(SoftTargetIconEnemy)은 꺼지며, 이 기능을 끄면 다시 켜집니다."
+L["Custom damage text font"] = "사용자 지정 피해 글꼴"
+L["Use the TrashHand damage text font for floating combat text."] = "전투 상황 알림의 피해 숫자에 TrashHand 글꼴을 사용합니다."
+L["Highlight cursor on shake"] = "마우스를 흔들면 커서 강조"
+L["Highlight the cursor when you shake the mouse."] = "마우스를 흔들면 커서를 강조합니다."
+L["Hide completed achievements"] = "달성한 업적 숨기기"
+L["Achievement UI will default to showing incomplete achievements only."] = "업적 창에서 기본적으로 달성하지 않은 업적만 표시합니다."
+L["Show minimap button"] = "미니맵 버튼 표시"
+L["Show a SMoRG's QoL button on the minimap. The addon is also available from the addon compartment menu and from LibDataBroker displays such as Bazooka or Titan Panel."] = "미니맵에 SMoRG's QoL 버튼을 표시합니다. 애드온 메뉴와 Bazooka, Titan Panel 같은 LibDataBroker 표시기에서도 열 수 있습니다."
+L["Show splash on login"] = "접속 시 상태 요약"
+L["Show the status splash message when you log in."] = "접속할 때 켜진 기능 요약을 표시합니다."
+
+L["Advanced"] = "고급"
+L["Debug tracking"] = "디버그"
+L["Print verbose debug information (for troubleshooting)."] = "문제 해결을 위한 자세한 디버그 정보를 출력합니다."

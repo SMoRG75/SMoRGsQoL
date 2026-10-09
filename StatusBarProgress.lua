@@ -1,6 +1,7 @@
 -- Color the current value and append reputation progress/status. Let Blizzard
 -- calculate renown, friendship, paragon and capped values and own bar visuals.
 local _, SQOL = ...
+local L = SQOL.L
 local hooked = {}
 
 local function IsReadable(value)
@@ -52,7 +53,7 @@ local function Apply(bar, text)
     if not value or not total or total <= 0 then return end
     if state.isReputation then
         local remaining = 100 * (1 - SQOL.clamp01(value / total))
-        suffix = suffix .. string.format(" · %.1f%% left", remaining)
+        suffix = suffix .. " · " .. string.format(L["%.1f%% left"], remaining)
         local status = GetReputationStatus()
         if type(status) == "string" and status ~= "" then
             suffix = suffix .. " · " .. status

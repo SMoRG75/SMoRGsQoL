@@ -1,0 +1,105 @@
+-- Simplified Chinese (zhCN)
+local _, SQOL = ...
+if SQOL.Locale ~= "zhCN" then return end
+local L = SQOL.L
+
+-- Sound profiles
+L["Horde (Peon)"] = "部落（苦工）"
+L["Alliance (Human worker)"] = "联盟（人类农民）"
+
+-- On-screen text
+L["Target:"] = "目标："
+L["none"] = "无"
+L["iLvl:"] = "装等："
+L["Spd:"] = "速度："
+L["> %d yd"] = "> %d码"
+L["%d-%d yd"] = "%d-%d码"
+L["< %d yd"] = "< %d码"
+L["+%d Rep — %s"] = "声望 +%d — %s"
+L["%.1f%% left"] = "剩余 %.1f%%"
+L["ON"] = "开启"
+L["OFF"] = "关闭"
+
+-- Chat messages
+L["Settings have been reset to defaults."] = "设置已恢复为默认值。"
+L["%s is OFF. Enable it with %s."] = "%s 已关闭。输入 %s 开启。"
+L["%s is not available in this client."] = "%s 在此客户端中不可用。"
+L["Type %s for the command list."] = "输入 %s 查看命令列表。"
+L["Type %s to see which features are on."] = "输入 %s 查看已开启的功能。"
+L["Could not auto-track quest %s."] = "无法自动追踪任务 %s。"
+L["And |cff33ff99SQoL|r auto-tracked it"] = "|cff33ff99SQoL|r 已自动追踪该任务"
+L["%s is done!"] = "%s 已完成！"
+L["%s is ready to turn in!"] = "%s 可以交任务了！"
+
+-- Slash command help
+L["Open the options window"] = "打开设置窗口"
+L["Switch between the Horde and Alliance quest sounds"] = "切换部落和联盟的任务音效"
+L["Preview floating reputation gains"] = "预览浮动声望提示"
+L["Preview the ready check countdown (add 'popup' to show the frame)"] = "预览就位确认倒计时（加上 'popup' 显示窗口）"
+L["Preview the queue pop countdown"] = "预览排队确认倒计时"
+L["Flash the cursor highlight once"] = "让鼠标指针高亮闪烁一次"
+L["Reset all settings to defaults"] = "将所有设置恢复为默认值"
+L["Show this command list"] = "显示此命令列表"
+
+-- Options window and Settings page
+L["Quality-of-life tweaks. Changes apply immediately."] = "便捷功能合集。修改立即生效。"
+L["Blizzard Settings"] = "暴雪设置"
+L["%d of %d features enabled"] = "已开启 %d/%d 项功能"
+L["|cffeda55fLeft-click|r to open options"] = "|cffeda55f左键点击|r打开设置"
+L["|cffeda55fRight-click|r to open Blizzard Settings"] = "|cffeda55f右键点击|r打开暴雪设置"
+
+L["Quests"] = "任务"
+L["Auto-track newly accepted quests"] = "自动追踪新接受的任务"
+L["Automatically track newly accepted quests in the objective tracker."] = "自动将新接受的任务加入目标追踪。"
+L["Color quest progress"] = "任务进度着色"
+L["Colorize quest and scenario progress messages, the current count of quest objectives in the objective tracker, and quest objective counts on nameplates (red → yellow → green)."] = "为任务和场景战役的进度信息、目标追踪中任务目标的当前数量以及姓名板上的任务计数着色（红 → 黄 → 绿）。"
+L["Show objective counts on nameplates"] = "在姓名板上显示任务目标"
+L["Show quest objective counts (e.g., 0/10) above relevant nameplates."] = "在相关单位的姓名板上方显示任务目标进度（例如 0/10）。"
+L["Quest completion sound"] = "任务完成音效"
+L["Play a sound when a quest is ready to turn in (or done for bonus/world quests)."] = "任务可以交付时（奖励目标和世界任务为完成时）播放音效。"
+L["Quest objective completion sound"] = "任务目标完成音效"
+L["Play a worker voice line when one objective is completed but the quest is not yet done."] = "完成一个任务目标但任务尚未完成时，播放一句工人语音。"
+L["Quest sound profile"] = "任务音效方案"
+L["Choose the worker voice used for objective and full quest completion."] = "选择目标完成和任务完成时使用的工人语音。"
+
+L["Character"] = "角色"
+L["Show item level on PlayerFrame"] = "在玩家头像显示物品等级"
+L["Show your equipped item level on the player frame, independently of movement speed."] = "在玩家头像上显示已装备的物品等级，与移动速度分开设置。"
+L["Show movement speed on PlayerFrame"] = "在玩家头像显示移动速度"
+L["Show movement speed on the player frame, independently of item level."] = "在玩家头像上显示移动速度，与物品等级分开设置。"
+
+L["Reputation & XP"] = "声望与经验值"
+L["Color XP/reputation numbers"] = "经验值/声望数值着色"
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "为当前经验值/声望数值着色并加描边（红 → 黄 → 绿）。声望还会在总值后显示剩余百分比和当前声望等级。标签和最大值保持白色，进度条颜色不变。与任务进度着色分开设置。"
+L["Auto-watch reputation gains"] = "自动监视声望变化"
+L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "某个阵营的声望变化时，自动将其设为监视的声望。"
+L["Floating reputation gains"] = "浮动声望提示"
+L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "在角色附近以绿色文字显示获得的声望，文字向上飘动并淡出。与自动监视声望分开设置。"
+
+L["Group"] = "小队"
+L["Ready check countdown timer"] = "就位确认倒计时"
+L["Show a live countdown on the ready check popup for how long until it expires."] = "在就位确认窗口上显示距离超时的剩余时间。"
+L["LFG queue pop countdown timer"] = "队伍查找器确认倒计时"
+L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."] = "在队伍查找器的确认窗口上显示剩余的接受时间（40秒）。"
+L["Show party member levels"] = "显示队友等级"
+L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] = "在小队框体（默认和团队风格）上显示每位队友的等级，适合5人副本。"
+
+L["Interface"] = "界面"
+L["Show target in unit tooltips"] = "在鼠标提示中显示目标"
+L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover."] = "在单位鼠标提示中添加一行“目标：”，显示该单位正在选中谁：玩家按职业着色，NPC按声望关系着色，目标是你时显示红色的“你”。鼠标悬停时实时更新。"
+L["Range icon and distance for your target"] = "目标射程图标与距离"
+L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "在目标姓名板上暴雪软目标剑形图标的位置（没有姓名板时在目标框体头像旁），以码为单位显示到可攻击目标的距离（例如“8-30码”，根据动作条上技能的射程推算）；所有攻击技能都够不到时显示一个闪烁的图标。使用与动作按钮变红相同的射程检测，因此会随形态和额外动作条变化。开启期间会关闭暴雪的剑形图标（SoftTargetIconEnemy），关闭本功能后会恢复。"
+L["Custom damage text font"] = "自定义伤害数字字体"
+L["Use the TrashHand damage text font for floating combat text."] = "浮动战斗信息中的伤害数字使用 TrashHand 字体。"
+L["Highlight cursor on shake"] = "晃动鼠标时高亮指针"
+L["Highlight the cursor when you shake the mouse."] = "晃动鼠标时高亮显示鼠标指针。"
+L["Hide completed achievements"] = "隐藏已完成的成就"
+L["Achievement UI will default to showing incomplete achievements only."] = "成就界面默认只显示未完成的成就。"
+L["Show minimap button"] = "显示小地图按钮"
+L["Show a SMoRG's QoL button on the minimap. The addon is also available from the addon compartment menu and from LibDataBroker displays such as Bazooka or Titan Panel."] = "在小地图上显示 SMoRG's QoL 按钮。也可以通过插件菜单以及 Bazooka、Titan Panel 等 LibDataBroker 信息条打开本插件。"
+L["Show splash on login"] = "登录时显示状态"
+L["Show the status splash message when you log in."] = "登录时显示已开启功能的摘要。"
+
+L["Advanced"] = "高级"
+L["Debug tracking"] = "调试信息"
+L["Print verbose debug information (for troubleshooting)."] = "输出详细的调试信息（用于排查问题）。"
