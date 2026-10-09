@@ -1,0 +1,33 @@
+# Build the addon zip with the BigWigs packager and upload it to CurseForge,
+# Wago Addons, WoWInterface and GitHub Releases when a v* tag is pushed.
+# See RELEASING.md for the secrets and the TOC project IDs it needs.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # create the GitHub release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    # A missing secret only skips that site's upload.
+    env:
+      CF_API_TOKEN: ${{ secrets.CF_API_KEY }}
+      WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+      WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+      GH_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Check out the tag
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # the packager needs the tag history
+
+      - name: Package and upload
+        uses: BigWigsMods/packager@v2
