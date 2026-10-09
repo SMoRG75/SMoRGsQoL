@@ -69,11 +69,14 @@ release notes.
 
 ## Testing the package locally
 
-Git Bash can run the packager without uploading anything (`-d`); it needs a
-`zip` command on the PATH. The package is written to `.release/` (git-ignored as
-a dotfolder):
+Git Bash can run the packager without uploading anything (`-d`). It needs a
+`zip` command on the PATH, which Git for Windows does not include. Keep
+`release.sh` outside the repository; the package is written to `.release/`:
 
 ```bash
-curl -sSLO https://raw.githubusercontent.com/BigWigsMods/packager/v2/release.sh
-bash release.sh -d
+curl -sSL -o ~/release.sh https://raw.githubusercontent.com/BigWigsMods/packager/v2/release.sh
+```
+
+```bash
+bash ~/release.sh -d
 ```
