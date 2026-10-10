@@ -9,7 +9,16 @@ Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.1.0
+## What's new in 1.2.0
+
+- 🌍 **Translations** — the addon now follows your game language: German, French, Spanish (Spain and Latin America), Brazilian Portuguese, Italian, Russian, Korean, and Simplified and Traditional Chinese. That covers the options window, Blizzard's Settings page, tooltips, chat messages, `/sqol help` and on-screen text such as the item level/speed line and the range in meters (码/碼 in Chinese). The quest voice lines stay in English. ⚠️ The translations have not been checked by native speakers yet; see [Translations](#translations) to suggest corrections.
+- 🤝 **Floating reputation gains and auto-watch reputation work on every client language** — they now read Blizzard's own localized reputation messages instead of English text.
+- 💬 **Clearer chat output** — `/sqol`, `/sqol help` and the login splash use the same names as the options window and show each command's aliases.
+- 📦 **More places to download** — besides CurseForge, the addon is now on Wago Addons, WoWInterface and GitHub Releases (WowUp installs from all of them).
+
+After updating, **restart the game** (a `/reload` is not enough), because this release adds new files. See the [changelog](CHANGELOG.md) for the full release history.
+
+### 1.1.0
 
 - 🪟 **Options window** — all settings in one movable window, grouped into Quests, Character, Reputation & XP, Group, Interface and Advanced. Open it from Bazooka/Titan Panel and other LibDataBroker displays, the addon compartment menu, the optional minimap button (`/sqol minimap`) or `/sqol config`. Right-click the launcher for Blizzard's Settings page, which now uses the same sections.
 - 🎨 **Colored objective counts in the quest tracker** — with **Color quest progress** on, the current count (the `1` in `1/5 Boar Pelt`) is colored red → yellow → green for quests, campaign quests, world quests and bonus objectives, and finished objectives keep a green count.
@@ -17,8 +26,6 @@ Everything is toggleable:
 - 🏹 **Range icon and distance** — on your target's nameplate, where Blizzard's soft target sword icon sits, the distance to your target in yards (e.g. `8-30 yd`), and a pulsing icon when none of the offensive abilities on your bars can reach it. `/sqol range` (`rng`).
 - 🧾 **Better placement** — the item level/speed line sits above your name on Retail (clear of long names, druid mana and class resources), and nameplate objective counts sit above the unit name instead of overlapping it.
 - 🌍 **WoW Forever support** — the addon loads in WoW Forever, with the item level/speed line placed for its player frame.
-
-After updating, **restart the game** (a `/reload` is not enough), because this release adds new files. See the [changelog](CHANGELOG.md) for the full release history.
 
 ### 1.0.24
 
@@ -169,12 +176,12 @@ SMoRG's QoL follows your game language: English, German, French, Spanish (Spain 
 
 SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor its development on [GitHub Sponsors](https://github.com/sponsors/SMoRG75). Bug reports and ideas are just as welcome on [CurseForge](https://www.curseforge.com/wow/addons/smorgsqol) or [GitHub](https://github.com/SMoRG75/SMoRGsQoL/issues).
 
-## Updating to 1.1.0
+## Updating to 1.2.0
 
-Install the complete addon folder, including the new `Libs` folder and all Lua
+Install the complete addon folder, including the new `Locales` folder and all Lua
 files listed in `SMoRGsQoL.toc`, then restart the game (a `/reload` does not load
-new files). Keep your saved variables; existing settings are preserved, and the
-new features (tooltip target, range icon and distance, minimap button) start disabled.
+new files). Keep your saved variables; existing settings are preserved. The addon
+picks the language of your game client automatically.
 
 ## Code structure
 

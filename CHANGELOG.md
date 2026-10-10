@@ -1,9 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.0] - 2026-10-10
 
 ### Added
 
+- SMoRG's QoL is now also available on **Wago Addons**, **WoWInterface** and **GitHub Releases**, so addon managers such as WowUp can install and update it from there.
 - **Translations** — the addon now speaks German, French, Spanish (Spain and Latin America), Brazilian Portuguese, Italian, Russian, Korean and Simplified and Traditional Chinese: the options window, Blizzard's Settings page, tooltips, chat messages, `/sqol help`, the launcher tooltip and on-screen text (item level/speed line, range in meters or 码/碼, tooltip target, floating reputation gains). The addon description in the in-game AddOns list is translated too. The quest voice lines stay in English, and slash commands are the same in every language. **The translations have not been checked by native speakers yet**, so corrections are very welcome on CurseForge or GitHub.
 
 ### Changed
