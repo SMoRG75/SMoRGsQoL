@@ -1,8 +1,8 @@
 # SMoRG's QoL
 
-A small collection of **individually toggleable** quality-of-life tweaks for World of Warcraft (Retail and WoW Forever).
+**Hear your quest progress:** *"Work, work."* when you finish an objective, *"Work complete."* when the quest is done. Plus toggleable QoL tweaks for Retail and WoW Forever.
 
-🔊 It started with one idea: **hear your quest progress**. A worker voice line plays when you finish a quest objective (*"Work, work."*), and another when the whole quest is ready to turn in (*"Work complete."*). Prefer the Alliance? Switch to the Human worker (*"More work?"* / *"Job's done!"*).
+🔊 The worker voice lines are where it all started. Prefer the Alliance? Switch to the Human worker (*"More work?"* / *"Job's done!"*). Every other feature is a small, **individually toggleable** tweak.
 
 Everything is toggleable:
 - 🪟 via the options window (LibDataBroker displays such as Bazooka, the addon compartment menu, the optional minimap button or `/sqol config`),
