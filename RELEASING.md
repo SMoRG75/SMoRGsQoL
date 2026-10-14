@@ -63,8 +63,8 @@ WoWInterface has no WoW Forever category, so it only gets the Retail version.
 Tags containing `alpha` or `beta` (e.g. `v1.2.0-beta1`) are uploaded as alpha or
 beta files instead of releases.
 
-The game versions come from `## Interface: 120100, 16001`: `120100` is Retail
-12.1.0 and `16001` is WoW Forever. The whole `CHANGELOG.md` is uploaded as the
+The game versions come from `## Interface: 120105, 16001`: `120105` is Retail
+12.1.5 and `16001` is WoW Forever. The whole `CHANGELOG.md` is uploaded as the
 release notes.
 
 ## Testing the package locally

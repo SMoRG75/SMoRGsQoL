@@ -1,4 +1,4 @@
-## Interface: 120100, 16001
+## Interface: 120105, 16001
 ## Title: SMoRG's QoL
 ## Notes: Hear your quest progress: a worker voice line when you complete a quest objective, and another when the whole quest is done (Horde Peon or Alliance worker). Plus toggleable quality-of-life tweaks: colored quest progress, quest auto-tracking, a range icon and distance, tooltip targets, item level and movement speed, XP/reputation colors, party levels, reputation watching, cursor highlight, and ready check/queue countdowns. Options window via LDB, the addon compartment or /sqol config.
 ## Notes-deDE: Höre deinen Questfortschritt: eine Arbeiter-Sprachzeile, wenn du ein Questziel erfüllst, und eine weitere, wenn die ganze Quest abgeschlossen ist (Horde-Peon: "Work, work." / "Work complete." oder Allianz-Arbeiter: "More work?" / "Job's done!"). Dazu abschaltbare Komfortfunktionen: farbiger Questfortschritt, automatisches Verfolgen von Quests, Reichweitensymbol und Entfernung, Ziel im Tooltip, Gegenstandsstufe und Bewegungstempo, EP-/Ruffarben, Gruppenstufen, Rufbeobachtung, Cursor-Hervorhebung sowie Countdowns für Bereitschaftscheck und Warteschlange. Optionen über LDB, das Addon-Menü an der Minikarte oder /sqol config.
@@ -12,7 +12,7 @@
 ## Notes-zhCN: 用声音感知任务进度：完成任务目标时播放工人语音，整个任务完成时再播放另一句（部落苦工："Work, work." / "Work complete."，或联盟工人："More work?" / "Job's done!"）。另有可开关的便捷功能：任务进度着色、自动追踪任务、射程图标与距离、鼠标提示显示目标、物品等级与移动速度、经验/声望颜色、队伍等级、声望监视、鼠标指针高亮，以及就位确认/排队倒计时。可通过 LDB、插件菜单或 /sqol config 打开设置窗口。
 ## Notes-zhTW: 以聲音感受任務進度：完成任務目標時播放工人語音，整個任務完成時再播放另一句（部落苦工："Work, work." / "Work complete."，或聯盟工人："More work?" / "Job's done!"）。另有可開關的便利功能：任務進度著色、自動追蹤任務、射程圖示與距離、浮動提示顯示目標、物品等級與移動速度、經驗/聲望顏色、隊伍等級、聲望監視、游標高亮，以及準備確認/排隊倒數。可透過 LDB、插件選單或 /sqol config 開啟設定視窗。
 ## Author: SMoRG75
-## Version: 1.2.0
+## Version: 1.2.1
 ## IconTexture: Interface\AddOns\SMoRGsQoL\Media\smorgsqol-icon-simple-v3-400.png
 ## SavedVariables: SQOL_DB
 ## X-Curse-Project-ID: 1418599

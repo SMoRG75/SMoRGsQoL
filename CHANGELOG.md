@@ -1,9 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.1] - 2026-10-14
 
 ### Changed
 
+- Updated for WoW 12.1.5 (Retail interface `120105`).
 - **New addon icon** — a simple quest scroll with a green check replaces the old landscape picture, so the icon is recognizable at the small sizes it is shown in: the AddOns list, the minimap button, the options window and LibDataBroker displays.
 - The tooltip for **Custom damage text font** and the options window now say that the font only changes after a game client restart.
 
