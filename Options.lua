@@ -75,7 +75,7 @@ SQOL.OptionSections = {
             { key = "ShowRangeIndicator", label = L["Range icon and distance for your target"],
               tooltip = L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] },
             { key = "DamageTextFont", label = L["Custom damage text font"],
-              tooltip = L["Use the TrashHand damage text font for floating combat text."] },
+              tooltip = L["Use the TrashHand damage text font for floating combat text. Restart the game client after changing this; the font is only loaded when the game starts."] },
             { key = "CursorShakeHighlight", label = L["Highlight cursor on shake"],
               tooltip = L["Highlight the cursor when you shake the mouse."] },
             { key = "HideDoneAchievements", label = L["Hide completed achievements"],

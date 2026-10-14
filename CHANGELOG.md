@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **New addon icon** — a simple quest scroll with a green check replaces the old landscape picture, so the icon is recognizable at the small sizes it is shown in: the AddOns list, the minimap button, the options window and LibDataBroker displays.
+- The tooltip for **Custom damage text font** and the options window now say that the font only changes after a game client restart.
+
 ## [1.2.0] - 2026-10-10
 
 ### Added

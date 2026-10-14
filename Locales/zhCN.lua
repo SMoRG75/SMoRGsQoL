@@ -43,6 +43,7 @@ L["Show this command list"] = "显示此命令列表"
 
 -- Options window and Settings page
 L["Quality-of-life tweaks. Changes apply immediately."] = "便捷功能合集。修改立即生效。"
+L["The custom damage text font only changes after a game client restart."] = "自定义伤害数字字体需要重新启动游戏客户端后才会生效。"
 L["Blizzard Settings"] = "暴雪设置"
 L["%d of %d features enabled"] = "已开启 %d/%d 项功能"
 L["|cffeda55fLeft-click|r to open options"] = "|cffeda55f左键点击|r打开设置"
@@ -90,7 +91,7 @@ L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: cl
 L["Range icon and distance for your target"] = "目标射程图标与距离"
 L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "在目标姓名板上暴雪软目标剑形图标的位置（没有姓名板时在目标框体头像旁），以码为单位显示到可攻击目标的距离（例如“8-30码”，根据动作条上技能的射程推算）；所有攻击技能都够不到时显示一个闪烁的图标。使用与动作按钮变红相同的射程检测，因此会随形态和额外动作条变化。开启期间会关闭暴雪的剑形图标（SoftTargetIconEnemy），关闭本功能后会恢复。"
 L["Custom damage text font"] = "自定义伤害数字字体"
-L["Use the TrashHand damage text font for floating combat text."] = "浮动战斗信息中的伤害数字使用 TrashHand 字体。"
+L["Use the TrashHand damage text font for floating combat text. Restart the game client after changing this; the font is only loaded when the game starts."] = "浮动战斗信息中的伤害数字使用 TrashHand 字体。更改后请重新启动游戏客户端；字体只会在游戏启动时加载。"
 L["Highlight cursor on shake"] = "晃动鼠标时高亮指针"
 L["Highlight the cursor when you shake the mouse."] = "晃动鼠标时高亮显示鼠标指针。"
 L["Hide completed achievements"] = "隐藏已完成的成就"

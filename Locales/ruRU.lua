@@ -43,6 +43,7 @@ L["Show this command list"] = "Показать этот список коман
 
 -- Options window and Settings page
 L["Quality-of-life tweaks. Changes apply immediately."] = "Улучшения для удобства игры. Изменения применяются сразу."
+L["The custom damage text font only changes after a game client restart."] = "Свой шрифт чисел урона меняется только после перезапуска клиента игры."
 L["Blizzard Settings"] = "Настройки Blizzard"
 L["%d of %d features enabled"] = "Включено функций: %d из %d"
 L["|cffeda55fLeft-click|r to open options"] = "|cffeda55fЛевый клик|r — открыть настройки"
@@ -90,7 +91,7 @@ L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: cl
 L["Range icon and distance for your target"] = "Значок дальности и расстояние до цели"
 L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "На индикаторе здоровья цели, там, где Blizzard показывает значок меча мягкого выбора цели (или рядом с портретом на рамке цели, если индикатора нет), показывает расстояние до атакуемой цели в метрах (например, \"8-30 м\", по дальности способностей на ваших панелях команд) и пульсирующий значок, когда ни одна атакующая способность не достает. Использует ту же проверку дальности, что окрашивает кнопки команд в красный, поэтому учитывает облики и бонусные панели. Пока функция включена, значок меча Blizzard (SoftTargetIconEnemy) отключен; он включается снова, когда вы отключаете функцию."
 L["Custom damage text font"] = "Свой шрифт урона"
-L["Use the TrashHand damage text font for floating combat text."] = "Использует шрифт TrashHand для чисел урона во всплывающем тексте боя."
+L["Use the TrashHand damage text font for floating combat text. Restart the game client after changing this; the font is only loaded when the game starts."] = "Использует шрифт TrashHand для чисел урона во всплывающем тексте боя. После изменения перезапустите клиент игры: шрифт загружается только при запуске игры."
 L["Highlight cursor on shake"] = "Подсветка курсора при встряхивании"
 L["Highlight the cursor when you shake the mouse."] = "Подсвечивает курсор, когда вы встряхиваете мышь."
 L["Hide completed achievements"] = "Скрыть полученные достижения"

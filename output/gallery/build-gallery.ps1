@@ -57,7 +57,7 @@ function New-Background {
 }
 
 $background = New-Background
-$logo = [System.Drawing.Image]::FromFile((Join-Path $repo 'smorgsqol.png'))
+$logo = [System.Drawing.Image]::FromFile((Join-Path $repo 'Media\smorgsqol-icon-simple-v3-400.png'))
 
 function New-Canvas {
     $bmp = New-Object System.Drawing.Bitmap $W, $H

@@ -43,6 +43,7 @@ L["Show this command list"] = "이 명령어 목록 표시"
 
 -- Options window and Settings page
 L["Quality-of-life tweaks. Changes apply immediately."] = "편의 기능 모음. 변경 사항은 즉시 적용됩니다."
+L["The custom damage text font only changes after a game client restart."] = "사용자 지정 피해 숫자 글꼴은 게임 클라이언트를 다시 시작해야 바뀝니다."
 L["Blizzard Settings"] = "블리자드 설정"
 L["%d of %d features enabled"] = "기능 %d/%d개 사용 중"
 L["|cffeda55fLeft-click|r to open options"] = "|cffeda55f왼쪽 클릭|r: 설정 열기"
@@ -90,7 +91,7 @@ L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: cl
 L["Range icon and distance for your target"] = "대상 사거리 아이콘과 거리"
 L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "대상의 이름표에서 블리자드의 소프트 타겟 칼 아이콘 자리에(이름표가 없으면 대상 창 초상화 옆에) 공격 가능한 대상까지의 거리를 미터로 표시하고(예: \"8-30미터\", 행동 단축바에 있는 기술의 사거리 기준), 공격 기술이 하나도 닿지 않으면 깜빡이는 아이콘을 표시합니다. 행동 단축 버튼을 빨갛게 바꾸는 것과 같은 사거리 검사를 사용하므로 변신과 보너스 단축바도 따라갑니다. 켜져 있는 동안 블리자드의 칼 아이콘(SoftTargetIconEnemy)은 꺼지며, 이 기능을 끄면 다시 켜집니다."
 L["Custom damage text font"] = "사용자 지정 피해 글꼴"
-L["Use the TrashHand damage text font for floating combat text."] = "전투 상황 알림의 피해 숫자에 TrashHand 글꼴을 사용합니다."
+L["Use the TrashHand damage text font for floating combat text. Restart the game client after changing this; the font is only loaded when the game starts."] = "전투 상황 알림의 피해 숫자에 TrashHand 글꼴을 사용합니다. 변경한 후에는 게임 클라이언트를 다시 시작하세요. 글꼴은 게임을 시작할 때만 불러옵니다."
 L["Highlight cursor on shake"] = "마우스를 흔들면 커서 강조"
 L["Highlight the cursor when you shake the mouse."] = "마우스를 흔들면 커서를 강조합니다."
 L["Hide completed achievements"] = "달성한 업적 숨기기"

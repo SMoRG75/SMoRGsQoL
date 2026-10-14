@@ -4,7 +4,7 @@ local L = SQOL.L
 ------------------------------------------------------------
 -- Damage text font
 ------------------------------------------------------------
-local SQOL_DAMAGE_TEXT_FONT = "Interface\\AddOns\\SMoRGsQoL\\trashhand.ttf"
+local SQOL_DAMAGE_TEXT_FONT = "Interface\\AddOns\\SMoRGsQoL\\Media\\trashhand.ttf"
 local defaultDamageFont = "Fonts\\FRIZQT__.TTF"
 
 function SQOL.ApplyDamageTextFont()

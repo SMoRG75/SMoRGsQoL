@@ -11,7 +11,7 @@ ADDON_NAME = ADDON_NAME or "SMoRGsQoL"
 local L = SQOL.L
 
 local POPUP_NAME = "SQOL_OptionsPopup"
-local ICON = "Interface\\AddOns\\SMoRGsQoL\\smorgsqol.png"
+local ICON = "Interface\\AddOns\\SMoRGsQoL\\Media\\smorgsqol-icon-simple-v3-400.png"
 
 local COLUMN_WIDTH = 290
 local COLUMN_GAP = 20
@@ -285,7 +285,8 @@ local function SQOL_Popup_Create()
 
     local subtitle = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     subtitle:SetPoint("TOPLEFT", frame, "TOPLEFT", 70, -36)
-    subtitle:SetText(L["Quality-of-life tweaks. Changes apply immediately."])
+    subtitle:SetJustifyH("LEFT")
+    subtitle:SetText(L["Quality-of-life tweaks. Changes apply immediately."] .. "\n" .. L["The custom damage text font only changes after a game client restart."])
 
     SQOL_Popup_BuildContent(frame)
 

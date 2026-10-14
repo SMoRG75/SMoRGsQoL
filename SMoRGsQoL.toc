@@ -13,7 +13,7 @@
 ## Notes-zhTW: 以聲音感受任務進度：完成任務目標時播放工人語音，整個任務完成時再播放另一句（部落苦工："Work, work." / "Work complete."，或聯盟工人："More work?" / "Job's done!"）。另有可開關的便利功能：任務進度著色、自動追蹤任務、射程圖示與距離、浮動提示顯示目標、物品等級與移動速度、經驗/聲望顏色、隊伍等級、聲望監視、游標高亮，以及準備確認/排隊倒數。可透過 LDB、插件選單或 /sqol config 開啟設定視窗。
 ## Author: SMoRG75
 ## Version: 1.2.0
-## IconTexture: Interface\AddOns\SMoRGsQoL\smorgsqol.png
+## IconTexture: Interface\AddOns\SMoRGsQoL\Media\smorgsqol-icon-simple-v3-400.png
 ## SavedVariables: SQOL_DB
 ## X-Curse-Project-ID: 1418599
 ## X-Wago-ID: 5NRgMx63

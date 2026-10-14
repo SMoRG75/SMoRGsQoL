@@ -43,6 +43,7 @@ L["Show this command list"] = "Mostrar esta lista de comandos"
 
 -- Options window and Settings page
 L["Quality-of-life tweaks. Changes apply immediately."] = "Ajustes de qualidade de vida. As mudanças valem na hora."
+L["The custom damage text font only changes after a game client restart."] = "A fonte de dano personalizada só muda depois de reiniciar o cliente do jogo."
 L["Blizzard Settings"] = "Configurações da Blizzard"
 L["%d of %d features enabled"] = "%d de %d recursos ligados"
 L["|cffeda55fLeft-click|r to open options"] = "|cffeda55fClique esquerdo|r para abrir as opções"
@@ -90,7 +91,7 @@ L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: cl
 L["Range icon and distance for your target"] = "Ícone de alcance e distância do alvo"
 L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "Na placa de identificação do alvo, onde fica o ícone de espada do alvo suave da Blizzard (ou ao lado do retrato do quadro de alvo quando não há placa), mostra a distância até um alvo atacável em metros (ex.: \"8-30 m\", pelo alcance das habilidades nas suas barras de ação) e um ícone pulsante quando nenhuma habilidade ofensiva alcança. Usa a mesma verificação de alcance que deixa os botões de ação vermelhos, então acompanha formas e barras bônus. Enquanto ativado, o ícone de espada da Blizzard (SoftTargetIconEnemy) fica desligado; ele volta quando você desativa esta opção."
 L["Custom damage text font"] = "Fonte personalizada para o dano"
-L["Use the TrashHand damage text font for floating combat text."] = "Usa a fonte TrashHand nos números de dano do texto de combate flutuante."
+L["Use the TrashHand damage text font for floating combat text. Restart the game client after changing this; the font is only loaded when the game starts."] = "Usa a fonte TrashHand nos números de dano do texto de combate flutuante. Reinicie o cliente do jogo depois de mudar isto; a fonte só é carregada quando o jogo inicia."
 L["Highlight cursor on shake"] = "Destacar o cursor ao sacudir"
 L["Highlight the cursor when you shake the mouse."] = "Destaca o cursor quando você sacode o mouse."
 L["Hide completed achievements"] = "Ocultar conquistas concluídas"

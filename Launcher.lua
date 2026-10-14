@@ -10,7 +10,7 @@ local ADDON_NAME, SQOL = ...
 ADDON_NAME = ADDON_NAME or "SMoRGsQoL"
 local L = SQOL.L
 
-local ICON = "Interface\\AddOns\\SMoRGsQoL\\smorgsqol.png"
+local ICON = "Interface\\AddOns\\SMoRGsQoL\\Media\\smorgsqol-icon-simple-v3-400.png"
 local LibStub = rawget(_G, "LibStub")
 local LDB = LibStub and LibStub("LibDataBroker-1.1", true)
 local LDBIcon = LibStub and LibStub("LibDBIcon-1.0", true)
