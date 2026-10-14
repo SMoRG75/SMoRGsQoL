@@ -1,0 +1,79 @@
+1
+00:00:00,400 --> 00:00:02,500
+Auto-repair. Auto-loot. Selling junk. Your UI already does that.
+
+2
+00:00:02,500 --> 00:00:04,500
+SMoRG's QoL does the little things nobody else does.
+
+3
+00:00:04,700 --> 00:00:07,100
+Finish a quest objective…
+
+4
+00:00:07,100 --> 00:00:10,000
+…and the Human worker asks: “More work?”
+
+5
+00:00:10,200 --> 00:00:13,400
+Finish the whole quest…
+
+6
+00:00:13,400 --> 00:00:16,000
+“Job's done!” Ready to turn in.
+
+7
+00:00:16,000 --> 00:00:20,000
+Playing Horde? Switch to the Peon.
+
+8
+00:00:20,000 --> 00:00:24,500
+Above the mob: your quest count (1/7) and your range in yards.
+
+9
+00:00:24,500 --> 00:00:29,500
+Progress messages go from red through yellow to green.
+
+10
+00:00:29,500 --> 00:00:32,700
+The last quilboar…
+
+11
+00:00:32,700 --> 00:00:36,000
+“Work complete.” Each sound has its own on/off switch.
+
+12
+00:00:36,000 --> 00:00:41,000
+New quests are tracked automatically.
+
+13
+00:00:41,000 --> 00:00:46,000
+Item level and speed on your player frame.
+
+14
+00:00:46,000 --> 00:00:52,000
+Colored XP and rep numbers. The rep bar shows % left and standing.
+
+15
+00:00:52,000 --> 00:00:56,000
+Tooltips show who a unit is targeting. Here: you.
+
+16
+00:00:56,000 --> 00:01:00,500
+Achievements usually open on a wall of finished ones…
+
+17
+00:01:00,500 --> 00:01:04,200
+…now they open on the ones you haven't earned yet.
+
+18
+00:01:04,200 --> 00:01:09,200
+Ready check and queue pop timers, party levels: every tweak is its own checkbox.
+
+19
+00:01:09,400 --> 00:01:11,800
+Also inside: floating rep gains, cursor shake highlight, a hand-drawn combat font.
+
+20
+00:01:11,800 --> 00:01:14,200
+Free for Retail and WoW Forever. Search for “SMoRGs QoL”.

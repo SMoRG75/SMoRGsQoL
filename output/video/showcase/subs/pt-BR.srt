@@ -1,0 +1,79 @@
+1
+00:00:00,400 --> 00:00:02,500
+Reparo automático. Saque automático. Vender lixo. Sua interface já faz isso.
+
+2
+00:00:02,500 --> 00:00:04,500
+O SMoRG's QoL faz as pequenas coisas que ninguém mais faz.
+
+3
+00:00:04,700 --> 00:00:07,100
+Conclua um objetivo de missão…
+
+4
+00:00:07,100 --> 00:00:10,000
+…e o trabalhador humano pergunta: “More work?”
+
+5
+00:00:10,200 --> 00:00:13,400
+Conclua a missão inteira…
+
+6
+00:00:13,400 --> 00:00:16,000
+“Job's done!” Pronta para entregar.
+
+7
+00:00:16,000 --> 00:00:20,000
+Joga de Horda? Troque para o peão.
+
+8
+00:00:20,000 --> 00:00:24,500
+Acima do inimigo: seu contador de missão (1/7) e a que distância ele está.
+
+9
+00:00:24,500 --> 00:00:29,500
+As mensagens de progresso vão do vermelho ao amarelo e ao verde.
+
+10
+00:00:29,500 --> 00:00:32,700
+O último javatusco…
+
+11
+00:00:32,700 --> 00:00:36,000
+“Work complete.” Cada som liga e desliga separadamente.
+
+12
+00:00:36,000 --> 00:00:41,000
+Missões novas são rastreadas automaticamente.
+
+13
+00:00:41,000 --> 00:00:46,000
+Nível de item e velocidade no seu quadro de jogador.
+
+14
+00:00:46,000 --> 00:00:52,000
+Números de XP e reputação coloridos. A barra de reputação mostra o % restante e o nível.
+
+15
+00:00:52,000 --> 00:00:56,000
+As dicas mostram quem a unidade está mirando. Aqui: você.
+
+16
+00:00:56,000 --> 00:01:00,500
+As conquistas costumam abrir num paredão de conquistas concluídas…
+
+17
+00:01:00,500 --> 00:01:04,200
+…agora abrem nas que ainda faltam.
+
+18
+00:01:04,200 --> 00:01:09,200
+Contagens regressivas de prontidão e de fila, níveis do grupo: cada ajuste tem sua própria caixa.
+
+19
+00:01:09,400 --> 00:01:11,800
+Também: reputação flutuante, cursor destacado ao chacoalhar o mouse, fonte de combate desenhada à mão.
+
+20
+00:01:11,800 --> 00:01:14,200
+Grátis para Retail e WoW Forever. Procure “SMoRGs QoL”.

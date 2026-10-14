@@ -1,0 +1,35 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,Malgun Gothic,50,&H00FFFFFF,&H00FFFFFF,&H5A000000,&H00000000,-1,0,0,0,100,100,0,0,3,14,0,2,200,200,64,1
+Style: CapTop,Malgun Gothic,50,&H00FFFFFF,&H00FFFFFF,&H5A000000,&H00000000,-1,0,0,0,100,100,0,0,3,14,0,8,200,200,64,1
+Style: Tag,Malgun Gothic,58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,3,2,220,220,330,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.40,0:00:02.50,Tag,,0,0,0,,{\fad(120,120)}자동 수리. 자동 전리품. 잡동사니 판매. 그런 건 이미 있죠.
+Dialogue: 0,0:00:02.50,0:00:04.50,Tag,,0,0,0,,{\fad(120,120)}SMoRG's QoL은 아무도 안 하는 작은 것들을 합니다.
+Dialogue: 0,0:00:04.70,0:00:07.10,Cap,,0,0,0,,{\fad(120,120)}퀘스트 목표를 하나 완료하면…
+Dialogue: 0,0:00:07.10,0:00:10.00,Cap,,0,0,0,,{\fad(120,120)}…인간 일꾼이 묻습니다: {\c&H6AC4E8&}“More work?”{\c&HFFFFFF&}
+Dialogue: 0,0:00:10.20,0:00:13.40,Cap,,0,0,0,,{\fad(120,120)}퀘스트 전체를 완료하면…
+Dialogue: 0,0:00:13.40,0:00:16.00,Cap,,0,0,0,,{\fad(120,120)}{\c&H6AC4E8&}“Job's done!”{\c&HFFFFFF&} 이제 보고하세요.
+Dialogue: 0,0:00:16.00,0:00:20.00,Cap,,0,0,0,,{\fad(120,120)}호드인가요? 오크 일꾼으로 바꾸세요.
+Dialogue: 0,0:00:20.00,0:00:24.50,Cap,,0,0,0,,{\fad(120,120)}몹 위에는 퀘스트 진행도(1/7)와 몹까지의 거리가 표시됩니다.
+Dialogue: 0,0:00:24.50,0:00:29.50,Cap,,0,0,0,,{\fad(120,120)}진행 메시지는 빨강에서 노랑, 초록으로 바뀝니다.
+Dialogue: 0,0:00:29.50,0:00:32.70,Cap,,0,0,0,,{\fad(120,120)}마지막 가시멧돼지…
+Dialogue: 0,0:00:32.70,0:00:36.00,Cap,,0,0,0,,{\fad(120,120)}{\c&H6AC4E8&}“Work complete.”{\c&HFFFFFF&} 소리마다 따로 켜고 끌 수 있습니다.
+Dialogue: 0,0:00:36.00,0:00:41.00,CapTop,,0,0,0,,{\fad(120,120)}새 퀘스트는 자동으로 추적됩니다.
+Dialogue: 0,0:00:41.00,0:00:46.00,CapTop,,0,0,0,,{\fad(120,120)}플레이어 창에 아이템 레벨과 이동 속도.
+Dialogue: 0,0:00:46.00,0:00:52.00,CapTop,,0,0,0,,{\fad(120,120)}경험치와 평판 숫자에 색이 입혀지고, 평판 바에는 남은 %와 평판 단계가 표시됩니다.
+Dialogue: 0,0:00:52.00,0:00:56.00,Cap,,0,0,0,,{\fad(120,120)}툴팁에 대상이 누구를 노리는지 표시됩니다. 여기서는 당신.
+Dialogue: 0,0:00:56.00,0:01:00.50,Cap,,0,0,0,,{\fad(120,120)}업적 창은 보통 완료한 업적으로 가득하지만…
+Dialogue: 0,0:01:00.50,0:01:04.20,Cap,,0,0,0,,{\fad(120,120)}…이제 아직 못 딴 업적부터 보여줍니다.
+Dialogue: 0,0:01:04.20,0:01:09.20,Cap,,0,0,0,,{\fad(120,120)}전투 준비 확인·대기열 카운트다운, 파티원 레벨: 기능마다 체크박스가 따로 있습니다.
+Dialogue: 0,0:01:09.40,0:01:11.80,Cap,,0,0,0,,{\fad(120,120)}그 밖에: 떠오르는 평판 획득, 마우스를 흔들면 강조되는 커서, 손글씨 전투 글꼴.
+Dialogue: 0,0:01:11.80,0:01:14.20,Cap,,0,0,0,,{\fad(120,120)}Retail과 WoW Forever에서 무료. “SMoRGs QoL”을 검색하세요.

@@ -1,0 +1,46 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Heading,Segoe UI,32,&H007AC7E8,&H000000FF,&H0021140B,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,8,90,90,944,1
+Style: Body,Segoe UI,34,&H00F2F1ED,&H000000FF,&H0021140B,&H00000000,0,0,0,0,100,100,0,0,1,0,0,8,90,90,990,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.12,0:00:05.42,Heading,,0,0,0,,Ascolta i progressi delle tue missioni
+Dialogue: 0,0:00:00.12,0:00:05.42,Body,,0,0,0,,Battute dei lavoratori e migliorie facoltative alla qualità di gioco.
+Dialogue: 0,0:00:05.62,0:00:12.42,Heading,,0,0,0,,Obiettivo completato
+Dialogue: 0,0:00:05.62,0:00:12.42,Body,,0,0,0,,Il lavoratore dell’Alleanza risponde: «More work?»
+Dialogue: 0,0:00:12.62,0:00:19.42,Heading,,0,0,0,,Missione pronta da consegnare
+Dialogue: 0,0:00:12.62,0:00:19.42,Body,,0,0,0,,Completa l’intera missione: «Job’s done!»
+Dialogue: 0,0:00:19.62,0:00:24.42,Heading,,0,0,0,,Scegli il tuo lavoratore
+Dialogue: 0,0:00:19.62,0:00:24.42,Body,,0,0,0,,Peone dell’Orda o lavoratore dell’Alleanza: scegli tu.
+Dialogue: 0,0:00:24.62,0:00:31.42,Heading,,0,0,0,,Progressi e portata
+Dialogue: 0,0:00:24.62,0:00:31.42,Body,,0,0,0,,Contatori degli obiettivi e distanza sopra il tuo bersaglio.
+Dialogue: 0,0:00:31.62,0:00:37.42,Heading,,0,0,0,,I progressi prendono colore
+Dialogue: 0,0:00:31.62,0:00:37.42,Body,,0,0,0,,I progressi passano dal rosso al giallo e poi al verde.
+Dialogue: 0,0:00:37.62,0:00:45.42,Heading,,0,0,0,,«Work complete.»
+Dialogue: 0,0:00:37.62,0:00:45.42,Body,,0,0,0,,Il peone dell’Orda annuncia una missione completata.
+Dialogue: 0,0:00:45.62,0:00:53.42,Heading,,0,0,0,,Tracciamento automatico delle missioni
+Dialogue: 0,0:00:45.62,0:00:53.42,Body,,0,0,0,,Le missioni accettate appaiono nel pannello degli obiettivi.
+Dialogue: 0,0:00:53.62,0:00:59.42,Heading,,0,0,0,,Livello oggetto e velocità di movimento
+Dialogue: 0,0:00:53.62,0:00:59.42,Body,,0,0,0,,Entrambi i valori direttamente nel riquadro del personaggio.
+Dialogue: 0,0:00:59.62,0:01:05.42,Heading,,0,0,0,,Esperienza e reputazione a colpo d’occhio
+Dialogue: 0,0:00:59.62,0:01:05.42,Body,,0,0,0,,Numeri colorati, reputazione rimanente e grado di reputazione.
+Dialogue: 0,0:01:05.62,0:01:11.42,Heading,,0,0,0,,Chi sta prendendo di mira chi?
+Dialogue: 0,0:01:05.62,0:01:11.42,Body,,0,0,0,,I tooltip mostrano il bersaglio dell’unità. Qui: tu.
+Dialogue: 0,0:01:11.62,0:01:15.92,Heading,,0,0,0,,Prima: imprese completate
+Dialogue: 0,0:01:11.62,0:01:15.92,Body,,0,0,0,,La vista predefinita include le imprese già ottenute.
+Dialogue: 0,0:01:16.12,0:01:20.42,Heading,,0,0,0,,Dopo: spazio alle imprese mancanti
+Dialogue: 0,0:01:16.12,0:01:20.42,Body,,0,0,0,,Nascondi le imprese completate quando apri la finestra.
+Dialogue: 0,0:01:20.62,0:01:26.42,Heading,,0,0,0,,Ritrova il cursore
+Dialogue: 0,0:01:20.62,0:01:26.42,Body,,0,0,0,,Scuoti il mouse per evidenziare il cursore.
+Dialogue: 0,0:01:26.62,0:01:32.42,Heading,,0,0,0,,La tua avventura. Le tue impostazioni.
+Dialogue: 0,0:01:26.62,0:01:32.42,Body,,0,0,0,,Attiva ogni funzione separatamente. Impostazioni: /sqol config.
+Dialogue: 0,0:01:32.62,0:01:39.42,Heading,,0,0,0,,Gratis per Retail e WoW Forever
+Dialogue: 0,0:01:32.62,0:01:39.42,Body,,0,0,0,,Cerca «SMoRGs QoL» sulla tua piattaforma di addon.

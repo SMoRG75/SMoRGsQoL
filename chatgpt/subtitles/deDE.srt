@@ -1,0 +1,79 @@
+1
+00:00:00,120 --> 00:00:05,420
+Höre deinen Questfortschritt
+Arbeiter-Sprachzeilen und optionale Komfortfunktionen.
+
+2
+00:00:05,620 --> 00:00:12,420
+Questziel abgeschlossen
+Der Allianz-Arbeiter antwortet: „More work?“
+
+3
+00:00:12,620 --> 00:00:19,420
+Quest bereit zur Abgabe
+Schließe die ganze Quest ab: „Job’s done!“
+
+4
+00:00:19,620 --> 00:00:24,420
+Wähle deinen Arbeiter
+Horde-Peon oder Allianz-Arbeiter — du entscheidest.
+
+5
+00:00:24,620 --> 00:00:31,420
+Questfortschritt und Reichweite
+Zielzähler und Entfernung direkt über deinem Ziel.
+
+6
+00:00:31,620 --> 00:00:37,420
+Fortschritt in Farbe
+Der Questfortschritt wechselt von Rot über Gelb zu Grün.
+
+7
+00:00:37,620 --> 00:00:45,420
+„Work complete.“
+Der Horde-Peon meldet eine abgeschlossene Quest.
+
+8
+00:00:45,620 --> 00:00:53,420
+Automatische Questverfolgung
+Neu angenommene Quests erscheinen in der Zielverfolgung.
+
+9
+00:00:53,620 --> 00:00:59,420
+Gegenstandsstufe und Bewegungstempo
+Beide Werte direkt an deinem Spielerrahmen.
+
+10
+00:00:59,620 --> 00:01:05,420
+EP und Ruf im Blick
+Farbige Zahlen, verbleibender Ruf und deine Rufstufe.
+
+11
+00:01:05,620 --> 00:01:11,420
+Wer hat wen im Ziel?
+Einheiten-Tooltips zeigen ihr Ziel. Hier: dich.
+
+12
+00:01:11,620 --> 00:01:15,920
+Vorher: abgeschlossene Erfolge
+Die Standardansicht enthält bereits errungene Erfolge.
+
+13
+00:01:16,120 --> 00:01:20,420
+Nachher: fehlende Erfolge im Blick
+Blende abgeschlossene Erfolge beim Öffnen des Fensters aus.
+
+14
+00:01:20,620 --> 00:01:26,420
+Finde deinen Mauszeiger
+Schüttle die Maus, um den Mauszeiger hervorzuheben.
+
+15
+00:01:26,620 --> 00:01:32,420
+Dein Abenteuer. Deine Einstellungen.
+Jede Funktion einzeln umschalten. Einstellungen: /sqol config.
+
+16
+00:01:32,620 --> 00:01:39,420
+Kostenlos für Retail und WoW Forever
+Suche auf deiner Addon-Plattform nach „SMoRGs QoL“.

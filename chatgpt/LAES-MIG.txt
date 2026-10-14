@@ -1,0 +1,48 @@
+SMoRG's QoL - sprogversioner
+===========================
+
+11 færdige videoer baseret på optagelsen fra 12. oktober 2026.
+Hver video varer ca. 1 minut og 39,5 sekunder.
+
+Format: MP4, H.264, 1920 x 1080, 30 billeder/sekund, AAC-stereolyd.
+Forklarende tekster er indbrændt i hver video og vises under spilbilledet.
+Spillets UI og den originale lyd, inklusive worker-replikker, er på engelsk.
+Der er ikke tilføjet speak eller musik.
+
+SMoRGsQoL-enUS.mp4  Engelsk
+SMoRGsQoL-deDE.mp4  Tysk
+SMoRGsQoL-frFR.mp4  Fransk
+SMoRGsQoL-esES.mp4  Spansk (Spanien)
+SMoRGsQoL-esMX.mp4  Spansk (Latinamerika)
+SMoRGsQoL-ptBR.mp4  Portugisisk (Brasilien)
+SMoRGsQoL-itIT.mp4  Italiensk
+SMoRGsQoL-ruRU.mp4  Russisk
+SMoRGsQoL-koKR.mp4  Koreansk
+SMoRGsQoL-zhCN.mp4  Kinesisk (forenklet)
+SMoRGsQoL-zhTW.mp4  Kinesisk (traditionelt)
+
+Sproglisten følger X-Localizations i addonets SMoRGsQoL.toc.
+
+Indhold
+-------
+Introduktion; lyd ved fuldført quest-mål; lyd ved fuldført quest;
+Horde/Alliance-lydprofil; quest-tællere og afstand; farvet quest-fremskridt;
+Horde-questlyd; automatisk quest-tracking; item level og bevægelseshastighed;
+XP/rep-tal; target i tooltips; achievements før/efter filtrering;
+markørfremhævning; individuelle indstillinger; afslutning.
+
+I subtitles ligger separate UTF-8-undertekster som SRT og ASS.
+SRT-filerne kan bruges til undertekstredigering eller senere genbrug.
+MP4-filerne indeholder allerede de samme tekster synligt i billedet.
+Undgå derfor at vise et ekstra identisk undertekstspor oven i videoen.
+
+captions.json indeholder de oversatte tekster.
+build_videos.py genskaber videoerne med FFmpeg og Pillow.
+verify_videos.py kontrollerer format, alle billed-/lyddata og undertekstfiler.
+verification.json indeholder resultatet af kontrollen.
+work indeholder arbejdsfiler og billeder til visuel kontrol.
+
+Kildeoptagelse:
+C:\Users\san\Videos\NVIDIA\World Of Warcraft\World Of Warcraft 2026.10.12 - 21.10.24.01.mp4
+
+Alle tekstfiler er gemt som UTF-8 med CRLF-linjeskift.

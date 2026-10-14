@@ -1,0 +1,46 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Heading,Segoe UI,32,&H007AC7E8,&H000000FF,&H0021140B,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,8,90,90,944,1
+Style: Body,Segoe UI,34,&H00F2F1ED,&H000000FF,&H0021140B,&H00000000,0,0,0,0,100,100,0,0,1,0,0,8,90,90,990,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.12,0:00:05.42,Heading,,0,0,0,,Höre deinen Questfortschritt
+Dialogue: 0,0:00:00.12,0:00:05.42,Body,,0,0,0,,Arbeiter-Sprachzeilen und optionale Komfortfunktionen.
+Dialogue: 0,0:00:05.62,0:00:12.42,Heading,,0,0,0,,Questziel abgeschlossen
+Dialogue: 0,0:00:05.62,0:00:12.42,Body,,0,0,0,,Der Allianz-Arbeiter antwortet: „More work?“
+Dialogue: 0,0:00:12.62,0:00:19.42,Heading,,0,0,0,,Quest bereit zur Abgabe
+Dialogue: 0,0:00:12.62,0:00:19.42,Body,,0,0,0,,Schließe die ganze Quest ab: „Job’s done!“
+Dialogue: 0,0:00:19.62,0:00:24.42,Heading,,0,0,0,,Wähle deinen Arbeiter
+Dialogue: 0,0:00:19.62,0:00:24.42,Body,,0,0,0,,Horde-Peon oder Allianz-Arbeiter — du entscheidest.
+Dialogue: 0,0:00:24.62,0:00:31.42,Heading,,0,0,0,,Questfortschritt und Reichweite
+Dialogue: 0,0:00:24.62,0:00:31.42,Body,,0,0,0,,Zielzähler und Entfernung direkt über deinem Ziel.
+Dialogue: 0,0:00:31.62,0:00:37.42,Heading,,0,0,0,,Fortschritt in Farbe
+Dialogue: 0,0:00:31.62,0:00:37.42,Body,,0,0,0,,Der Questfortschritt wechselt von Rot über Gelb zu Grün.
+Dialogue: 0,0:00:37.62,0:00:45.42,Heading,,0,0,0,,„Work complete.“
+Dialogue: 0,0:00:37.62,0:00:45.42,Body,,0,0,0,,Der Horde-Peon meldet eine abgeschlossene Quest.
+Dialogue: 0,0:00:45.62,0:00:53.42,Heading,,0,0,0,,Automatische Questverfolgung
+Dialogue: 0,0:00:45.62,0:00:53.42,Body,,0,0,0,,Neu angenommene Quests erscheinen in der Zielverfolgung.
+Dialogue: 0,0:00:53.62,0:00:59.42,Heading,,0,0,0,,Gegenstandsstufe und Bewegungstempo
+Dialogue: 0,0:00:53.62,0:00:59.42,Body,,0,0,0,,Beide Werte direkt an deinem Spielerrahmen.
+Dialogue: 0,0:00:59.62,0:01:05.42,Heading,,0,0,0,,EP und Ruf im Blick
+Dialogue: 0,0:00:59.62,0:01:05.42,Body,,0,0,0,,Farbige Zahlen, verbleibender Ruf und deine Rufstufe.
+Dialogue: 0,0:01:05.62,0:01:11.42,Heading,,0,0,0,,Wer hat wen im Ziel?
+Dialogue: 0,0:01:05.62,0:01:11.42,Body,,0,0,0,,Einheiten-Tooltips zeigen ihr Ziel. Hier: dich.
+Dialogue: 0,0:01:11.62,0:01:15.92,Heading,,0,0,0,,Vorher: abgeschlossene Erfolge
+Dialogue: 0,0:01:11.62,0:01:15.92,Body,,0,0,0,,Die Standardansicht enthält bereits errungene Erfolge.
+Dialogue: 0,0:01:16.12,0:01:20.42,Heading,,0,0,0,,Nachher: fehlende Erfolge im Blick
+Dialogue: 0,0:01:16.12,0:01:20.42,Body,,0,0,0,,Blende abgeschlossene Erfolge beim Öffnen des Fensters aus.
+Dialogue: 0,0:01:20.62,0:01:26.42,Heading,,0,0,0,,Finde deinen Mauszeiger
+Dialogue: 0,0:01:20.62,0:01:26.42,Body,,0,0,0,,Schüttle die Maus, um den Mauszeiger hervorzuheben.
+Dialogue: 0,0:01:26.62,0:01:32.42,Heading,,0,0,0,,Dein Abenteuer. Deine Einstellungen.
+Dialogue: 0,0:01:26.62,0:01:32.42,Body,,0,0,0,,Jede Funktion einzeln umschalten. Einstellungen: /sqol config.
+Dialogue: 0,0:01:32.62,0:01:39.42,Heading,,0,0,0,,Kostenlos für Retail und WoW Forever
+Dialogue: 0,0:01:32.62,0:01:39.42,Body,,0,0,0,,Suche auf deiner Addon-Plattform nach „SMoRGs QoL“.

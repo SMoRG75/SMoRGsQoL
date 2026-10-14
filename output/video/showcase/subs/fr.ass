@@ -1,0 +1,35 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,Segoe UI,50,&H00FFFFFF,&H00FFFFFF,&H5A000000,&H00000000,-1,0,0,0,100,100,0,0,3,14,0,2,200,200,64,1
+Style: CapTop,Segoe UI,50,&H00FFFFFF,&H00FFFFFF,&H5A000000,&H00000000,-1,0,0,0,100,100,0,0,3,14,0,8,200,200,64,1
+Style: Tag,Segoe UI,58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,3,2,220,220,330,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.40,0:00:02.50,Tag,,0,0,0,,{\fad(120,120)}Réparation auto. Butin auto. Vente des déchets. Votre interface le fait déjà.
+Dialogue: 0,0:00:02.50,0:00:04.50,Tag,,0,0,0,,{\fad(120,120)}SMoRG's QoL fait les petites choses que personne d'autre ne fait.
+Dialogue: 0,0:00:04.70,0:00:07.10,Cap,,0,0,0,,{\fad(120,120)}Terminez un objectif de quête…
+Dialogue: 0,0:00:07.10,0:00:10.00,Cap,,0,0,0,,{\fad(120,120)}…et le paysan humain demande : {\c&H6AC4E8&}« More work? »{\c&HFFFFFF&}
+Dialogue: 0,0:00:10.20,0:00:13.40,Cap,,0,0,0,,{\fad(120,120)}Terminez toute la quête…
+Dialogue: 0,0:00:13.40,0:00:16.00,Cap,,0,0,0,,{\fad(120,120)}{\c&H6AC4E8&}« Job's done! »{\c&HFFFFFF&} Prête à être rendue.
+Dialogue: 0,0:00:16.00,0:00:20.00,Cap,,0,0,0,,{\fad(120,120)}Vous jouez Horde ? Choisissez le péon.
+Dialogue: 0,0:00:20.00,0:00:24.50,Cap,,0,0,0,,{\fad(120,120)}Au-dessus du monstre : votre compteur de quête (1/7) et la distance qui vous en sépare.
+Dialogue: 0,0:00:24.50,0:00:29.50,Cap,,0,0,0,,{\fad(120,120)}Les messages de progression passent du rouge au jaune puis au vert.
+Dialogue: 0,0:00:29.50,0:00:32.70,Cap,,0,0,0,,{\fad(120,120)}Le dernier huran…
+Dialogue: 0,0:00:32.70,0:00:36.00,Cap,,0,0,0,,{\fad(120,120)}{\c&H6AC4E8&}« Work complete. »{\c&HFFFFFF&} Chaque son s'active ou se coupe séparément.
+Dialogue: 0,0:00:36.00,0:00:41.00,CapTop,,0,0,0,,{\fad(120,120)}Les nouvelles quêtes sont suivies automatiquement.
+Dialogue: 0,0:00:41.00,0:00:46.00,CapTop,,0,0,0,,{\fad(120,120)}Niveau d'objet et vitesse sur votre cadre de joueur.
+Dialogue: 0,0:00:46.00,0:00:52.00,CapTop,,0,0,0,,{\fad(120,120)}Chiffres d'XP et de réputation en couleur. La barre de réputation affiche le % restant et le rang.
+Dialogue: 0,0:00:52.00,0:00:56.00,Cap,,0,0,0,,{\fad(120,120)}Les infobulles montrent qui une unité cible. Ici : vous.
+Dialogue: 0,0:00:56.00,0:01:00.50,Cap,,0,0,0,,{\fad(120,120)}D'habitude, les hauts faits s'ouvrent sur un mur de hauts faits terminés…
+Dialogue: 0,0:01:00.50,0:01:04.20,Cap,,0,0,0,,{\fad(120,120)}…désormais, sur ceux qu'il vous reste à obtenir.
+Dialogue: 0,0:01:04.20,0:01:09.20,Cap,,0,0,0,,{\fad(120,120)}Comptes à rebours de l'appel et de la file, niveaux du groupe : chaque option a sa propre case.
+Dialogue: 0,0:01:09.40,0:01:11.80,Cap,,0,0,0,,{\fad(120,120)}Aussi : gains de réputation flottants, curseur mis en évidence quand on secoue la souris, police de combat manuscrite.
+Dialogue: 0,0:01:11.80,0:01:14.20,Cap,,0,0,0,,{\fad(120,120)}Gratuit pour Retail et WoW Forever. Cherchez « SMoRGs QoL ».

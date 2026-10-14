@@ -1,0 +1,79 @@
+1
+00:00:00,120 --> 00:00:05,420
+Hear your quest progress
+Worker voice lines and optional quality-of-life tweaks.
+
+2
+00:00:05,620 --> 00:00:12,420
+Objective complete
+The Alliance worker responds: “More work?”
+
+3
+00:00:12,620 --> 00:00:19,420
+Quest ready to turn in
+Finish the whole quest: “Job’s done!”
+
+4
+00:00:19,620 --> 00:00:24,420
+Choose your worker
+Horde Peon or Alliance worker — your choice.
+
+5
+00:00:24,620 --> 00:00:31,420
+Quest progress and range
+Objective counts and distance, right above your target.
+
+6
+00:00:31,620 --> 00:00:37,420
+Progress in color
+Quest progress changes from red through yellow to green.
+
+7
+00:00:37,620 --> 00:00:45,420
+“Work complete.”
+The Horde Peon announces a completed quest.
+
+8
+00:00:45,620 --> 00:00:53,420
+Automatic quest tracking
+Newly accepted quests appear in the objective tracker.
+
+9
+00:00:53,620 --> 00:00:59,420
+Item level and movement speed
+See both values directly on your player frame.
+
+10
+00:00:59,620 --> 00:01:05,420
+XP and reputation at a glance
+Colored numbers, reputation remaining and your standing.
+
+11
+00:01:05,620 --> 00:01:11,420
+Who is targeting whom?
+Unit tooltips show their target. Here: you.
+
+12
+00:01:11,620 --> 00:01:15,920
+Before: completed achievements
+The default view includes achievements you already earned.
+
+13
+00:01:16,120 --> 00:01:20,420
+After: focus on what is missing
+Hide completed achievements when you open the window.
+
+14
+00:01:20,620 --> 00:01:26,420
+Find your cursor
+Shake the mouse to highlight your cursor.
+
+15
+00:01:26,620 --> 00:01:32,420
+Your adventure. Your settings.
+Toggle each feature separately. Open settings with /sqol config.
+
+16
+00:01:32,620 --> 00:01:39,420
+Free for Retail and WoW Forever
+Find “SMoRGs QoL” on your preferred addon platform.

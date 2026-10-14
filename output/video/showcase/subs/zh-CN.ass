@@ -1,0 +1,35 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,Microsoft YaHei,50,&H00FFFFFF,&H00FFFFFF,&H5A000000,&H00000000,-1,0,0,0,100,100,0,0,3,14,0,2,200,200,64,1
+Style: CapTop,Microsoft YaHei,50,&H00FFFFFF,&H00FFFFFF,&H5A000000,&H00000000,-1,0,0,0,100,100,0,0,3,14,0,8,200,200,64,1
+Style: Tag,Microsoft YaHei,58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,3,2,220,220,330,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.40,0:00:02.50,Tag,,0,0,0,,{\fad(120,120)}自动修理、自动拾取、卖垃圾——你的界面早就有了。
+Dialogue: 0,0:00:02.50,0:00:04.50,Tag,,0,0,0,,{\fad(120,120)}SMoRG's QoL 做的是别人没做的小事。
+Dialogue: 0,0:00:04.70,0:00:07.10,Cap,,0,0,0,,{\fad(120,120)}完成一个任务目标……
+Dialogue: 0,0:00:07.10,0:00:10.00,Cap,,0,0,0,,{\fad(120,120)}……人类工人会问：{\c&H6AC4E8&}“More work?”{\c&HFFFFFF&}
+Dialogue: 0,0:00:10.20,0:00:13.40,Cap,,0,0,0,,{\fad(120,120)}完成整个任务……
+Dialogue: 0,0:00:13.40,0:00:16.00,Cap,,0,0,0,,{\fad(120,120)}{\c&H6AC4E8&}“Job's done!”{\c&HFFFFFF&} 可以交任务了。
+Dialogue: 0,0:00:16.00,0:00:20.00,Cap,,0,0,0,,{\fad(120,120)}玩部落？换成兽人苦工的语音。
+Dialogue: 0,0:00:20.00,0:00:24.50,Cap,,0,0,0,,{\fad(120,120)}怪物头顶：你的任务计数（1/7）以及你和它的距离。
+Dialogue: 0,0:00:24.50,0:00:29.50,Cap,,0,0,0,,{\fad(120,120)}进度提示从红色变黄，再变绿。
+Dialogue: 0,0:00:29.50,0:00:32.70,Cap,,0,0,0,,{\fad(120,120)}最后一只野猪人……
+Dialogue: 0,0:00:32.70,0:00:36.00,Cap,,0,0,0,,{\fad(120,120)}{\c&H6AC4E8&}“Work complete.”{\c&HFFFFFF&} 每个音效都能单独开关。
+Dialogue: 0,0:00:36.00,0:00:41.00,CapTop,,0,0,0,,{\fad(120,120)}新任务自动追踪。
+Dialogue: 0,0:00:41.00,0:00:46.00,CapTop,,0,0,0,,{\fad(120,120)}玩家头像上显示物品等级和移动速度。
+Dialogue: 0,0:00:46.00,0:00:52.00,CapTop,,0,0,0,,{\fad(120,120)}经验和声望数字带颜色；声望条显示剩余百分比和声望等级。
+Dialogue: 0,0:00:52.00,0:00:56.00,Cap,,0,0,0,,{\fad(120,120)}鼠标提示显示单位的目标是谁。这里：你。
+Dialogue: 0,0:00:56.00,0:01:00.50,Cap,,0,0,0,,{\fad(120,120)}成就界面平时满是已完成的成就……
+Dialogue: 0,0:01:00.50,0:01:04.20,Cap,,0,0,0,,{\fad(120,120)}……现在默认只显示还没拿到的。
+Dialogue: 0,0:01:04.20,0:01:09.20,Cap,,0,0,0,,{\fad(120,120)}就位确认和排队倒计时、队友等级：每项改动都有自己的勾选框。
+Dialogue: 0,0:01:09.40,0:01:11.80,Cap,,0,0,0,,{\fad(120,120)}还有：浮动声望提示、晃动鼠标时高亮光标、手写风格的战斗字体。
+Dialogue: 0,0:01:11.80,0:01:14.20,Cap,,0,0,0,,{\fad(120,120)}正式服与 WoW Forever 均免费。搜索 “SMoRGs QoL”。

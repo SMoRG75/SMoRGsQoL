@@ -1,0 +1,46 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Heading,Segoe UI,32,&H007AC7E8,&H000000FF,&H0021140B,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,8,90,90,944,1
+Style: Body,Segoe UI,34,&H00F2F1ED,&H000000FF,&H0021140B,&H00000000,0,0,0,0,100,100,0,0,1,0,0,8,90,90,990,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.12,0:00:05.42,Heading,,0,0,0,,Entendez votre progression de quête
+Dialogue: 0,0:00:00.12,0:00:05.42,Body,,0,0,0,,Des répliques d’ouvrier et des améliorations facultatives.
+Dialogue: 0,0:00:05.62,0:00:12.42,Heading,,0,0,0,,Objectif accompli
+Dialogue: 0,0:00:05.62,0:00:12.42,Body,,0,0,0,,L’ouvrier de l’Alliance répond : « More work? »
+Dialogue: 0,0:00:12.62,0:00:19.42,Heading,,0,0,0,,Quête prête à être rendue
+Dialogue: 0,0:00:12.62,0:00:19.42,Body,,0,0,0,,Terminez toute la quête : « Job’s done! »
+Dialogue: 0,0:00:19.62,0:00:24.42,Heading,,0,0,0,,Choisissez votre ouvrier
+Dialogue: 0,0:00:19.62,0:00:24.42,Body,,0,0,0,,Péon de la Horde ou ouvrier de l’Alliance : à vous de choisir.
+Dialogue: 0,0:00:24.62,0:00:31.42,Heading,,0,0,0,,Progression et portée
+Dialogue: 0,0:00:24.62,0:00:31.42,Body,,0,0,0,,Compteurs d’objectifs et distance juste au-dessus de votre cible.
+Dialogue: 0,0:00:31.62,0:00:37.42,Heading,,0,0,0,,La progression en couleur
+Dialogue: 0,0:00:31.62,0:00:37.42,Body,,0,0,0,,La progression passe du rouge au jaune, puis au vert.
+Dialogue: 0,0:00:37.62,0:00:45.42,Heading,,0,0,0,,« Work complete. »
+Dialogue: 0,0:00:37.62,0:00:45.42,Body,,0,0,0,,Le péon de la Horde annonce une quête accomplie.
+Dialogue: 0,0:00:45.62,0:00:53.42,Heading,,0,0,0,,Suivi automatique des quêtes
+Dialogue: 0,0:00:45.62,0:00:53.42,Body,,0,0,0,,Les quêtes acceptées apparaissent dans le suivi des objectifs.
+Dialogue: 0,0:00:53.62,0:00:59.42,Heading,,0,0,0,,Niveau d’objet et vitesse de déplacement
+Dialogue: 0,0:00:53.62,0:00:59.42,Body,,0,0,0,,Les deux valeurs s’affichent sur votre cadre de joueur.
+Dialogue: 0,0:00:59.62,0:01:05.42,Heading,,0,0,0,,XP et réputation en un coup d’œil
+Dialogue: 0,0:00:59.62,0:01:05.42,Body,,0,0,0,,Chiffres colorés, réputation restante et niveau de réputation.
+Dialogue: 0,0:01:05.62,0:01:11.42,Heading,,0,0,0,,Qui cible qui ?
+Dialogue: 0,0:01:05.62,0:01:11.42,Body,,0,0,0,,Les infobulles affichent la cible des unités. Ici : vous.
+Dialogue: 0,0:01:11.62,0:01:15.92,Heading,,0,0,0,,Avant : les hauts faits accomplis
+Dialogue: 0,0:01:11.62,0:01:15.92,Body,,0,0,0,,La vue par défaut inclut vos hauts faits déjà obtenus.
+Dialogue: 0,0:01:16.12,0:01:20.42,Heading,,0,0,0,,Après : place aux hauts faits manquants
+Dialogue: 0,0:01:16.12,0:01:20.42,Body,,0,0,0,,Masquez les hauts faits accomplis à l’ouverture de la fenêtre.
+Dialogue: 0,0:01:20.62,0:01:26.42,Heading,,0,0,0,,Retrouvez votre curseur
+Dialogue: 0,0:01:20.62,0:01:26.42,Body,,0,0,0,,Secouez la souris pour mettre le curseur en évidence.
+Dialogue: 0,0:01:26.62,0:01:32.42,Heading,,0,0,0,,Votre aventure. Vos réglages.
+Dialogue: 0,0:01:26.62,0:01:32.42,Body,,0,0,0,,Activez chaque fonction séparément. Réglages : /sqol config.
+Dialogue: 0,0:01:32.62,0:01:39.42,Heading,,0,0,0,,Gratuit pour Retail et WoW Forever
+Dialogue: 0,0:01:32.62,0:01:39.42,Body,,0,0,0,,Cherchez « SMoRGs QoL » sur votre plateforme d’addons.

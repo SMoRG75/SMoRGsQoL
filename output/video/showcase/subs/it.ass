@@ -1,0 +1,35 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,Segoe UI,50,&H00FFFFFF,&H00FFFFFF,&H5A000000,&H00000000,-1,0,0,0,100,100,0,0,3,14,0,2,200,200,64,1
+Style: CapTop,Segoe UI,50,&H00FFFFFF,&H00FFFFFF,&H5A000000,&H00000000,-1,0,0,0,100,100,0,0,3,14,0,8,200,200,64,1
+Style: Tag,Segoe UI,58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,3,2,220,220,330,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.40,0:00:02.50,Tag,,0,0,0,,{\fad(120,120)}Riparazione automatica. Bottino automatico. Vendita della robaccia. La tua interfaccia lo fa già.
+Dialogue: 0,0:00:02.50,0:00:04.50,Tag,,0,0,0,,{\fad(120,120)}SMoRG's QoL fa le piccole cose che nessun altro fa.
+Dialogue: 0,0:00:04.70,0:00:07.10,Cap,,0,0,0,,{\fad(120,120)}Completa un obiettivo di missione…
+Dialogue: 0,0:00:07.10,0:00:10.00,Cap,,0,0,0,,{\fad(120,120)}…e il lavoratore umano chiede: {\c&H6AC4E8&}«More work?»{\c&HFFFFFF&}
+Dialogue: 0,0:00:10.20,0:00:13.40,Cap,,0,0,0,,{\fad(120,120)}Completa l'intera missione…
+Dialogue: 0,0:00:13.40,0:00:16.00,Cap,,0,0,0,,{\fad(120,120)}{\c&H6AC4E8&}«Job's done!»{\c&HFFFFFF&} Pronta da consegnare.
+Dialogue: 0,0:00:16.00,0:00:20.00,Cap,,0,0,0,,{\fad(120,120)}Giochi con l'Orda? Passa al peone.
+Dialogue: 0,0:00:20.00,0:00:24.50,Cap,,0,0,0,,{\fad(120,120)}Sopra il nemico: il contatore della missione (1/7) e quanto è lontano.
+Dialogue: 0,0:00:24.50,0:00:29.50,Cap,,0,0,0,,{\fad(120,120)}I messaggi di avanzamento passano dal rosso al giallo al verde.
+Dialogue: 0,0:00:29.50,0:00:32.70,Cap,,0,0,0,,{\fad(120,120)}L'ultimo verrospino…
+Dialogue: 0,0:00:32.70,0:00:36.00,Cap,,0,0,0,,{\fad(120,120)}{\c&H6AC4E8&}«Work complete.»{\c&HFFFFFF&} Ogni suono si attiva o disattiva da solo.
+Dialogue: 0,0:00:36.00,0:00:41.00,CapTop,,0,0,0,,{\fad(120,120)}Le nuove missioni vengono tracciate automaticamente.
+Dialogue: 0,0:00:41.00,0:00:46.00,CapTop,,0,0,0,,{\fad(120,120)}Livello oggetti e velocità sul riquadro del giocatore.
+Dialogue: 0,0:00:46.00,0:00:52.00,CapTop,,0,0,0,,{\fad(120,120)}Numeri di esperienza e reputazione colorati. La barra della reputazione mostra il % mancante e il grado.
+Dialogue: 0,0:00:52.00,0:00:56.00,Cap,,0,0,0,,{\fad(120,120)}I tooltip mostrano chi sta prendendo di mira un'unità. Qui: te.
+Dialogue: 0,0:00:56.00,0:01:00.50,Cap,,0,0,0,,{\fad(120,120)}Di solito le imprese si aprono su un muro di imprese completate…
+Dialogue: 0,0:01:00.50,0:01:04.20,Cap,,0,0,0,,{\fad(120,120)}…ora si aprono su quelle che ti mancano.
+Dialogue: 0,0:01:04.20,0:01:09.20,Cap,,0,0,0,,{\fad(120,120)}Conti alla rovescia per l'appello e la coda, livelli del gruppo: ogni ritocco ha la sua casella.
+Dialogue: 0,0:01:09.40,0:01:11.80,Cap,,0,0,0,,{\fad(120,120)}Inoltre: reputazione fluttuante, cursore evidenziato quando scuoti il mouse, carattere di combattimento disegnato a mano.
+Dialogue: 0,0:01:11.80,0:01:14.20,Cap,,0,0,0,,{\fad(120,120)}Gratis per Retail e WoW Forever. Cerca «SMoRGs QoL».

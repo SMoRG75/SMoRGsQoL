@@ -1,8 +1,26 @@
 /.vscode
 .codex
 .claude/settings.local.json
-# Raw recordings for the promo videos (large; only the finished videos are kept)
+
+# Raw recordings for the promo videos (large, not in git)
 output/video/Addon part *
+output/video/World Of Warcraft *.mp4
+
+# Showcase (build-showcase.py): intermediates and rendered videos.
+# The script and subs/ are kept; the mp4s are rebuilt with
+# python output/video/build-showcase.py --reuse-master
+output/video/build/showcase-master.mp4
+output/video/build/*-log.txt
+output/video/build/chk/
+output/video/showcase/*.mp4
 
 # BigWigs packager output (see RELEASING.md)
 /.release
+
+# Local video build files, Python cache, and generated verification report
+/chatgpt/work/
+/chatgpt/__pycache__/
+/chatgpt/verification.json
+
+# Rendered localized videos
+/chatgpt/SMoRGsQoL-*.mp4

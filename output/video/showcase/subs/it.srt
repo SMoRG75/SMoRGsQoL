@@ -1,0 +1,79 @@
+1
+00:00:00,400 --> 00:00:02,500
+Riparazione automatica. Bottino automatico. Vendita della robaccia. La tua interfaccia lo fa già.
+
+2
+00:00:02,500 --> 00:00:04,500
+SMoRG's QoL fa le piccole cose che nessun altro fa.
+
+3
+00:00:04,700 --> 00:00:07,100
+Completa un obiettivo di missione…
+
+4
+00:00:07,100 --> 00:00:10,000
+…e il lavoratore umano chiede: «More work?»
+
+5
+00:00:10,200 --> 00:00:13,400
+Completa l'intera missione…
+
+6
+00:00:13,400 --> 00:00:16,000
+«Job's done!» Pronta da consegnare.
+
+7
+00:00:16,000 --> 00:00:20,000
+Giochi con l'Orda? Passa al peone.
+
+8
+00:00:20,000 --> 00:00:24,500
+Sopra il nemico: il contatore della missione (1/7) e quanto è lontano.
+
+9
+00:00:24,500 --> 00:00:29,500
+I messaggi di avanzamento passano dal rosso al giallo al verde.
+
+10
+00:00:29,500 --> 00:00:32,700
+L'ultimo verrospino…
+
+11
+00:00:32,700 --> 00:00:36,000
+«Work complete.» Ogni suono si attiva o disattiva da solo.
+
+12
+00:00:36,000 --> 00:00:41,000
+Le nuove missioni vengono tracciate automaticamente.
+
+13
+00:00:41,000 --> 00:00:46,000
+Livello oggetti e velocità sul riquadro del giocatore.
+
+14
+00:00:46,000 --> 00:00:52,000
+Numeri di esperienza e reputazione colorati. La barra della reputazione mostra il % mancante e il grado.
+
+15
+00:00:52,000 --> 00:00:56,000
+I tooltip mostrano chi sta prendendo di mira un'unità. Qui: te.
+
+16
+00:00:56,000 --> 00:01:00,500
+Di solito le imprese si aprono su un muro di imprese completate…
+
+17
+00:01:00,500 --> 00:01:04,200
+…ora si aprono su quelle che ti mancano.
+
+18
+00:01:04,200 --> 00:01:09,200
+Conti alla rovescia per l'appello e la coda, livelli del gruppo: ogni ritocco ha la sua casella.
+
+19
+00:01:09,400 --> 00:01:11,800
+Inoltre: reputazione fluttuante, cursore evidenziato quando scuoti il mouse, carattere di combattimento disegnato a mano.
+
+20
+00:01:11,800 --> 00:01:14,200
+Gratis per Retail e WoW Forever. Cerca «SMoRGs QoL».

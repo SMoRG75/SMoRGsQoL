@@ -1,0 +1,46 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Heading,Microsoft JhengHei,32,&H007AC7E8,&H000000FF,&H0021140B,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,8,90,90,944,1
+Style: Body,Microsoft JhengHei,34,&H00F2F1ED,&H000000FF,&H0021140B,&H00000000,0,0,0,0,100,100,0,0,1,0,0,8,90,90,990,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.12,0:00:05.42,Heading,,0,0,0,,以聲音感受任務進度
+Dialogue: 0,0:00:00.12,0:00:05.42,Body,,0,0,0,,工人語音，以及可依需求開啟的便利功能。
+Dialogue: 0,0:00:05.62,0:00:12.42,Heading,,0,0,0,,任務目標完成
+Dialogue: 0,0:00:05.62,0:00:12.42,Body,,0,0,0,,聯盟工人回應：「More work?」
+Dialogue: 0,0:00:12.62,0:00:19.42,Heading,,0,0,0,,任務已完成，可以交付
+Dialogue: 0,0:00:12.62,0:00:19.42,Body,,0,0,0,,完成整個任務：「Job’s done!」
+Dialogue: 0,0:00:19.62,0:00:24.42,Heading,,0,0,0,,選擇你的工人
+Dialogue: 0,0:00:19.62,0:00:24.42,Body,,0,0,0,,部落苦工或聯盟工人，由你選擇。
+Dialogue: 0,0:00:24.62,0:00:31.42,Heading,,0,0,0,,任務進度與射程
+Dialogue: 0,0:00:24.62,0:00:31.42,Body,,0,0,0,,在目標上方直接顯示目標計數與距離。
+Dialogue: 0,0:00:31.62,0:00:37.42,Heading,,0,0,0,,用色彩呈現進度
+Dialogue: 0,0:00:31.62,0:00:37.42,Body,,0,0,0,,任務進度從紅色變為黃色，再變為綠色。
+Dialogue: 0,0:00:37.62,0:00:45.42,Heading,,0,0,0,,「Work complete.」
+Dialogue: 0,0:00:37.62,0:00:45.42,Body,,0,0,0,,部落苦工為你播報任務完成。
+Dialogue: 0,0:00:45.62,0:00:53.42,Heading,,0,0,0,,自動追蹤任務
+Dialogue: 0,0:00:45.62,0:00:53.42,Body,,0,0,0,,新接受的任務會自動顯示在目標追蹤欄中。
+Dialogue: 0,0:00:53.62,0:00:59.42,Heading,,0,0,0,,物品等級與移動速度
+Dialogue: 0,0:00:53.62,0:00:59.42,Body,,0,0,0,,在玩家頭像框架上直接查看這兩項數值。
+Dialogue: 0,0:00:59.62,0:01:05.42,Heading,,0,0,0,,經驗與聲望一目了然
+Dialogue: 0,0:00:59.62,0:01:05.42,Body,,0,0,0,,彩色數值、剩餘聲望以及目前的聲望等級。
+Dialogue: 0,0:01:05.62,0:01:11.42,Heading,,0,0,0,,誰的目標是誰？
+Dialogue: 0,0:01:05.62,0:01:11.42,Body,,0,0,0,,浮動提示會顯示該單位的目標。這裡是你。
+Dialogue: 0,0:01:11.62,0:01:15.92,Heading,,0,0,0,,開啟前：顯示已完成的成就
+Dialogue: 0,0:01:11.62,0:01:15.92,Body,,0,0,0,,預設清單也包含你已經獲得的成就。
+Dialogue: 0,0:01:16.12,0:01:20.42,Heading,,0,0,0,,開啟後：專注尚未完成的成就
+Dialogue: 0,0:01:16.12,0:01:20.42,Body,,0,0,0,,開啟成就視窗時隱藏已完成的成就。
+Dialogue: 0,0:01:20.62,0:01:26.42,Heading,,0,0,0,,輕鬆找到游標
+Dialogue: 0,0:01:20.62,0:01:26.42,Body,,0,0,0,,搖晃滑鼠即可醒目顯示游標。
+Dialogue: 0,0:01:26.62,0:01:32.42,Heading,,0,0,0,,你的冒險，你的設定。
+Dialogue: 0,0:01:26.62,0:01:32.42,Body,,0,0,0,,每項功能都能獨立開關。輸入 /sqol config 開啟設定。
+Dialogue: 0,0:01:32.62,0:01:39.42,Heading,,0,0,0,,免費支援 Retail 和 WoW Forever
+Dialogue: 0,0:01:32.62,0:01:39.42,Body,,0,0,0,,在你常用的插件平台搜尋「SMoRGs QoL」。

@@ -1,0 +1,46 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Heading,Malgun Gothic,32,&H007AC7E8,&H000000FF,&H0021140B,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,8,90,90,944,1
+Style: Body,Malgun Gothic,34,&H00F2F1ED,&H000000FF,&H0021140B,&H00000000,0,0,0,0,100,100,0,0,1,0,0,8,90,90,990,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.12,0:00:05.42,Heading,,0,0,0,,퀘스트 진행을 소리로 확인하세요
+Dialogue: 0,0:00:00.12,0:00:05.42,Body,,0,0,0,,일꾼 대사와 선택해서 쓰는 편의 기능.
+Dialogue: 0,0:00:05.62,0:00:12.42,Heading,,0,0,0,,퀘스트 목표 완료
+Dialogue: 0,0:00:05.62,0:00:12.42,Body,,0,0,0,,얼라이언스 일꾼이 답합니다: “More work?”
+Dialogue: 0,0:00:12.62,0:00:19.42,Heading,,0,0,0,,퀘스트를 완료하고 보고할 차례
+Dialogue: 0,0:00:12.62,0:00:19.42,Body,,0,0,0,,퀘스트를 모두 완료하면: “Job’s done!”
+Dialogue: 0,0:00:19.62,0:00:24.42,Heading,,0,0,0,,원하는 일꾼을 선택하세요
+Dialogue: 0,0:00:19.62,0:00:24.42,Body,,0,0,0,,호드 일꾼 또는 얼라이언스 일꾼을 선택하세요.
+Dialogue: 0,0:00:24.62,0:00:31.42,Heading,,0,0,0,,퀘스트 진행과 사거리
+Dialogue: 0,0:00:24.62,0:00:31.42,Body,,0,0,0,,목표 바로 위에 진행 수치와 거리를 표시합니다.
+Dialogue: 0,0:00:31.62,0:00:37.42,Heading,,0,0,0,,색으로 보는 진행 상황
+Dialogue: 0,0:00:31.62,0:00:37.42,Body,,0,0,0,,퀘스트 진행에 따라 빨강에서 노랑, 초록으로 바뀝니다.
+Dialogue: 0,0:00:37.62,0:00:45.42,Heading,,0,0,0,,“Work complete.”
+Dialogue: 0,0:00:37.62,0:00:45.42,Body,,0,0,0,,호드 일꾼이 퀘스트 완료를 알려줍니다.
+Dialogue: 0,0:00:45.62,0:00:53.42,Heading,,0,0,0,,퀘스트 자동 추적
+Dialogue: 0,0:00:45.62,0:00:53.42,Body,,0,0,0,,새로 수락한 퀘스트가 목표 추적기에 표시됩니다.
+Dialogue: 0,0:00:53.62,0:00:59.42,Heading,,0,0,0,,아이템 레벨과 이동 속도
+Dialogue: 0,0:00:53.62,0:00:59.42,Body,,0,0,0,,플레이어 프레임에서 두 수치를 바로 확인하세요.
+Dialogue: 0,0:00:59.62,0:01:05.42,Heading,,0,0,0,,경험치와 평판을 한눈에
+Dialogue: 0,0:00:59.62,0:01:05.42,Body,,0,0,0,,수치 색상, 남은 평판, 평판 등급을 확인하세요.
+Dialogue: 0,0:01:05.62,0:01:11.42,Heading,,0,0,0,,누가 누구를 대상으로 삼았을까요?
+Dialogue: 0,0:01:05.62,0:01:11.42,Body,,0,0,0,,툴팁에 해당 유닛의 대상이 표시됩니다. 여기서는 당신입니다.
+Dialogue: 0,0:01:11.62,0:01:15.92,Heading,,0,0,0,,변경 전: 완료한 업적도 표시
+Dialogue: 0,0:01:11.62,0:01:15.92,Body,,0,0,0,,기본 화면에는 이미 달성한 업적도 표시됩니다.
+Dialogue: 0,0:01:16.12,0:01:20.42,Heading,,0,0,0,,변경 후: 남은 업적에 집중
+Dialogue: 0,0:01:16.12,0:01:20.42,Body,,0,0,0,,업적 창을 열 때 완료한 업적을 숨깁니다.
+Dialogue: 0,0:01:20.62,0:01:26.42,Heading,,0,0,0,,커서를 쉽게 찾으세요
+Dialogue: 0,0:01:20.62,0:01:26.42,Body,,0,0,0,,마우스를 흔들면 커서가 강조됩니다.
+Dialogue: 0,0:01:26.62,0:01:32.42,Heading,,0,0,0,,나만의 모험. 나만의 설정.
+Dialogue: 0,0:01:26.62,0:01:32.42,Body,,0,0,0,,기능마다 따로 켜고 끄세요. 설정 열기: /sqol config.
+Dialogue: 0,0:01:32.62,0:01:39.42,Heading,,0,0,0,,Retail 및 WoW Forever에서 무료
+Dialogue: 0,0:01:32.62,0:01:39.42,Body,,0,0,0,,애드온 플랫폼에서 “SMoRGs QoL”을 검색하세요.

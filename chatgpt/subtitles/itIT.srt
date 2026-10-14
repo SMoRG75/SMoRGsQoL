@@ -1,0 +1,79 @@
+1
+00:00:00,120 --> 00:00:05,420
+Ascolta i progressi delle tue missioni
+Battute dei lavoratori e migliorie facoltative alla qualità di gioco.
+
+2
+00:00:05,620 --> 00:00:12,420
+Obiettivo completato
+Il lavoratore dell’Alleanza risponde: «More work?»
+
+3
+00:00:12,620 --> 00:00:19,420
+Missione pronta da consegnare
+Completa l’intera missione: «Job’s done!»
+
+4
+00:00:19,620 --> 00:00:24,420
+Scegli il tuo lavoratore
+Peone dell’Orda o lavoratore dell’Alleanza: scegli tu.
+
+5
+00:00:24,620 --> 00:00:31,420
+Progressi e portata
+Contatori degli obiettivi e distanza sopra il tuo bersaglio.
+
+6
+00:00:31,620 --> 00:00:37,420
+I progressi prendono colore
+I progressi passano dal rosso al giallo e poi al verde.
+
+7
+00:00:37,620 --> 00:00:45,420
+«Work complete.»
+Il peone dell’Orda annuncia una missione completata.
+
+8
+00:00:45,620 --> 00:00:53,420
+Tracciamento automatico delle missioni
+Le missioni accettate appaiono nel pannello degli obiettivi.
+
+9
+00:00:53,620 --> 00:00:59,420
+Livello oggetto e velocità di movimento
+Entrambi i valori direttamente nel riquadro del personaggio.
+
+10
+00:00:59,620 --> 00:01:05,420
+Esperienza e reputazione a colpo d’occhio
+Numeri colorati, reputazione rimanente e grado di reputazione.
+
+11
+00:01:05,620 --> 00:01:11,420
+Chi sta prendendo di mira chi?
+I tooltip mostrano il bersaglio dell’unità. Qui: tu.
+
+12
+00:01:11,620 --> 00:01:15,920
+Prima: imprese completate
+La vista predefinita include le imprese già ottenute.
+
+13
+00:01:16,120 --> 00:01:20,420
+Dopo: spazio alle imprese mancanti
+Nascondi le imprese completate quando apri la finestra.
+
+14
+00:01:20,620 --> 00:01:26,420
+Ritrova il cursore
+Scuoti il mouse per evidenziare il cursore.
+
+15
+00:01:26,620 --> 00:01:32,420
+La tua avventura. Le tue impostazioni.
+Attiva ogni funzione separatamente. Impostazioni: /sqol config.
+
+16
+00:01:32,620 --> 00:01:39,420
+Gratis per Retail e WoW Forever
+Cerca «SMoRGs QoL» sulla tua piattaforma di addon.

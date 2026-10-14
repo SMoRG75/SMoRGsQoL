@@ -1,0 +1,79 @@
+1
+00:00:00,120 --> 00:00:05,420
+Entendez votre progression de quête
+Des répliques d’ouvrier et des améliorations facultatives.
+
+2
+00:00:05,620 --> 00:00:12,420
+Objectif accompli
+L’ouvrier de l’Alliance répond : « More work? »
+
+3
+00:00:12,620 --> 00:00:19,420
+Quête prête à être rendue
+Terminez toute la quête : « Job’s done! »
+
+4
+00:00:19,620 --> 00:00:24,420
+Choisissez votre ouvrier
+Péon de la Horde ou ouvrier de l’Alliance : à vous de choisir.
+
+5
+00:00:24,620 --> 00:00:31,420
+Progression et portée
+Compteurs d’objectifs et distance juste au-dessus de votre cible.
+
+6
+00:00:31,620 --> 00:00:37,420
+La progression en couleur
+La progression passe du rouge au jaune, puis au vert.
+
+7
+00:00:37,620 --> 00:00:45,420
+« Work complete. »
+Le péon de la Horde annonce une quête accomplie.
+
+8
+00:00:45,620 --> 00:00:53,420
+Suivi automatique des quêtes
+Les quêtes acceptées apparaissent dans le suivi des objectifs.
+
+9
+00:00:53,620 --> 00:00:59,420
+Niveau d’objet et vitesse de déplacement
+Les deux valeurs s’affichent sur votre cadre de joueur.
+
+10
+00:00:59,620 --> 00:01:05,420
+XP et réputation en un coup d’œil
+Chiffres colorés, réputation restante et niveau de réputation.
+
+11
+00:01:05,620 --> 00:01:11,420
+Qui cible qui ?
+Les infobulles affichent la cible des unités. Ici : vous.
+
+12
+00:01:11,620 --> 00:01:15,920
+Avant : les hauts faits accomplis
+La vue par défaut inclut vos hauts faits déjà obtenus.
+
+13
+00:01:16,120 --> 00:01:20,420
+Après : place aux hauts faits manquants
+Masquez les hauts faits accomplis à l’ouverture de la fenêtre.
+
+14
+00:01:20,620 --> 00:01:26,420
+Retrouvez votre curseur
+Secouez la souris pour mettre le curseur en évidence.
+
+15
+00:01:26,620 --> 00:01:32,420
+Votre aventure. Vos réglages.
+Activez chaque fonction séparément. Réglages : /sqol config.
+
+16
+00:01:32,620 --> 00:01:39,420
+Gratuit pour Retail et WoW Forever
+Cherchez « SMoRGs QoL » sur votre plateforme d’addons.

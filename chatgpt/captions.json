@@ -1,0 +1,728 @@
+{
+  "enUS": [
+    [
+      "Hear your quest progress",
+      "Worker voice lines and optional quality-of-life tweaks."
+    ],
+    [
+      "Objective complete",
+      "The Alliance worker responds: “More work?”"
+    ],
+    [
+      "Quest ready to turn in",
+      "Finish the whole quest: “Job’s done!”"
+    ],
+    [
+      "Choose your worker",
+      "Horde Peon or Alliance worker — your choice."
+    ],
+    [
+      "Quest progress and range",
+      "Objective counts and distance, right above your target."
+    ],
+    [
+      "Progress in color",
+      "Quest progress changes from red through yellow to green."
+    ],
+    [
+      "“Work complete.”",
+      "The Horde Peon announces a completed quest."
+    ],
+    [
+      "Automatic quest tracking",
+      "Newly accepted quests appear in the objective tracker."
+    ],
+    [
+      "Item level and movement speed",
+      "See both values directly on your player frame."
+    ],
+    [
+      "XP and reputation at a glance",
+      "Colored numbers, reputation remaining and your standing."
+    ],
+    [
+      "Who is targeting whom?",
+      "Unit tooltips show their target. Here: you."
+    ],
+    [
+      "Before: completed achievements",
+      "The default view includes achievements you already earned."
+    ],
+    [
+      "After: focus on what is missing",
+      "Hide completed achievements when you open the window."
+    ],
+    [
+      "Find your cursor",
+      "Shake the mouse to highlight your cursor."
+    ],
+    [
+      "Your adventure. Your settings.",
+      "Toggle each feature separately. Open settings with /sqol config."
+    ],
+    [
+      "Free for Retail and WoW Forever",
+      "Find “SMoRGs QoL” on your preferred addon platform."
+    ]
+  ],
+  "deDE": [
+    [
+      "Höre deinen Questfortschritt",
+      "Arbeiter-Sprachzeilen und optionale Komfortfunktionen."
+    ],
+    [
+      "Questziel abgeschlossen",
+      "Der Allianz-Arbeiter antwortet: „More work?“"
+    ],
+    [
+      "Quest bereit zur Abgabe",
+      "Schließe die ganze Quest ab: „Job’s done!“"
+    ],
+    [
+      "Wähle deinen Arbeiter",
+      "Horde-Peon oder Allianz-Arbeiter — du entscheidest."
+    ],
+    [
+      "Questfortschritt und Reichweite",
+      "Zielzähler und Entfernung direkt über deinem Ziel."
+    ],
+    [
+      "Fortschritt in Farbe",
+      "Der Questfortschritt wechselt von Rot über Gelb zu Grün."
+    ],
+    [
+      "„Work complete.“",
+      "Der Horde-Peon meldet eine abgeschlossene Quest."
+    ],
+    [
+      "Automatische Questverfolgung",
+      "Neu angenommene Quests erscheinen in der Zielverfolgung."
+    ],
+    [
+      "Gegenstandsstufe und Bewegungstempo",
+      "Beide Werte direkt an deinem Spielerrahmen."
+    ],
+    [
+      "EP und Ruf im Blick",
+      "Farbige Zahlen, verbleibender Ruf und deine Rufstufe."
+    ],
+    [
+      "Wer hat wen im Ziel?",
+      "Einheiten-Tooltips zeigen ihr Ziel. Hier: dich."
+    ],
+    [
+      "Vorher: abgeschlossene Erfolge",
+      "Die Standardansicht enthält bereits errungene Erfolge."
+    ],
+    [
+      "Nachher: fehlende Erfolge im Blick",
+      "Blende abgeschlossene Erfolge beim Öffnen des Fensters aus."
+    ],
+    [
+      "Finde deinen Mauszeiger",
+      "Schüttle die Maus, um den Mauszeiger hervorzuheben."
+    ],
+    [
+      "Dein Abenteuer. Deine Einstellungen.",
+      "Jede Funktion einzeln umschalten. Einstellungen: /sqol config."
+    ],
+    [
+      "Kostenlos für Retail und WoW Forever",
+      "Suche auf deiner Addon-Plattform nach „SMoRGs QoL“."
+    ]
+  ],
+  "frFR": [
+    [
+      "Entendez votre progression de quête",
+      "Des répliques d’ouvrier et des améliorations facultatives."
+    ],
+    [
+      "Objectif accompli",
+      "L’ouvrier de l’Alliance répond : « More work? »"
+    ],
+    [
+      "Quête prête à être rendue",
+      "Terminez toute la quête : « Job’s done! »"
+    ],
+    [
+      "Choisissez votre ouvrier",
+      "Péon de la Horde ou ouvrier de l’Alliance : à vous de choisir."
+    ],
+    [
+      "Progression et portée",
+      "Compteurs d’objectifs et distance juste au-dessus de votre cible."
+    ],
+    [
+      "La progression en couleur",
+      "La progression passe du rouge au jaune, puis au vert."
+    ],
+    [
+      "« Work complete. »",
+      "Le péon de la Horde annonce une quête accomplie."
+    ],
+    [
+      "Suivi automatique des quêtes",
+      "Les quêtes acceptées apparaissent dans le suivi des objectifs."
+    ],
+    [
+      "Niveau d’objet et vitesse de déplacement",
+      "Les deux valeurs s’affichent sur votre cadre de joueur."
+    ],
+    [
+      "XP et réputation en un coup d’œil",
+      "Chiffres colorés, réputation restante et niveau de réputation."
+    ],
+    [
+      "Qui cible qui ?",
+      "Les infobulles affichent la cible des unités. Ici : vous."
+    ],
+    [
+      "Avant : les hauts faits accomplis",
+      "La vue par défaut inclut vos hauts faits déjà obtenus."
+    ],
+    [
+      "Après : place aux hauts faits manquants",
+      "Masquez les hauts faits accomplis à l’ouverture de la fenêtre."
+    ],
+    [
+      "Retrouvez votre curseur",
+      "Secouez la souris pour mettre le curseur en évidence."
+    ],
+    [
+      "Votre aventure. Vos réglages.",
+      "Activez chaque fonction séparément. Réglages : /sqol config."
+    ],
+    [
+      "Gratuit pour Retail et WoW Forever",
+      "Cherchez « SMoRGs QoL » sur votre plateforme d’addons."
+    ]
+  ],
+  "esES": [
+    [
+      "Escucha el progreso de tus misiones",
+      "Frases de trabajadores y mejoras opcionales de calidad de vida."
+    ],
+    [
+      "Objetivo completado",
+      "El trabajador de la Alianza responde: «More work?»"
+    ],
+    [
+      "Misión lista para entregar",
+      "Completa toda la misión: «Job’s done!»"
+    ],
+    [
+      "Elige a tu trabajador",
+      "Peón de la Horda o trabajador de la Alianza: tú eliges."
+    ],
+    [
+      "Progreso de misión y alcance",
+      "Contadores de objetivos y distancia justo sobre tu objetivo."
+    ],
+    [
+      "El progreso, en color",
+      "El progreso pasa del rojo al amarillo y después al verde."
+    ],
+    [
+      "«Work complete.»",
+      "El peón de la Horda anuncia una misión completada."
+    ],
+    [
+      "Seguimiento automático de misiones",
+      "Las misiones aceptadas aparecen en el seguimiento de objetivos."
+    ],
+    [
+      "Nivel de objeto y velocidad",
+      "Ambos valores se muestran en tu marco de jugador."
+    ],
+    [
+      "Experiencia y reputación de un vistazo",
+      "Números de colores, reputación restante y tu rango."
+    ],
+    [
+      "¿Quién tiene a quién como objetivo?",
+      "Las descripciones muestran el objetivo de la unidad. Aquí: tú."
+    ],
+    [
+      "Antes: logros completados",
+      "La vista predeterminada incluye los logros que ya has obtenido."
+    ],
+    [
+      "Después: céntrate en los que faltan",
+      "Oculta los logros completados al abrir la ventana."
+    ],
+    [
+      "Encuentra tu cursor",
+      "Agita el ratón para resaltar el cursor."
+    ],
+    [
+      "Tu aventura. Tus ajustes.",
+      "Activa cada función por separado. Ajustes: /sqol config."
+    ],
+    [
+      "Gratis para Retail y WoW Forever",
+      "Busca «SMoRGs QoL» en tu plataforma de addons."
+    ]
+  ],
+  "esMX": [
+    [
+      "Escucha el progreso de tus misiones",
+      "Frases de trabajadores y mejoras opcionales de calidad de vida."
+    ],
+    [
+      "Objetivo completado",
+      "El trabajador de la Alianza responde: «More work?»"
+    ],
+    [
+      "Misión lista para entregar",
+      "Completa toda la misión: «Job’s done!»"
+    ],
+    [
+      "Elige a tu trabajador",
+      "Peón de la Horda o trabajador de la Alianza: tú eliges."
+    ],
+    [
+      "Progreso de misión y alcance",
+      "Contadores de objetivos y distancia justo sobre tu objetivo."
+    ],
+    [
+      "El progreso, a color",
+      "El progreso pasa de rojo a amarillo y después a verde."
+    ],
+    [
+      "«Work complete.»",
+      "El peón de la Horda anuncia una misión completada."
+    ],
+    [
+      "Seguimiento automático de misiones",
+      "Las misiones aceptadas aparecen en el seguimiento de objetivos."
+    ],
+    [
+      "Nivel de objeto y velocidad",
+      "Ambos valores se muestran en tu marco de jugador."
+    ],
+    [
+      "Experiencia y reputación de un vistazo",
+      "Números a color, reputación restante y tu rango."
+    ],
+    [
+      "¿Quién tiene a quién como objetivo?",
+      "Las descripciones muestran el objetivo de la unidad. Aquí: tú."
+    ],
+    [
+      "Antes: logros completados",
+      "La vista predeterminada incluye los logros que ya obtuviste."
+    ],
+    [
+      "Después: enfócate en los que faltan",
+      "Oculta los logros completados al abrir la ventana."
+    ],
+    [
+      "Encuentra tu cursor",
+      "Agita el mouse para resaltar el cursor."
+    ],
+    [
+      "Tu aventura. Tus ajustes.",
+      "Activa cada función por separado. Configuración: /sqol config."
+    ],
+    [
+      "Gratis para Retail y WoW Forever",
+      "Busca «SMoRGs QoL» en tu plataforma de addons."
+    ]
+  ],
+  "ptBR": [
+    [
+      "Ouça o progresso das suas missões",
+      "Falas de trabalhadores e melhorias opcionais de qualidade de vida."
+    ],
+    [
+      "Objetivo concluído",
+      "O trabalhador da Aliança responde: “More work?”"
+    ],
+    [
+      "Missão pronta para entregar",
+      "Conclua a missão inteira: “Job’s done!”"
+    ],
+    [
+      "Escolha seu trabalhador",
+      "Peão da Horda ou trabalhador da Aliança: você escolhe."
+    ],
+    [
+      "Progresso de missão e alcance",
+      "Contadores de objetivos e distância logo acima do seu alvo."
+    ],
+    [
+      "Progresso em cores",
+      "O progresso passa do vermelho ao amarelo e ao verde."
+    ],
+    [
+      "“Work complete.”",
+      "O peão da Horda anuncia uma missão concluída."
+    ],
+    [
+      "Rastreamento automático de missões",
+      "Missões aceitas aparecem no rastreador de objetivos."
+    ],
+    [
+      "Nível de item e velocidade de movimento",
+      "Veja os dois valores diretamente no quadro do personagem."
+    ],
+    [
+      "Experiência e reputação à vista",
+      "Números coloridos, reputação restante e seu nível de reputação."
+    ],
+    [
+      "Quem está mirando em quem?",
+      "As dicas de tela mostram o alvo da unidade. Aqui: você."
+    ],
+    [
+      "Antes: conquistas concluídas",
+      "A visualização padrão inclui conquistas que você já obteve."
+    ],
+    [
+      "Depois: foco no que falta",
+      "Oculte conquistas concluídas ao abrir a janela."
+    ],
+    [
+      "Encontre seu cursor",
+      "Sacuda o mouse para destacar o cursor."
+    ],
+    [
+      "Sua aventura. Suas configurações.",
+      "Ative cada recurso separadamente. Configurações: /sqol config."
+    ],
+    [
+      "Grátis para Retail e WoW Forever",
+      "Procure “SMoRGs QoL” na sua plataforma de addons."
+    ]
+  ],
+  "itIT": [
+    [
+      "Ascolta i progressi delle tue missioni",
+      "Battute dei lavoratori e migliorie facoltative alla qualità di gioco."
+    ],
+    [
+      "Obiettivo completato",
+      "Il lavoratore dell’Alleanza risponde: «More work?»"
+    ],
+    [
+      "Missione pronta da consegnare",
+      "Completa l’intera missione: «Job’s done!»"
+    ],
+    [
+      "Scegli il tuo lavoratore",
+      "Peone dell’Orda o lavoratore dell’Alleanza: scegli tu."
+    ],
+    [
+      "Progressi e portata",
+      "Contatori degli obiettivi e distanza sopra il tuo bersaglio."
+    ],
+    [
+      "I progressi prendono colore",
+      "I progressi passano dal rosso al giallo e poi al verde."
+    ],
+    [
+      "«Work complete.»",
+      "Il peone dell’Orda annuncia una missione completata."
+    ],
+    [
+      "Tracciamento automatico delle missioni",
+      "Le missioni accettate appaiono nel pannello degli obiettivi."
+    ],
+    [
+      "Livello oggetto e velocità di movimento",
+      "Entrambi i valori direttamente nel riquadro del personaggio."
+    ],
+    [
+      "Esperienza e reputazione a colpo d’occhio",
+      "Numeri colorati, reputazione rimanente e grado di reputazione."
+    ],
+    [
+      "Chi sta prendendo di mira chi?",
+      "I tooltip mostrano il bersaglio dell’unità. Qui: tu."
+    ],
+    [
+      "Prima: imprese completate",
+      "La vista predefinita include le imprese già ottenute."
+    ],
+    [
+      "Dopo: spazio alle imprese mancanti",
+      "Nascondi le imprese completate quando apri la finestra."
+    ],
+    [
+      "Ritrova il cursore",
+      "Scuoti il mouse per evidenziare il cursore."
+    ],
+    [
+      "La tua avventura. Le tue impostazioni.",
+      "Attiva ogni funzione separatamente. Impostazioni: /sqol config."
+    ],
+    [
+      "Gratis per Retail e WoW Forever",
+      "Cerca «SMoRGs QoL» sulla tua piattaforma di addon."
+    ]
+  ],
+  "ruRU": [
+    [
+      "Слушайте прогресс заданий",
+      "Реплики рабочих и дополнительные удобные функции."
+    ],
+    [
+      "Цель задания выполнена",
+      "Рабочий Альянса отвечает: «More work?»"
+    ],
+    [
+      "Задание готово к сдаче",
+      "Выполните всё задание: «Job’s done!»"
+    ],
+    [
+      "Выберите своего рабочего",
+      "Пеон Орды или рабочий Альянса — выбор за вами."
+    ],
+    [
+      "Прогресс задания и дальность",
+      "Счётчик целей и расстояние прямо над вашей целью."
+    ],
+    [
+      "Прогресс в цвете",
+      "Цвет прогресса меняется с красного на жёлтый и зелёный."
+    ],
+    [
+      "«Work complete.»",
+      "Пеон Орды сообщает о выполнении задания."
+    ],
+    [
+      "Автоотслеживание заданий",
+      "Принятые задания появляются в списке отслеживаемых целей."
+    ],
+    [
+      "Уровень предметов и скорость",
+      "Оба значения отображаются на рамке вашего персонажа."
+    ],
+    [
+      "Опыт и репутация на виду",
+      "Цветные числа, оставшаяся репутация и уровень отношений."
+    ],
+    [
+      "Кто кого выбрал целью?",
+      "Подсказки показывают цель существа. Здесь — вас."
+    ],
+    [
+      "До: выполненные достижения",
+      "Стандартный вид включает уже полученные достижения."
+    ],
+    [
+      "После: внимание недостающим",
+      "Скрывайте выполненные достижения при открытии окна."
+    ],
+    [
+      "Найдите свой курсор",
+      "Встряхните мышь, чтобы подсветить курсор."
+    ],
+    [
+      "Ваше приключение. Ваши настройки.",
+      "Включайте функции по отдельности. Настройки: /sqol config."
+    ],
+    [
+      "Бесплатно для Retail и WoW Forever",
+      "Ищите «SMoRGs QoL» на своей платформе аддонов."
+    ]
+  ],
+  "koKR": [
+    [
+      "퀘스트 진행을 소리로 확인하세요",
+      "일꾼 대사와 선택해서 쓰는 편의 기능."
+    ],
+    [
+      "퀘스트 목표 완료",
+      "얼라이언스 일꾼이 답합니다: “More work?”"
+    ],
+    [
+      "퀘스트를 완료하고 보고할 차례",
+      "퀘스트를 모두 완료하면: “Job’s done!”"
+    ],
+    [
+      "원하는 일꾼을 선택하세요",
+      "호드 일꾼 또는 얼라이언스 일꾼을 선택하세요."
+    ],
+    [
+      "퀘스트 진행과 사거리",
+      "목표 바로 위에 진행 수치와 거리를 표시합니다."
+    ],
+    [
+      "색으로 보는 진행 상황",
+      "퀘스트 진행에 따라 빨강에서 노랑, 초록으로 바뀝니다."
+    ],
+    [
+      "“Work complete.”",
+      "호드 일꾼이 퀘스트 완료를 알려줍니다."
+    ],
+    [
+      "퀘스트 자동 추적",
+      "새로 수락한 퀘스트가 목표 추적기에 표시됩니다."
+    ],
+    [
+      "아이템 레벨과 이동 속도",
+      "플레이어 프레임에서 두 수치를 바로 확인하세요."
+    ],
+    [
+      "경험치와 평판을 한눈에",
+      "수치 색상, 남은 평판, 평판 등급을 확인하세요."
+    ],
+    [
+      "누가 누구를 대상으로 삼았을까요?",
+      "툴팁에 해당 유닛의 대상이 표시됩니다. 여기서는 당신입니다."
+    ],
+    [
+      "변경 전: 완료한 업적도 표시",
+      "기본 화면에는 이미 달성한 업적도 표시됩니다."
+    ],
+    [
+      "변경 후: 남은 업적에 집중",
+      "업적 창을 열 때 완료한 업적을 숨깁니다."
+    ],
+    [
+      "커서를 쉽게 찾으세요",
+      "마우스를 흔들면 커서가 강조됩니다."
+    ],
+    [
+      "나만의 모험. 나만의 설정.",
+      "기능마다 따로 켜고 끄세요. 설정 열기: /sqol config."
+    ],
+    [
+      "Retail 및 WoW Forever에서 무료",
+      "애드온 플랫폼에서 “SMoRGs QoL”을 검색하세요."
+    ]
+  ],
+  "zhCN": [
+    [
+      "用声音感知任务进度",
+      "工人语音，以及可按需开启的便捷功能。"
+    ],
+    [
+      "任务目标完成",
+      "联盟工人回应：“More work?”"
+    ],
+    [
+      "任务已完成，可以交付",
+      "完成整个任务：“Job’s done!”"
+    ],
+    [
+      "选择你的工人",
+      "部落苦工或联盟工人，由你选择。"
+    ],
+    [
+      "任务进度与射程",
+      "在目标上方直接显示目标计数与距离。"
+    ],
+    [
+      "用颜色显示进度",
+      "任务进度从红色变为黄色，再变为绿色。"
+    ],
+    [
+      "“Work complete.”",
+      "部落苦工为你播报任务完成。"
+    ],
+    [
+      "自动追踪任务",
+      "新接受的任务会自动显示在目标追踪栏中。"
+    ],
+    [
+      "物品等级与移动速度",
+      "在玩家头像框体上直接查看这两项数值。"
+    ],
+    [
+      "经验与声望一目了然",
+      "彩色数值、剩余声望以及当前声望等级。"
+    ],
+    [
+      "谁的目标是谁？",
+      "鼠标提示会显示该单位的目标。这里是你。"
+    ],
+    [
+      "开启前：显示已完成的成就",
+      "默认列表也包含你已经获得的成就。"
+    ],
+    [
+      "开启后：专注尚未完成的成就",
+      "打开成就窗口时隐藏已完成的成就。"
+    ],
+    [
+      "轻松找到鼠标指针",
+      "晃动鼠标即可高亮显示指针。"
+    ],
+    [
+      "你的冒险，你的设置。",
+      "每项功能都能单独开关。输入 /sqol config 打开设置。"
+    ],
+    [
+      "免费支持 Retail 和 WoW Forever",
+      "在你常用的插件平台搜索“SMoRGs QoL”。"
+    ]
+  ],
+  "zhTW": [
+    [
+      "以聲音感受任務進度",
+      "工人語音，以及可依需求開啟的便利功能。"
+    ],
+    [
+      "任務目標完成",
+      "聯盟工人回應：「More work?」"
+    ],
+    [
+      "任務已完成，可以交付",
+      "完成整個任務：「Job’s done!」"
+    ],
+    [
+      "選擇你的工人",
+      "部落苦工或聯盟工人，由你選擇。"
+    ],
+    [
+      "任務進度與射程",
+      "在目標上方直接顯示目標計數與距離。"
+    ],
+    [
+      "用色彩呈現進度",
+      "任務進度從紅色變為黃色，再變為綠色。"
+    ],
+    [
+      "「Work complete.」",
+      "部落苦工為你播報任務完成。"
+    ],
+    [
+      "自動追蹤任務",
+      "新接受的任務會自動顯示在目標追蹤欄中。"
+    ],
+    [
+      "物品等級與移動速度",
+      "在玩家頭像框架上直接查看這兩項數值。"
+    ],
+    [
+      "經驗與聲望一目了然",
+      "彩色數值、剩餘聲望以及目前的聲望等級。"
+    ],
+    [
+      "誰的目標是誰？",
+      "浮動提示會顯示該單位的目標。這裡是你。"
+    ],
+    [
+      "開啟前：顯示已完成的成就",
+      "預設清單也包含你已經獲得的成就。"
+    ],
+    [
+      "開啟後：專注尚未完成的成就",
+      "開啟成就視窗時隱藏已完成的成就。"
+    ],
+    [
+      "輕鬆找到游標",
+      "搖晃滑鼠即可醒目顯示游標。"
+    ],
+    [
+      "你的冒險，你的設定。",
+      "每項功能都能獨立開關。輸入 /sqol config 開啟設定。"
+    ],
+    [
+      "免費支援 Retail 和 WoW Forever",
+      "在你常用的插件平台搜尋「SMoRGs QoL」。"
+    ]
+  ]
+}

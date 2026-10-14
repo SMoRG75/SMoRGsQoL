@@ -1,0 +1,46 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Heading,Segoe UI,32,&H007AC7E8,&H000000FF,&H0021140B,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,8,90,90,944,1
+Style: Body,Segoe UI,34,&H00F2F1ED,&H000000FF,&H0021140B,&H00000000,0,0,0,0,100,100,0,0,1,0,0,8,90,90,990,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.12,0:00:05.42,Heading,,0,0,0,,Ouça o progresso das suas missões
+Dialogue: 0,0:00:00.12,0:00:05.42,Body,,0,0,0,,Falas de trabalhadores e melhorias opcionais de qualidade de vida.
+Dialogue: 0,0:00:05.62,0:00:12.42,Heading,,0,0,0,,Objetivo concluído
+Dialogue: 0,0:00:05.62,0:00:12.42,Body,,0,0,0,,O trabalhador da Aliança responde: “More work?”
+Dialogue: 0,0:00:12.62,0:00:19.42,Heading,,0,0,0,,Missão pronta para entregar
+Dialogue: 0,0:00:12.62,0:00:19.42,Body,,0,0,0,,Conclua a missão inteira: “Job’s done!”
+Dialogue: 0,0:00:19.62,0:00:24.42,Heading,,0,0,0,,Escolha seu trabalhador
+Dialogue: 0,0:00:19.62,0:00:24.42,Body,,0,0,0,,Peão da Horda ou trabalhador da Aliança: você escolhe.
+Dialogue: 0,0:00:24.62,0:00:31.42,Heading,,0,0,0,,Progresso de missão e alcance
+Dialogue: 0,0:00:24.62,0:00:31.42,Body,,0,0,0,,Contadores de objetivos e distância logo acima do seu alvo.
+Dialogue: 0,0:00:31.62,0:00:37.42,Heading,,0,0,0,,Progresso em cores
+Dialogue: 0,0:00:31.62,0:00:37.42,Body,,0,0,0,,O progresso passa do vermelho ao amarelo e ao verde.
+Dialogue: 0,0:00:37.62,0:00:45.42,Heading,,0,0,0,,“Work complete.”
+Dialogue: 0,0:00:37.62,0:00:45.42,Body,,0,0,0,,O peão da Horda anuncia uma missão concluída.
+Dialogue: 0,0:00:45.62,0:00:53.42,Heading,,0,0,0,,Rastreamento automático de missões
+Dialogue: 0,0:00:45.62,0:00:53.42,Body,,0,0,0,,Missões aceitas aparecem no rastreador de objetivos.
+Dialogue: 0,0:00:53.62,0:00:59.42,Heading,,0,0,0,,Nível de item e velocidade de movimento
+Dialogue: 0,0:00:53.62,0:00:59.42,Body,,0,0,0,,Veja os dois valores diretamente no quadro do personagem.
+Dialogue: 0,0:00:59.62,0:01:05.42,Heading,,0,0,0,,Experiência e reputação à vista
+Dialogue: 0,0:00:59.62,0:01:05.42,Body,,0,0,0,,Números coloridos, reputação restante e seu nível de reputação.
+Dialogue: 0,0:01:05.62,0:01:11.42,Heading,,0,0,0,,Quem está mirando em quem?
+Dialogue: 0,0:01:05.62,0:01:11.42,Body,,0,0,0,,As dicas de tela mostram o alvo da unidade. Aqui: você.
+Dialogue: 0,0:01:11.62,0:01:15.92,Heading,,0,0,0,,Antes: conquistas concluídas
+Dialogue: 0,0:01:11.62,0:01:15.92,Body,,0,0,0,,A visualização padrão inclui conquistas que você já obteve.
+Dialogue: 0,0:01:16.12,0:01:20.42,Heading,,0,0,0,,Depois: foco no que falta
+Dialogue: 0,0:01:16.12,0:01:20.42,Body,,0,0,0,,Oculte conquistas concluídas ao abrir a janela.
+Dialogue: 0,0:01:20.62,0:01:26.42,Heading,,0,0,0,,Encontre seu cursor
+Dialogue: 0,0:01:20.62,0:01:26.42,Body,,0,0,0,,Sacuda o mouse para destacar o cursor.
+Dialogue: 0,0:01:26.62,0:01:32.42,Heading,,0,0,0,,Sua aventura. Suas configurações.
+Dialogue: 0,0:01:26.62,0:01:32.42,Body,,0,0,0,,Ative cada recurso separadamente. Configurações: /sqol config.
+Dialogue: 0,0:01:32.62,0:01:39.42,Heading,,0,0,0,,Grátis para Retail e WoW Forever
+Dialogue: 0,0:01:32.62,0:01:39.42,Body,,0,0,0,,Procure “SMoRGs QoL” na sua plataforma de addons.

@@ -1,0 +1,79 @@
+1
+00:00:00,400 --> 00:00:02,500
+Auto-Reparatur. Auto-Plündern. Schrott verkaufen. Kann dein UI längst.
+
+2
+00:00:02,500 --> 00:00:04,500
+SMoRG's QoL macht die kleinen Dinge, die sonst keiner macht.
+
+3
+00:00:04,700 --> 00:00:07,100
+Schließ ein Questziel ab…
+
+4
+00:00:07,100 --> 00:00:10,000
+…und der menschliche Arbeiter fragt: „More work?“
+
+5
+00:00:10,200 --> 00:00:13,400
+Schließ die ganze Quest ab…
+
+6
+00:00:13,400 --> 00:00:16,000
+„Job's done!“ Bereit zum Abgeben.
+
+7
+00:00:16,000 --> 00:00:20,000
+Du spielst Horde? Nimm den Peon.
+
+8
+00:00:20,000 --> 00:00:24,500
+Über dem Gegner: dein Questzähler (1/7) und deine Entfernung zu ihm.
+
+9
+00:00:24,500 --> 00:00:29,500
+Fortschrittsmeldungen wechseln von Rot über Gelb zu Grün.
+
+10
+00:00:29,500 --> 00:00:32,700
+Der letzte Stacheleber…
+
+11
+00:00:32,700 --> 00:00:36,000
+„Work complete.“ Jeder Sound lässt sich einzeln abschalten.
+
+12
+00:00:36,000 --> 00:00:41,000
+Neue Quests werden automatisch verfolgt.
+
+13
+00:00:41,000 --> 00:00:46,000
+Gegenstandsstufe und Tempo am Spielerrahmen.
+
+14
+00:00:46,000 --> 00:00:52,000
+Farbige EP- und Rufzahlen. Die Rufleiste zeigt % übrig und Rufstufe.
+
+15
+00:00:52,000 --> 00:00:56,000
+Tooltips zeigen, wen eine Einheit anvisiert. Hier: dich.
+
+16
+00:00:56,000 --> 00:01:00,500
+Erfolge öffnen sich sonst mit einer Wand aus erledigten…
+
+17
+00:01:00,500 --> 00:01:04,200
+…jetzt mit denen, die dir noch fehlen.
+
+18
+00:01:04,200 --> 00:01:09,200
+Countdowns für Bereitschaftscheck und Warteschlange, Gruppenstufen: jede Verbesserung hat ihr eigenes Häkchen.
+
+19
+00:01:09,400 --> 00:01:11,800
+Außerdem: schwebende Rufgewinne, Cursor-Hervorhebung beim Schütteln, handgezeichnete Kampfschrift.
+
+20
+00:01:11,800 --> 00:01:14,200
+Kostenlos für Retail und WoW Forever. Such nach „SMoRGs QoL“.
