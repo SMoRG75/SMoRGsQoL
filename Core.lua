@@ -40,6 +40,7 @@ SQOL.defaults = {
     QuestCompleteSound = true,
     QuestObjectiveSound = true,
     QuestSoundProfile = "Horde",
+    AdventureRecap = false,
     HideDoneAchievements = false,
     RepWatch     = false,
     ShowRepGains = false,

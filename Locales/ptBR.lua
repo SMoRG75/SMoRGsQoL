@@ -3,6 +3,29 @@ local _, SQOL = ...
 if SQOL.Locale ~= "ptBR" then return end
 local L = SQOL.L
 
+-- Adventure Recap
+L["Adventure Recap"] = "Resumo da aventura"
+L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "Registra missões, reputação recebida e tempo de jogo por personagem. Abra com /sqol recap. Recarregar a interface continua a sessão; entrar novamente inicia outra. Sem janelas automáticas."
+L["Adventure Recap: /sqol recap [last | reset | test]"] = "Resumo da aventura: /sqol recap [last | reset | test]"
+L["Your Adventure"] = "Sua aventura"
+L["Quests completed"] = "Missões concluídas"
+L["World quests (included)"] = "Destas, missões mundiais"
+L["Reputation gained"] = "Reputação recebida"
+L["Session time"] = "Tempo de sessão"
+L["%dh %dm"] = "%d h %d min"
+L["Current session"] = "Sessão atual"
+L["Previous session"] = "Sessão anterior"
+L["Preview"] = "Prévia"
+L["Preview — sample data"] = "Prévia — dados de exemplo"
+L["No previous session recorded."] = "Nenhuma sessão anterior registrada."
+L["Enable Adventure Recap to start recording this character's session."] = "Ative o resumo da aventura para registrar a sessão deste personagem."
+L["%d quests completed this session."] = "%d missões concluídas nesta sessão."
+L["Most active faction: %s (+%d)"] = "Facção mais ativa: %s (+%d)"
+L["Recording paused."] = "Registro pausado."
+L["* Recorded reputation only; some gains could not be read."] = "* Apenas reputação registrada; alguns ganhos não puderam ser lidos."
+L["World quest count is a minimum; some quest types could not be identified."] = "O total de missões mundiais é um mínimo; alguns tipos de missão não puderam ser identificados."
+L["Current Adventure Recap reset."] = "Resumo da aventura atual reiniciado."
+
 -- Sound profiles
 L["Horde (Peon)"] = "Horda (peão)"
 L["Alliance (Human worker)"] = "Aliança (camponês humano)"

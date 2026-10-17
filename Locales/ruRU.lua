@@ -3,6 +3,29 @@ local _, SQOL = ...
 if SQOL.Locale ~= "ruRU" then return end
 local L = SQOL.L
 
+-- Adventure Recap
+L["Adventure Recap"] = "Итоги приключения"
+L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "Записывать задания, полученную репутацию и время игры для каждого персонажа. Открыть: /sqol recap. Перезагрузка интерфейса продолжает сеанс; новый вход начинает следующий. Без автоматических окон."
+L["Adventure Recap: /sqol recap [last | reset | test]"] = "Итоги приключения: /sqol recap [last | reset | test]"
+L["Your Adventure"] = "Ваше приключение"
+L["Quests completed"] = "Выполнено заданий"
+L["World quests (included)"] = "Из них локальных"
+L["Reputation gained"] = "Получено репутации"
+L["Session time"] = "Время сеанса"
+L["%dh %dm"] = "%d ч %d мин"
+L["Current session"] = "Текущий сеанс"
+L["Previous session"] = "Предыдущий сеанс"
+L["Preview"] = "Предпросмотр"
+L["Preview — sample data"] = "Предпросмотр — пример данных"
+L["No previous session recorded."] = "Нет записи предыдущего сеанса."
+L["Enable Adventure Recap to start recording this character's session."] = "Включите итоги приключения, чтобы записывать сеанс этого персонажа."
+L["%d quests completed this session."] = "Выполнено заданий за сеанс: %d."
+L["Most active faction: %s (+%d)"] = "Самая активная фракция: %s (+%d)"
+L["Recording paused."] = "Запись приостановлена."
+L["* Recorded reputation only; some gains could not be read."] = "* Только записанная репутация; некоторые прибавки не удалось прочитать."
+L["World quest count is a minimum; some quest types could not be identified."] = "Число локальных заданий — минимальное; типы некоторых заданий не удалось определить."
+L["Current Adventure Recap reset."] = "Текущие итоги приключения сброшены."
+
 -- Sound profiles
 L["Horde (Peon)"] = "Орда (батрак)"
 L["Alliance (Human worker)"] = "Альянс (крестьянин)"

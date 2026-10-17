@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Adventure Recap** — an optional, movable, per-character session window for completed quests, world quests, reputation gains and recorded playtime, with a most-active-faction highlight when reliable. Open it from the options window or `/sqol recap`; use `last`, `reset` or `test` for the previous session, a fresh current session or sample data. Recording is off by default, survives UI reloads, excludes offline/paused time and never opens a popup automatically. Unreadable reputation and unavailable world quest classification are clearly marked. Translated into every supported client language.
+- Automated coverage for session boundaries, duplicate turn-ins/chat events, repeatable quests, character isolation, localized reputation, secret values, missing APIs, pausing, reset and previews. In-game Retail and WoW Forever validation is still required before release.
+
 ## [1.2.1] - 2026-10-14
 
 ### Changed

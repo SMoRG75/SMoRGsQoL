@@ -37,6 +37,7 @@ function SQOL.Init(reset)
     SQOL.DB = SQOL_DB
 
     if reset then
+        SQOL.Recap_OnOptionChanged()
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         SQOL.RepGains_Hide()
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
@@ -420,6 +421,9 @@ function SQOL.ApplyOption(key)
             SQOL.ApplyAchievementFilter()
         end
 
+    elseif key == "AdventureRecap" then
+        SQOL.Recap_OnOptionChanged()
+
     elseif key == "ShowRepGains" then
         if not SQOL.DB.ShowRepGains then SQOL.RepGains_Hide() end
 
@@ -506,6 +510,8 @@ end
 local SQOL_Help
 
 local SQOL_COMMANDS = {
+    { names = { "recap" }, desc = L["Adventure Recap: /sqol recap [last | reset | test]"],
+      run = function(rest) SQOL.Recap_Command(rest) end },
     { names = { "config", "options", "opt" }, desc = L["Open the options window"],
       run = function() SQOL.OptionsPopup_Toggle() end },
     { names = { "minimap", "mm" }, key = "ShowMinimapButton" },
@@ -626,6 +632,8 @@ end
 
 f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
+f:RegisterEvent("PLAYER_LOGOUT")
+f:RegisterEvent("PLAYER_LEAVING_WORLD")
 f:RegisterEvent("QUEST_ACCEPTED")
 f:RegisterEvent("QUEST_LOG_UPDATE")
 SQOL_RegisterOptionalEvent("QUEST_WATCH_UPDATE")
@@ -708,6 +716,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "PLAYER_ENTERING_WORLD" then
+        SQOL.Recap_EnteringWorld(...)
         if SQOL.DB and (SQOL.DB.ShowItemLevel or SQOL.DB.ShowMovementSpeed) then
             SQOL.TryEnsurePlayerFrameIlvlUI(0)
         else
@@ -724,6 +733,9 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
         SQOL.RefreshPartyMemberLevels()
+
+    elseif event == "PLAYER_LOGOUT" or event == "PLAYER_LEAVING_WORLD" then
+        SQOL.Recap_Save()
 
     elseif event == "GROUP_ROSTER_UPDATE" then
         SQOL.RefreshPartyMemberLevels()
@@ -819,6 +831,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
         if questID then
+            SQOL.Recap_QuestAccepted(questID)
             SQOL.fullyCompleted[questID] = nil
             SQOL.questObjectiveStates[questID] = nil
             if SQOL.DB.AutoTrack then
@@ -831,6 +844,7 @@ f:SetScript("OnEvent", function(self, event, ...)
     elseif event == "QUEST_TURNED_IN" then
         SQOL.InvalidateQuestDataCache()
         local questID = ...
+        SQOL.Recap_QuestTurnedIn(questID)
         if questID then
             -- Keep the quest marked as handled so delayed QUEST_LOG_UPDATE events
             -- during turn-in do not fire the completion alert again.
@@ -858,6 +872,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
+        SQOL.Recap_ReputationMessage((...), select(11, ...))
         SQOL.RepGains_HandleMessage(...)
         if SQOL.DB and SQOL.DB.RepWatch then
             local msg = ...

@@ -18,6 +18,8 @@ SQOL.OptionSections = {
     {
         title = L["Quests"],
         options = {
+            { key = "AdventureRecap", label = L["Adventure Recap"],
+              tooltip = L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] },
             { key = "AutoTrack", label = L["Auto-track newly accepted quests"],
               tooltip = L["Automatically track newly accepted quests in the objective tracker."] },
             { key = "ColorProgress", label = L["Color quest progress"],

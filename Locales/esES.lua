@@ -3,6 +3,29 @@ local _, SQOL = ...
 if SQOL.Locale ~= "esES" and SQOL.Locale ~= "esMX" then return end
 local L = SQOL.L
 
+-- Adventure Recap
+L["Adventure Recap"] = "Resumen de aventuras"
+L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "Registra misiones, reputación ganada y tiempo de juego por personaje. Abre con /sqol recap. Recargar la interfaz continúa la sesión; volver a entrar inicia otra. Sin ventanas automáticas."
+L["Adventure Recap: /sqol recap [last | reset | test]"] = "Resumen de aventuras: /sqol recap [last | reset | test]"
+L["Your Adventure"] = "Tu aventura"
+L["Quests completed"] = "Misiones completadas"
+L["World quests (included)"] = "De ellas, misiones del mundo"
+L["Reputation gained"] = "Reputación ganada"
+L["Session time"] = "Tiempo de sesión"
+L["%dh %dm"] = "%d h %d min"
+L["Current session"] = "Sesión actual"
+L["Previous session"] = "Sesión anterior"
+L["Preview"] = "Vista previa"
+L["Preview — sample data"] = "Vista previa — datos de ejemplo"
+L["No previous session recorded."] = "No hay ninguna sesión anterior registrada."
+L["Enable Adventure Recap to start recording this character's session."] = "Activa el resumen de aventuras para registrar la sesión de este personaje."
+L["%d quests completed this session."] = "%d misiones completadas en esta sesión."
+L["Most active faction: %s (+%d)"] = "Facción más activa: %s (+%d)"
+L["Recording paused."] = "Registro en pausa."
+L["* Recorded reputation only; some gains could not be read."] = "* Solo reputación registrada; algunas ganancias no se pudieron leer."
+L["World quest count is a minimum; some quest types could not be identified."] = "El total de misiones del mundo es un mínimo; no se pudieron identificar algunos tipos de misión."
+L["Current Adventure Recap reset."] = "Resumen de aventuras actual reiniciado."
+
 -- Sound profiles
 L["Horde (Peon)"] = "Horda (peón)"
 L["Alliance (Human worker)"] = "Alianza (campesino humano)"

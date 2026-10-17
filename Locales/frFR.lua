@@ -3,6 +3,29 @@ local _, SQOL = ...
 if SQOL.Locale ~= "frFR" then return end
 local L = SQOL.L
 
+-- Adventure Recap
+L["Adventure Recap"] = "Bilan d'aventure"
+L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "Enregistre les quêtes, les gains de réputation et le temps de jeu par personnage. Ouvrir avec /sqol recap. Recharger l'interface poursuit la session ; se reconnecter en démarre une autre. Aucune fenêtre automatique."
+L["Adventure Recap: /sqol recap [last | reset | test]"] = "Bilan d'aventure : /sqol recap [last | reset | test]"
+L["Your Adventure"] = "Votre aventure"
+L["Quests completed"] = "Quêtes terminées"
+L["World quests (included)"] = "Dont expéditions"
+L["Reputation gained"] = "Réputation gagnée"
+L["Session time"] = "Durée de la session"
+L["%dh %dm"] = "%d h %d min"
+L["Current session"] = "Session actuelle"
+L["Previous session"] = "Session précédente"
+L["Preview"] = "Aperçu"
+L["Preview — sample data"] = "Aperçu — données d'exemple"
+L["No previous session recorded."] = "Aucune session précédente enregistrée."
+L["Enable Adventure Recap to start recording this character's session."] = "Activez le bilan d'aventure pour enregistrer la session de ce personnage."
+L["%d quests completed this session."] = "%d quêtes terminées pendant cette session."
+L["Most active faction: %s (+%d)"] = "Faction la plus active : %s (+%d)"
+L["Recording paused."] = "Enregistrement en pause."
+L["* Recorded reputation only; some gains could not be read."] = "* Réputation enregistrée uniquement ; certains gains n'ont pas pu être lus."
+L["World quest count is a minimum; some quest types could not be identified."] = "Le nombre d'expéditions est un minimum ; certains types de quêtes n'ont pas pu être identifiés."
+L["Current Adventure Recap reset."] = "Bilan d'aventure actuel réinitialisé."
+
 -- Sound profiles
 L["Horde (Peon)"] = "Horde (péon)"
 L["Alliance (Human worker)"] = "Alliance (paysan humain)"

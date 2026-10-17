@@ -36,7 +36,8 @@ local function widget()
         'SetFading', 'SetTimeVisible', 'SetFadeDuration', 'SetMaxLines',
         'SetInsertMode', 'SetSpacing', 'AddMessage', 'SetToplevel', 'SetClampedToScreen',
         'SetMovable', 'RegisterForDrag', 'StartMoving', 'StopMovingOrSizing', 'SetHitRectInsets',
-        'SetFontObject', 'SetColorTexture', 'SetHeight', 'SetOwner', 'SetTexCoord', 'SetShadowOffset' }) do
+        'SetFontObject', 'SetColorTexture', 'SetHeight', 'SetOwner', 'SetTexCoord', 'SetShadowOffset',
+        'SetBackdrop', 'SetBackdropColor', 'SetBackdropBorderColor' }) do
         w[method] = function() end
     end
     return w
@@ -477,7 +478,32 @@ assert(repFrame:IsShown())
 SlashCmdList.SQOL('rt')
 assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
 SlashCmdList.SQOL('reptexttest')
+-- Adventure Recap is routed independently of quest sounds and reputation text.
+sqol.SetOption('QuestCompleteSound', false)
+sqol.SetOption('QuestObjectiveSound', false)
+sqol.SetOption('AdventureRecap', true)
+local recapBefore = sqol.Recap_GetSummary().quests
+fire('QUEST_LOG_UPDATE')
+fire('QUEST_REMOVED', 920001)
+assert(sqol.Recap_GetSummary().quests == recapBefore, 'Ready/removal events never count as turn-ins')
+fire('QUEST_TURNED_IN', 920001)
+fire('QUEST_TURNED_IN', 920001)
+assert(sqol.Recap_GetSummary().quests == recapBefore + 1, 'Turn-in routing deduplicates quests')
+fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Reputation with Valarjar increased by 25.',
+    nil, nil, nil, nil, nil, nil, nil, nil, nil, 72001)
+fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Reputation with Valarjar increased by 25.',
+    nil, nil, nil, nil, nil, nil, nil, nil, nil, 72001)
+assert(sqol.Recap_GetSummary().reputation == 25, 'Chat line ID reaches recap independently of rep text')
+SlashCmdList.SQOL('recap test')
+assert(SQOL_AdventureRecap:IsShown() and SQOL_AdventureRecap.values[1].text == '18')
+SlashCmdList.SQOL('recap')
+assert(SQOL_AdventureRecap.values[1].text == tostring(recapBefore + 1), 'Slash command shows real totals')
+fire('PLAYER_LEAVING_WORLD')
+fire('PLAYER_LOGOUT')
+assert(SQOL_RecapDB.current.quests == recapBefore + 1, 'Logout saves per-character totals')
 SlashCmdList.SQOL('reset')
+assert(not sqol.DB.AdventureRecap and SQOL_RecapDB.current.quests == recapBefore + 1,
+    'Settings reset pauses recap while preserving session data')
 assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
 assert(not sqol.DB.ShowItemLevel and not sqol.DB.ShowMovementSpeed)
 for _, message in ipairs(messages) do io.write(message, '\n') end

@@ -3,6 +3,29 @@ local _, SQOL = ...
 if SQOL.Locale ~= "zhTW" then return end
 local L = SQOL.L
 
+-- Adventure Recap
+L["Adventure Recap"] = "冒險回顧"
+L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "依角色記錄任務、獲得的聲望與遊戲時間。使用 /sqol recap 開啟。重載介面會延續本次遊戲時段；重新登入會開始新時段。不會自動跳出視窗。"
+L["Adventure Recap: /sqol recap [last | reset | test]"] = "冒險回顧：/sqol recap [last | reset | test]"
+L["Your Adventure"] = "你的冒險"
+L["Quests completed"] = "已完成任務"
+L["World quests (included)"] = "其中世界任務"
+L["Reputation gained"] = "獲得聲望"
+L["Session time"] = "遊戲時長"
+L["%dh %dm"] = "%d小時%d分鐘"
+L["Current session"] = "本次遊戲"
+L["Previous session"] = "上次遊戲"
+L["Preview"] = "預覽"
+L["Preview — sample data"] = "預覽 — 範例資料"
+L["No previous session recorded."] = "沒有上次遊戲的記錄。"
+L["Enable Adventure Recap to start recording this character's session."] = "啟用冒險回顧，開始記錄此角色的遊戲時段。"
+L["%d quests completed this session."] = "本次遊戲完成了%d個任務。"
+L["Most active faction: %s (+%d)"] = "最活躍陣營：%s（+%d）"
+L["Recording paused."] = "記錄已暫停。"
+L["* Recorded reputation only; some gains could not be read."] = "* 僅顯示已記錄的聲望；部分獲取資料無法讀取。"
+L["World quest count is a minimum; some quest types could not be identified."] = "世界任務數量為最小值；部分任務類型無法識別。"
+L["Current Adventure Recap reset."] = "本次冒險回顧已重設。"
+
 -- Sound profiles
 L["Horde (Peon)"] = "部落（苦工）"
 L["Alliance (Human worker)"] = "聯盟（人類農民）"

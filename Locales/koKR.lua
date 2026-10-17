@@ -3,6 +3,29 @@ local _, SQOL = ...
 if SQOL.Locale ~= "koKR" then return end
 local L = SQOL.L
 
+-- Adventure Recap
+L["Adventure Recap"] = "모험 요약"
+L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "캐릭터별로 퀘스트, 획득 평판, 플레이 시간을 기록합니다. /sqol recap으로 엽니다. UI를 다시 불러오면 세션이 이어지고, 다시 접속하면 새 세션이 시작됩니다. 자동 팝업은 없습니다."
+L["Adventure Recap: /sqol recap [last | reset | test]"] = "모험 요약: /sqol recap [last | reset | test]"
+L["Your Adventure"] = "나의 모험"
+L["Quests completed"] = "완료한 퀘스트"
+L["World quests (included)"] = "그중 전역 퀘스트"
+L["Reputation gained"] = "획득한 평판"
+L["Session time"] = "세션 시간"
+L["%dh %dm"] = "%d시간 %d분"
+L["Current session"] = "현재 세션"
+L["Previous session"] = "이전 세션"
+L["Preview"] = "미리 보기"
+L["Preview — sample data"] = "미리 보기 — 예시 데이터"
+L["No previous session recorded."] = "기록된 이전 세션이 없습니다."
+L["Enable Adventure Recap to start recording this character's session."] = "이 캐릭터의 세션을 기록하려면 모험 요약을 켜세요."
+L["%d quests completed this session."] = "이번 세션에서 퀘스트 %d개를 완료했습니다."
+L["Most active faction: %s (+%d)"] = "가장 활발한 진영: %s (+%d)"
+L["Recording paused."] = "기록이 일시 중지되었습니다."
+L["* Recorded reputation only; some gains could not be read."] = "* 기록된 평판만 표시합니다. 일부 획득량을 읽을 수 없었습니다."
+L["World quest count is a minimum; some quest types could not be identified."] = "전역 퀘스트 수는 최소값입니다. 일부 퀘스트 유형을 확인할 수 없었습니다."
+L["Current Adventure Recap reset."] = "현재 모험 요약을 초기화했습니다."
+
 -- Sound profiles
 L["Horde (Peon)"] = "호드 (일꾼)"
 L["Alliance (Human worker)"] = "얼라이언스 (인간 농부)"

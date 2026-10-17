@@ -3,6 +3,29 @@ local _, SQOL = ...
 if SQOL.Locale ~= "itIT" then return end
 local L = SQOL.L
 
+-- Adventure Recap
+L["Adventure Recap"] = "Riepilogo avventura"
+L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "Registra missioni, reputazione ottenuta e tempo di gioco per personaggio. Apri con /sqol recap. Ricaricare l'interfaccia continua la sessione; un nuovo accesso ne avvia un'altra. Nessuna finestra automatica."
+L["Adventure Recap: /sqol recap [last | reset | test]"] = "Riepilogo avventura: /sqol recap [last | reset | test]"
+L["Your Adventure"] = "La tua avventura"
+L["Quests completed"] = "Missioni completate"
+L["World quests (included)"] = "Di cui missioni mondiali"
+L["Reputation gained"] = "Reputazione ottenuta"
+L["Session time"] = "Durata sessione"
+L["%dh %dm"] = "%d h %d min"
+L["Current session"] = "Sessione attuale"
+L["Previous session"] = "Sessione precedente"
+L["Preview"] = "Anteprima"
+L["Preview — sample data"] = "Anteprima — dati di esempio"
+L["No previous session recorded."] = "Nessuna sessione precedente registrata."
+L["Enable Adventure Recap to start recording this character's session."] = "Attiva il riepilogo avventura per registrare la sessione di questo personaggio."
+L["%d quests completed this session."] = "%d missioni completate in questa sessione."
+L["Most active faction: %s (+%d)"] = "Fazione più attiva: %s (+%d)"
+L["Recording paused."] = "Registrazione in pausa."
+L["* Recorded reputation only; some gains could not be read."] = "* Solo reputazione registrata; alcuni guadagni non sono stati leggibili."
+L["World quest count is a minimum; some quest types could not be identified."] = "Il numero di missioni mondiali è un minimo; alcuni tipi di missione non sono stati identificati."
+L["Current Adventure Recap reset."] = "Riepilogo avventura attuale azzerato."
+
 -- Sound profiles
 L["Horde (Peon)"] = "Orda (peone)"
 L["Alliance (Human worker)"] = "Alleanza (contadino umano)"

@@ -71,6 +71,13 @@ After updating, **restart the game** (a `/reload` is not enough), because the ic
 
 ## Features
 
+- 📖 **Adventure Recap (development preview)**
+  - An optional, movable window with completed quests, world quests (included in the quest total), reputation gained, recorded playtime and the most active faction when all reputation messages were readable.
+  - Enable **Adventure Recap** under **Quests**, then open it from the options window or with `/sqol recap`. There are no automatic popups; collection is off by default.
+  - `/sqol recap last` shows the previous session, `/sqol recap reset` clears only the current session, and `/sqol recap test` previews sample data without changing real statistics.
+  - Sessions are stored per character. `/reload` continues the session; logging in again starts a new one and keeps the previous session. Offline time and time with recording disabled are excluded. Disabling recording pauses it without deleting the totals.
+  - Only `QUEST_TURNED_IN` counts a quest. Being ready to turn in or abandoning a quest does not count. Reputation counts positive gains, not gains minus losses; unreadable or unrecognized messages mark the total as incomplete and hide the top-faction highlight. If world quest classification is unavailable, its displayed count is marked as a minimum.
+  - Event-driven tracking; the visible recap refreshes its clock once per second. This preview still needs in-game verification on Retail and WoW Forever before release.
 - 🔊 **Quest sounds: objective and quest completion**
   - Plays a worker voice line when an individual objective is completed before the full quest is done (Peon: *"Work, work."*).
   - Plays another voice line and prints a chat message when the whole quest is ready to turn in, or done for bonus/world quests (Peon: *"Work complete."*).
@@ -141,6 +148,10 @@ Type `/sqol` to see current status, or use:
 
 - `/sqol help`
 - `/sqol config` (or `/sqol options`) — open the options window
+- `/sqol recap` — open Adventure Recap (enable recording in **Quests**)
+- `/sqol recap last` — show the previous session
+- `/sqol recap reset` — clear the current session; keep the previous session
+- `/sqol recap test` — show sample data without changing saved statistics
 - `/sqol minimap` (or `/sqol mm`) — toggle the minimap button
 - `/sqol autotrack` (or `/sqol at`)
 - `/sqol color` (or `/sqol col`) — toggle quest progress colors
@@ -171,6 +182,13 @@ Type `/sqol` to see current status, or use:
 
 Settings are stored per account in:
 - 💾 `SQOL_DB`
+
+Adventure Recap stores the current session, the previous session and its window
+position per character in `SQOL_RecapDB`. Resetting addon settings pauses recording
+and preserves recap data. As with other SavedVariables, changes reach disk when
+the client saves the UI (normally on logout or `/reload`); a crash may lose changes
+since that save. Clients without a reload flag conservatively start a new session
+on UI load.
 
 ## Translations
 
@@ -205,6 +223,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `PartyLevels.lua` | Levels on default and raid-style party frames |
 | `RangeIndicator.lua` | Range icon and distance for the target |
 | `Reputation.lua` | Reputation watching, faction lookup and header preservation |
+| `SessionRecap.lua` | Per-character Adventure Recap tracking, persistence and movable window |
 | `Countdowns.lua` | Shared countdown implementation, ready checks and queue pops |
 | `SMoRGsQoL.lua` | Saved settings/migration, option side effects, commands, events, auto-tracking and quest completion notifications |
 | `Options.lua` | Shared option list (sections, labels, tooltips) and Blizzard's Settings page |
@@ -222,6 +241,10 @@ expose only the entry points needed by the controller through `SQOL`.
 Run `lua tests/smoke.lua` from the repository root for a mocked load/event/command
 smoke test. It reads the real TOC order. In-game testing is still needed for frame
 layout, protected UI behavior and real quest/reputation data.
+
+Run `lua tests/recap.lua` for focused tests of turn-ins, repeatable quests,
+duplicate events, localized reputation, secret values, fallback APIs, session
+boundaries, character isolation, paused recording, reset and preview data.
 
 All visible text goes through `L["English text"]`. Run `lua tests/locales.lua` after
 changing any of it: it fails when a translation's English key is no longer used in
