@@ -3,6 +3,11 @@ local _, SQOL = ...
 if SQOL.Locale ~= "frFR" then return end
 local L = SQOL.L
 
+-- Smart Quest Radar
+L["Smart Quest Radar"] = "Radar de quêtes intelligent"
+L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] = "Marque les barres de nom concernées avec une icône de quête et jusqu’à trois objectifs inachevés. Utilise les données lisibles des infobulles de vos quêtes actives. Remplace les compteurs d’objectifs lorsque cette option est activée ; les données indisponibles sont masquées."
+L["Quest objective"] = "Objectif de quête"
+
 -- Reputation Memory
 L["Return to preferred reputation"] = "Revenir à la réputation préférée"
 L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] = "Enregistrez la faction suivie avec /sqol repfocus. Avec le suivi automatique activé, revenez à celle-ci après 10 secondes sans gain de réputation. Changer la faction suivie annule le retour prévu. Enregistré par personnage."

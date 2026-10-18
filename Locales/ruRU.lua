@@ -3,6 +3,11 @@ local _, SQOL = ...
 if SQOL.Locale ~= "ruRU" then return end
 local L = SQOL.L
 
+-- Smart Quest Radar
+L["Smart Quest Radar"] = "Умный радар заданий"
+L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] = "Отмечает подходящие индикаторы здоровья значком задания и показывает до трёх незавершённых целей. Использует доступные для чтения данные подсказок ваших активных заданий. При включении заменяет счётчики целей; недоступные данные скрываются."
+L["Quest objective"] = "Цель задания"
+
 -- Reputation Memory
 L["Return to preferred reputation"] = "Возвращаться к выбранной репутации"
 L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] = "Сохраните отслеживаемую фракцию командой /sqol repfocus. При автоматическом отслеживании возврат к ней произойдёт через 10 секунд без новых прибавок репутации. Смена отслеживаемой фракции отменяет возврат. Сохраняется для каждого персонажа."

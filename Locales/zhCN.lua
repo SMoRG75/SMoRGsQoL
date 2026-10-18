@@ -3,6 +3,11 @@ local _, SQOL = ...
 if SQOL.Locale ~= "zhCN" then return end
 local L = SQOL.L
 
+-- Smart Quest Radar
+L["Smart Quest Radar"] = "智能任务雷达"
+L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] = "在相关姓名板上显示任务图标和最多三个未完成的目标。使用当前任务中可读取的鼠标提示数据。启用时替代目标计数；不可用的数据将被隐藏。"
+L["Quest objective"] = "任务目标"
+
 -- Reputation Memory
 L["Return to preferred reputation"] = "返回首选声望"
 L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] = "使用 /sqol repfocus 保存当前追踪的阵营。启用自动追踪后，若10秒内没有新声望获取，将返回首选阵营。更改追踪阵营会取消待执行的返回。按角色保存。"

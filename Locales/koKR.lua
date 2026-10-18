@@ -3,6 +3,11 @@ local _, SQOL = ...
 if SQOL.Locale ~= "koKR" then return end
 local L = SQOL.L
 
+-- Smart Quest Radar
+L["Smart Quest Radar"] = "스마트 퀘스트 레이더"
+L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] = "관련 이름표에 퀘스트 아이콘과 최대 3개의 미완료 목표를 표시합니다. 진행 중인 퀘스트의 읽을 수 있는 툴팁 데이터를 사용합니다. 활성화하면 기존 목표 수 표시를 대체하며, 사용할 수 없는 데이터는 숨깁니다."
+L["Quest objective"] = "퀘스트 목표"
+
 -- Reputation Memory
 L["Return to preferred reputation"] = "선호 평판으로 돌아가기"
 L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] = "/sqol repfocus로 추적 중인 진영을 저장합니다. 자동 추적이 켜져 있으면 10초 동안 새 평판을 얻지 않을 때 저장한 진영으로 돌아갑니다. 추적 진영을 바꾸면 예약된 복귀가 취소됩니다. 캐릭터별로 저장됩니다."

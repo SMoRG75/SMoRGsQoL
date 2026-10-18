@@ -41,6 +41,7 @@ function SQOL.Init(reset)
         SQOL.RepMemory_OnOptionChanged()
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         SQOL.RepGains_Hide()
+        SQOL.NameplateObjectives_HideAll()
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
         print(SQOL_CHAT_PREFIX .. L["Settings have been reset to defaults."])
 
@@ -407,6 +408,7 @@ function SQOL.ApplyOption(key)
 
     elseif key == "ColorProgress" then
         SQOL.RefreshQuestTrackerColors()
+        SQOL.NameplateObjectives_ScheduleUpdateAll()
         if SQOL.DB.ColorProgress then
             SQOL.EnableCustomInfoMessages()
             SQOL.ScheduleQuestProgressBarScan(false)
@@ -443,8 +445,8 @@ function SQOL.ApplyOption(key)
     elseif key == "RepMemory" then
         SQOL.RepMemory_OnOptionChanged()
 
-    elseif key == "ShowNameplateObjectives" then
-        if SQOL.DB.ShowNameplateObjectives then
+    elseif key == "ShowNameplateObjectives" or key == "SmartQuestRadar" then
+        if SQOL.DB.ShowNameplateObjectives or SQOL.DB.SmartQuestRadar then
             SQOL.NameplateObjectives_RefreshVisibleUnits()
         else
             SQOL.NameplateObjectives_HideAll()
@@ -523,6 +525,7 @@ local SQOL_COMMANDS = {
     { names = { "autotrack", "at" }, key = "AutoTrack" },
     { names = { "color", "col" }, key = "ColorProgress" },
     { names = { "nameplate", "np" }, key = "ShowNameplateObjectives" },
+    { names = { "radar", "qr" }, key = "SmartQuestRadar" },
     { names = { "questsound", "qs" }, key = "QuestCompleteSound" },
     { names = { "objectivesound", "os" }, key = "QuestObjectiveSound" },
     { names = { "soundprofile", "soundset" }, desc = L["Switch between the Horde and Alliance quest sounds"],
@@ -659,6 +662,9 @@ f:RegisterEvent("UNIT_INVENTORY_CHANGED")
 f:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
 f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 f:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+SQOL_RegisterOptionalEvent("PLAYER_REGEN_ENABLED")
+SQOL_RegisterOptionalEvent("PLAYER_REGEN_DISABLED")
+SQOL_RegisterOptionalEvent("TOOLTIP_DATA_UPDATE")
 f:RegisterEvent("GROUP_ROSTER_UPDATE")
 f:RegisterEvent("UNIT_LEVEL")
 SQOL_RegisterOptionalEvent("READY_CHECK")
@@ -706,7 +712,7 @@ f:SetScript("OnEvent", function(self, event, ...)
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end
 
-        if SQOL.DB.ShowNameplateObjectives then
+        if SQOL.DB.ShowNameplateObjectives or SQOL.DB.SmartQuestRadar then
             SQOL.NameplateObjectives_RefreshVisibleUnits()
         else
             SQOL.NameplateObjectives_HideAll()
@@ -737,7 +743,7 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL.ScheduleScenarioProgressScan(false)
         end
 
-        if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
+        if SQOL.DB and (SQOL.DB.ShowNameplateObjectives or SQOL.DB.SmartQuestRadar) then
             SQOL.NameplateObjectives_RefreshVisibleUnits()
         end
 
@@ -790,9 +796,19 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "NAME_PLATE_UNIT_ADDED" then
-        if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
+        if SQOL.DB and (SQOL.DB.ShowNameplateObjectives or SQOL.DB.SmartQuestRadar) then
             local unit = ...
             SQOL.NameplateObjectives_UpdateUnit(unit)
+        end
+
+    elseif event == "TOOLTIP_DATA_UPDATE" then
+        if SQOL.DB and SQOL.DB.SmartQuestRadar then
+            SQOL.QuestRadar_OnTooltipDataUpdate(...)
+        end
+
+    elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
+        if SQOL.DB and SQOL.DB.SmartQuestRadar then
+            SQOL.NameplateObjectives_ScheduleUpdateAll()
         end
 
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
@@ -828,6 +844,9 @@ f:SetScript("OnEvent", function(self, event, ...)
 
     elseif event == "QUEST_ACCEPTED" then
         SQOL.InvalidateQuestDataCache()
+        if SQOL.DB and SQOL.DB.SmartQuestRadar then
+            SQOL.NameplateObjectives_ScheduleUpdateAll()
+        end
         local a1, a2 = ...
         local questIndex, questID
         if a2 then questIndex, questID = a1, a2 else questID = a1 end
@@ -852,6 +871,9 @@ f:SetScript("OnEvent", function(self, event, ...)
 
     elseif event == "QUEST_TURNED_IN" then
         SQOL.InvalidateQuestDataCache()
+        if SQOL.DB and SQOL.DB.SmartQuestRadar then
+            SQOL.NameplateObjectives_ScheduleUpdateAll()
+        end
         local questID = ...
         SQOL.Recap_QuestTurnedIn(questID)
         if questID then
@@ -863,6 +885,9 @@ f:SetScript("OnEvent", function(self, event, ...)
 
     elseif event == "QUEST_REMOVED" then
         SQOL.InvalidateQuestDataCache()
+        if SQOL.DB and SQOL.DB.SmartQuestRadar then
+            SQOL.NameplateObjectives_ScheduleUpdateAll()
+        end
         local questID = ...
         if questID then
             -- QUEST_ACCEPTED also clears this if the quest is picked up again
@@ -908,7 +933,7 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL.RecolorQuestObjectives_Throttle()
             SQOL.ScheduleQuestProgressBarScan(true)
         end
-        if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
+        if SQOL.DB and (SQOL.DB.ShowNameplateObjectives or SQOL.DB.SmartQuestRadar) then
             SQOL.NameplateObjectives_ScheduleUpdateAll()
         end
 
@@ -922,7 +947,7 @@ f:SetScript("OnEvent", function(self, event, ...)
             SQOL.RecolorQuestObjectives_Throttle()
             SQOL.ScheduleQuestProgressBarScan(true)
         end
-        if SQOL.DB and SQOL.DB.ShowNameplateObjectives then
+        if SQOL.DB and (SQOL.DB.ShowNameplateObjectives or SQOL.DB.SmartQuestRadar) then
             SQOL.NameplateObjectives_ScheduleUpdateAll()
         end
 

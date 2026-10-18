@@ -1294,7 +1294,7 @@ local function SQOL_NameplateObjectives_GetText(unit)
 end
 
 function SQOL.NameplateObjectives_UpdateUnit(unit)
-    if not SQOL.DB or not SQOL.DB.ShowNameplateObjectives then
+    if not SQOL.DB or not (SQOL.DB.ShowNameplateObjectives or SQOL.DB.SmartQuestRadar) then
         return
     end
     if not unit or not UnitExists(unit) then
@@ -1306,10 +1306,12 @@ function SQOL.NameplateObjectives_UpdateUnit(unit)
         return
     end
 
-    local okProgress, progressText = SQOL_NameplateObjectives_SafeCall(SQOL_NameplateObjectives_GetProgressText, unit)
-    if not okProgress then
-        return
-    end
+    SQOL._npUnits[unit] = nameplate
+    if not SQOL.DB.SmartQuestRadar then SQOL.QuestRadar_ClearUnit(unit) end
+    local getProgress = SQOL.DB.SmartQuestRadar and SQOL.QuestRadar_GetProgressText
+        or SQOL_NameplateObjectives_GetProgressText
+    local okProgress, progressText = SQOL_NameplateObjectives_SafeCall(getProgress, unit)
+    if not okProgress then progressText = nil end
     if progressText then
         text:SetText(progressText)
         text:Show()
@@ -1318,10 +1320,10 @@ function SQOL.NameplateObjectives_UpdateUnit(unit)
         text:Hide()
     end
 
-    SQOL._npUnits[unit] = nameplate
 end
 
 function SQOL.NameplateObjectives_ClearUnit(unit)
+    SQOL.QuestRadar_ClearUnit(unit)
     local nameplate = SQOL._npUnits[unit]
     if not nameplate and C_NamePlate and C_NamePlate.GetNamePlateForUnit then
         nameplate = C_NamePlate.GetNamePlateForUnit(unit)
@@ -1336,7 +1338,7 @@ function SQOL.NameplateObjectives_ClearUnit(unit)
 end
 
 local function SQOL_NameplateObjectives_UpdateAll()
-    if not SQOL.DB or not SQOL.DB.ShowNameplateObjectives then
+    if not SQOL.DB or not (SQOL.DB.ShowNameplateObjectives or SQOL.DB.SmartQuestRadar) then
         return
     end
 
@@ -1362,12 +1364,9 @@ function SQOL.NameplateObjectives_ScheduleUpdateAll()
 end
 
 function SQOL.NameplateObjectives_RefreshVisibleUnits()
+    SQOL.NameplateObjectives_HideAll()
     if not (C_NamePlate and C_NamePlate.GetNamePlates) then
         return
-    end
-
-    for unit in pairs(SQOL._npUnits) do
-        SQOL._npUnits[unit] = nil
     end
 
     local ok, plates = pcall(C_NamePlate.GetNamePlates)
@@ -1392,6 +1391,7 @@ end
 
 function SQOL.NameplateObjectives_HideAll()
     for unit, nameplate in pairs(SQOL._npUnits) do
+        SQOL.QuestRadar_ClearUnit(unit)
         if nameplate and nameplate.SQOLObjectiveText then
             nameplate.SQOLObjectiveText:SetText("")
             nameplate.SQOLObjectiveText:Hide()

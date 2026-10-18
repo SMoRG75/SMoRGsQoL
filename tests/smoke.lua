@@ -116,13 +116,14 @@ fire('PLAYER_ENTERING_WORLD')
 assert(sqol.DB and sqol.GetProgressColor(0.5) == '|cffffff00')
 for _, command in ipairs({ 'ilvl', 'speed', 'speed', 'ilvl', 'color', 'barcolor',
     'color', 'barcolor', 'damagefont', 'damagefont', 'cursor', 'cursor',
-    'rep', 'rep', 'nameplate', 'nameplate', 'partylevel', 'partylevel', 'tt', 'tt',
+    'rep', 'rep', 'nameplate', 'nameplate', 'radar', 'qr', 'partylevel', 'partylevel', 'tt', 'tt',
     'rctest', 'lfgtest', 'help', '' }) do
     SlashCmdList.SQOL(command)
 end
 assert(not sqol.DB.ShowItemLevel and not sqol.DB.ShowMovementSpeed)
 assert(not sqol.DB.ColorProgress and not sqol.DB.ColorStatusBarProgress)
 assert(not sqol.DB.ShowTooltipTarget)
+assert(not sqol.DB.SmartQuestRadar, 'Radar defaults off and both slash commands toggle it')
 assert(sqol.iLvlHolder and not sqol.iLvlHolder:IsShown())
 
 -- Launcher: LDB object, minimap button (off by default) and addon compartment.
@@ -515,7 +516,14 @@ SlashCmdList.SQOL('rep')
 memoryWatched = { factionID = 72, name = 'Stormwind', currentStanding = 800 }
 fire('UPDATE_FACTION')
 assert(sqol._repLastStanding == nil, 'External selection invalidates pending delta baseline')
+SlashCmdList.SQOL('radar')
+assert(sqol.DB.SmartQuestRadar, 'Radar enabled before settings reset')
+local radarLabel = widget()
+radarLabel:Show()
+sqol._npUnits.nameplateReset = { SQOLObjectiveText = radarLabel }
 SlashCmdList.SQOL('reset')
+assert(not sqol.DB.SmartQuestRadar and not radarLabel:IsShown()
+    and not sqol._npUnits.nameplateReset, 'Settings reset immediately clears radar overlays')
 assert(not sqol.DB.RepMemory and not sqol.DB.RepWatch
     and SQOL_CharacterDB.preferredFaction.factionID == 69, 'Reset disables memory and preserves preference')
 SlashCmdList.SQOL('repfocus clear')

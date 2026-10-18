@@ -71,6 +71,12 @@ After updating, **restart the game** (a `/reload` is not enough), because the ic
 
 ## Features
 
+- **Smart Quest Radar (development preview)**
+  - Marks relevant visible nameplates with a quest icon and up to three unfinished objective counts on one line, for example `2/8 · 1/5`. More objectives are summarized as `+N`.
+  - Enable **Smart Quest Radar** under **Quests**, or toggle it with `/sqol radar` (`qr`). It is off by default and works independently of **Show objective counts on nameplates**. While enabled, radar replaces the old counts in the same text region; turning it off restores the previous setting.
+  - Uses readable quest sections from `C_TooltipInfo.GetUnit` and matches their titles to your active quest log. Typed tooltip objectives are preferred. Clients without line types require an exact match to your own unfinished objective text. Ambiguous titles, completed objectives, party progress sections and unavailable data are skipped. Non-numeric objectives are marked as **Quest objective** only when explicitly unfinished.
+  - Shares existing quest caches and throttled nameplate updates. Relevant tooltip-data updates and entering/leaving combat refresh the display; no continuous scanning of nearby units is performed. **Color quest progress** also colors radar counters.
+  - Requires visible nameplates and readable tooltip data. It cannot identify objects without nameplates or guarantee every quest target, especially when the client restricts data. In-game layout, combat, grouped questing, reload/login and addon compatibility still need verification in Retail and WoW Forever.
 - 📖 **Adventure Recap (development preview)**
   - An optional, movable window with completed quests, world quests (included in the quest total), reputation gained, recorded playtime and the most active faction when all reputation messages were readable.
   - Enable **Adventure Recap** under **Quests**, then open it from the options window or with `/sqol recap`. There are no automatic popups; collection is off by default.
@@ -111,6 +117,7 @@ After updating, **restart the game** (a `/reload` is not enough), because the ic
   - Enable **Auto-watch reputation gains** and **Return to preferred reputation** under **Reputation & XP**. Both are optional and off by default. Auto-watch shows a new gain temporarily, then returns to your preferred faction after 10 seconds without new gains.
   - Changing or clearing the watched faction cancels the pending return, including changes made by another addon. A return that expires while the Reputation or Collections panel is open is cancelled to avoid rearranging the UI.
   - `/sqol repfocus status` shows the saved faction; `/sqol repfocus clear` forgets it. Disabling either option or resetting addon settings cancels pending work and keeps the saved preference.
+  - Panel checks use effective visibility, including hidden parents. Delayed watched-faction updates are acknowledged for up to two seconds before being discarded; a confirmed temporary faction starts the return timer.
   - The preference and a pending return survive `/reload` and login. A saved return is resumed only if the watched faction still matches the temporary faction; it does not override a changed selection. Uses one return timer, with no frame polling. In-game Retail and WoW Forever validation is required before release.
 - 🏷️ **Nameplate objective counts**
   - Shows quest objective progress (e.g., 0/10 or 45%) above relevant nameplates, with fallbacks for bonus/world quests.
@@ -173,6 +180,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol repfocus status` — show the preferred faction
 - `/sqol repfocus clear` — forget the preferred faction and cancel a pending return
 - `/sqol nameplate` (or `/sqol np`)
+- `/sqol radar` (or `/sqol qr`) — toggle Smart Quest Radar on visible nameplates
 - `/sqol ilvl` (or `/sqol stats`) — toggle item level only
 - `/sqol speed` (or `/sqol spd`) — independently toggle movement speed
 - `/sqol damagefont` (or `/sqol df`)
@@ -233,6 +241,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `Locales/<locale>.lua` | Translations for one client language (`esES.lua` also serves esMX) |
 | `Core.lua` | Defaults, sound profiles, shared utilities and namespace setup |
 | `VisualTweaks.lua` | Damage font, cursor highlight, achievement filter and tooltip target line |
+| `QuestRadar.lua` | Optional quest radar, safe tooltip parsing and active-quest relevance |
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
 | `PlayerStats.lua` | Independent item level and movement speed displays |
 | `PartyLevels.lua` | Levels on default and raid-style party frames |
@@ -262,9 +271,15 @@ duplicate events, localized reputation, secret values, fallback APIs, session
 boundaries, character isolation, paused recording, reset and preview data.
 
 Run `lua tests/reputation.lua` for reputation-memory deadlines, burst gains,
-external bar changes, cancellation, reload, per-character state, secret values,
+external bar changes, cancellation, effective panel visibility, delayed faction
+acknowledgements, reload, per-character state, secret values,
 and modern/legacy reputation and timer APIs. These tests mock the client APIs;
 verify the actual watched bar and events in both clients before release.
+
+Run `lua tests/radar.lua` for quest relevance, multiple and completed objectives,
+party sections, text-only clients, restricted data, API failures, tooltip refreshes
+and nameplate reuse. The smoke test also checks TOC loading and radar commands.
+These mocked tests do not replace testing inside both clients.
 
 All visible text goes through `L["English text"]`. Run `lua tests/locales.lua` after
 changing any of it: it fails when a translation's English key is no longer used in

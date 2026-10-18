@@ -46,6 +46,7 @@ SQOL.defaults = {
     RepMemory    = false,
     ShowRepGains = false,
     ShowNameplateObjectives = false,
+    SmartQuestRadar = false,
 
     -- PlayerFrame line: "iLvl: xx.x  Spd: yy%"
     ShowItemLevel = false,

@@ -24,6 +24,8 @@ SQOL.OptionSections = {
               tooltip = L["Automatically track newly accepted quests in the objective tracker."] },
             { key = "ColorProgress", label = L["Color quest progress"],
               tooltip = L["Colorize quest and scenario progress messages, the current count of quest objectives in the objective tracker, and quest objective counts on nameplates (red → yellow → green)."] },
+            { key = "SmartQuestRadar", label = L["Smart Quest Radar"],
+              tooltip = L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] },
             { key = "ShowNameplateObjectives", label = L["Show objective counts on nameplates"],
               tooltip = L["Show quest objective counts (e.g., 0/10) above relevant nameplates."] },
             { key = "QuestCompleteSound", label = L["Quest completion sound"],

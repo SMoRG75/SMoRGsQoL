@@ -13,14 +13,18 @@
   - Manuelle eller eksterne skift af den viste faction aflyser en ventende tilbagevenden. Valget og en eventuel ventende tilbagevenden overlever `/reload` og nyt login.
   - Valgfri og slået fra som standard; gem faction med `/sqol repfocus`, og aktivér **Return to preferred reputation** sammen med auto-watch.
   - Implementeret i `Reputation.lua` og committet som `d749a34` på `codex/reputation-memory`.
+  - Lokal fejlrettelse efter Retail-rapport: skjulte underpaneler måles med `IsVisible()`, og forsinkede faction-skift får en afgrænset bekræftelse. Regressionstests dækker begge fejl; rettelsen skal bekræftes i spillet.
   - Automatiske tests består; funktionel validering i Retail og WoW Forever mangler før release.
 
-- [ ] **3. Smart Quest Radar — næste nye funktion**
-  - Gør questrelevante fjender og NPC'er lettere at genkende med diskrete indikatorer og questprogress på deres nameplates.
-  - Start med en afgrænset prototype oven på den eksisterende nameplate-logik i `QuestProgress.lua`.
-  - Undersøg først, hvilke quest- og objektivdata Retail og WoW Forever faktisk stiller til rådighed, inklusive under combat.
-  - Brug tilgængelige, læsbare data; automatisk identifikation af alle relevante enheder kan ikke forudsættes.
-  - Hold funktionen valgfri og visuelt enkel. Kontrollér flere samtidige questmål, combat, `/reload`, login og samspil med andre addons i begge klienter.
+- [x] **3. Smart Quest Radar — implementeret, afprøvet i Retail**
+  - Quest-ikon og op til tre uafsluttede mål på én linje over relevante, synlige nameplates; yderligere mål vises som `+N`.
+  - Selvstændigt modul i `QuestRadar.lua`, integreret med den eksisterende nameplate-visning og quest-cache i `QuestProgress.lua`.
+  - Slået fra som standard; aktivér under **Quests → Smart Quest Radar** eller med `/sqol radar` (`qr`). Erstatter den gamle talvisning, mens radaren er aktiv, og bruger den eksisterende indstilling for progressfarver.
+  - Bruger læsbare tooltip-afsnit, der matcher karakterens aktive quests. Færdige mål, gruppemedlemmers afsnit, tvetydige questtitler og utilgængelige data springes over. Ingen scanning efter enheder uden nameplates.
+  - På klienter uden tooltip-linjetyper kræves et præcist match med karakterens egen uafsluttede objektivtekst. Dækningen afhænger af klientens data, også under combat.
+  - Automatisk dækket af `tests/radar.lua`, den eksisterende integrationstest og sprogtesten. Implementeret lokalt på `codex/smart-quest-radar`; endnu ikke committet eller pushet.
+  - [x] Afprøvet i Retail: brugeren har bekræftet, at funktionen er OK (18. oktober 2026).
+  - [ ] Valider i WoW Forever: placering og læsbarhed, flere samtidige questmål, gruppespil, combat, `/reload`, login, samspil med andre addons, klientens tooltip-data og skift mellem radaren og den gamle talvisning.
 
 ## Tidligere opgaver — afsluttet
 

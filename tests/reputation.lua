@@ -51,8 +51,14 @@ local function boot(saved, memory, autoWatch)
             [2] = { factionID = 2, name = "Stormwind", currentStanding = 2000 },
             [3] = { factionID = 3, name = "Silvermoon Court", currentStanding = 3000 },
         } }
-    ReputationFrame = { IsShown = function() return state.panelOpen end }
-    WardrobeFrame = { IsShown = function() return state.collectionsOpen end }
+    ReputationFrame = {
+        IsShown = function() return state.panelOpen end,
+        IsVisible = function() return state.panelOpen and not state.panelParentHidden end,
+    }
+    WardrobeFrame = {
+        IsShown = function() return state.collectionsOpen end,
+        IsVisible = function() return state.collectionsOpen and not state.collectionsParentHidden end,
+    }
     local function rows()
         local list = { { name = "Expansion", isHeader = true, isCollapsed = state.collapsed } }
         if not state.collapsed then
@@ -298,4 +304,99 @@ for i = 1, 50 do gain(2, 1) end
 equal(activeReturnTimers(), 1, "Fifty gains allocate one active return timer")
 advance(11)
 equal(state.watched, 1, "Burst completes without a callback loop")
-io.write("PASS: reputation memory deadlines, bursts, manual changes, pause, clear, reload, characters, panels, secrets and API fallbacks\n")
+boot(nil)
+saveFavorite()
+gain(2, 25)
+advance(0.3)
+state.panelOpen, state.panelParentHidden = true, true
+advance(11)
+equal(state.watched, 1, "A shown Reputation child of a hidden CharacterFrame does not block return")
+boot(nil)
+saveFavorite()
+gain(2, 25)
+advance(0.3)
+state.collectionsOpen, state.collectionsParentHidden = true, true
+advance(11)
+equal(state.watched, 1, "A shown wardrobe child of a hidden Collections frame does not block return")
+for _, frameName in ipairs({ "ReputationFrame", "WardrobeFrame", "WardrobeCollectionFrame", "CollectionsJournal" }) do
+    boot(nil)
+    saveFavorite()
+    local previous = _G[frameName]
+    _G[frameName] = { IsShown = function() return true end, IsVisible = function() return false end }
+    gain(2, 25)
+    advance(11)
+    equal(state.watched, 1, "An already hidden " .. frameName .. " does not block auto-watch or return")
+    _G[frameName] = previous
+end
+boot(nil)
+saveFavorite()
+ReputationFrame.IsVisible = nil
+gain(2, 25)
+advance(0.3)
+state.panelOpen = true
+advance(11)
+equal(state.watched, 2, "Older frame API falls back to IsShown and still protects an open panel")
+-- Retail may publish the watched faction after the setter has returned. The
+-- immediate read still sees the old faction; the later event is our own change.
+local function delayedSetter(withEvent)
+    C_Reputation.SetWatchedFactionByIndex = nil
+    C_Reputation.SetWatchedFactionByID = function(id)
+        addTimer(0.1, function()
+            state.watched, state.writes = id, state.writes + 1
+            if withEvent then updateFaction() end
+        end, false)
+    end
+end
+boot(nil)
+saveFavorite()
+delayedSetter(true)
+gain(2, 25)
+advance(0.11)
+equal(state.watched, 2, "Delayed gain faction is confirmed")
+assert(SQOL_CharacterDB.pendingReturn, "Delayed confirmation starts a persisted return")
+advance(10.5)
+equal(state.watched, 1, "Delayed setters also restore the preferred faction")
+equal(activeReturnTimers(), 0, "Delayed restore leaves no repeating return timer")
+boot(nil)
+saveFavorite()
+delayedSetter(true)
+gain(2, 25)
+advance(0.11)
+choose(3)
+advance(15)
+equal(state.watched, 3, "External choice after delayed confirmation still cancels")
+boot(nil)
+saveFavorite()
+delayedSetter(true)
+gain(2, 25)
+choose(3)
+advance(15)
+-- The already submitted client setter can still finish, but SQOL must not
+-- interpret its late completion as permission to return to the preferred bar.
+equal(state.watched, 2, "External choice cancels the return even before acknowledgement")
+equal(SQOL_CharacterDB.pendingReturn, nil, "Cancelled request cannot arm a late return")
+boot(nil)
+saveFavorite()
+delayedSetter(true)
+gain(2, 25)
+addon.DB.RepMemory = false
+addon.RepMemory_OnOptionChanged()
+advance(15)
+equal(state.watched, 2, "Disabling memory cancels unconfirmed returns")
+equal(SQOL_CharacterDB.pendingReturn, nil, "No persisted return after disable")
+boot(nil)
+saveFavorite()
+delayedSetter(false)
+gain(2, 25)
+advance(12.5)
+equal(state.watched, 1, "Bounded confirmation check handles a missing update event")
+boot(nil)
+saveFavorite()
+C_Reputation.SetWatchedFactionByIndex = nil
+C_Reputation.SetWatchedFactionByID = function() end
+gain(2, 25)
+advance(15)
+equal(state.watched, 1, "Silent rejected setter never invents a switch")
+equal(activeReturnTimers(), 0, "Rejected setter leaves no repeating return timer")
+equal(SQOL_CharacterDB.pendingReturn, nil, "Rejected setter leaves no persisted return")
+io.write("PASS: reputation memory deadlines, bursts, manual changes, reload, characters, panel visibility, delayed acknowledgements, secrets and API fallbacks\n")

@@ -12,6 +12,7 @@ SQOL._repApiWarned = false
 local internalWatchChange = false
 local memoryDB, observedID, observedName, observedValid
 local returnTimer, returnPending, returnGeneration = nil, nil, 0
+local pendingWatch
 local queueReturn, cancelReturn
 local standingFields = { "currentStanding", "earnedValue", "barValue", "currentValue", "currentReputation" }
 local booleanFields = { "isHeader", "isCollapsed", "hasRep", "isWatched" }
@@ -316,8 +317,10 @@ end
 local function SQOL_Rep_SetWatchedFactionRaw(index, factionID, factionName)
     -- The direct ID API avoids expanding or relaying out Blizzard's panel.
     if C_Reputation and type(C_Reputation.SetWatchedFactionByID) == "function" and usableNumber(factionID) then
-        if SQOL.safe_pcall(C_Reputation.SetWatchedFactionByID, factionID)
-            and SQOL_Rep_WatchedMatches(factionID, factionName) then return true end
+        if SQOL.safe_pcall(C_Reputation.SetWatchedFactionByID, factionID) then
+            if pendingWatch then pendingWatch.accepted = true end
+            if SQOL_Rep_WatchedMatches(factionID, factionName) then return true end
+        end
     end
     if SQOL.RepWatch_ReputationFrameOpen() then return false end
     return SQOL_Rep_WithLegacyShown(function()
@@ -337,6 +340,7 @@ local function SQOL_Rep_SetWatchedFactionRaw(index, factionID, factionName)
                 end
                 if type(useIndex) == "number" then
                     local legacyOk = SQOL.safe_pcall(legacy, useIndex)
+                    if legacyOk and pendingWatch then pendingWatch.accepted = true end
                     if legacyOk and SQOL_Rep_WatchedMatches(factionID, factionName) then
                         return true
                     end
@@ -355,11 +359,39 @@ end
 
 local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID, factionName, restoring)
     if not restoring and SQOL.RepMemory_OnFactionUpdate then SQOL.RepMemory_OnFactionUpdate() end
+    -- Setters have no return value and some clients publish the watched faction
+    -- later. Keep a bounded acknowledgement window instead of treating our own
+    -- delayed UPDATE_FACTION as an external selection.
+    if pendingWatch and SQOL_Rep_WatchedMatches(pendingWatch.factionID, pendingWatch.name) then
+        SQOL.RepMemory_OnFactionUpdate()
+    end
+    if pendingWatch and pendingWatch.factionID == factionID and pendingWatch.name == factionName then return true end
+    local request
+    if memoryDB and type(memoryDB.preferredFaction) == "table"
+        and SQOL.DB and SQOL.DB.RepMemory and SQOL.DB.RepWatch then
+        request = { factionID = factionID, name = factionName, restoring = restoring,
+            deadline = GetTime() + 2 }
+    end
+    pendingWatch = request
     internalWatchChange = true
     local ok, result = pcall(SQOL_Rep_SetWatchedFactionRaw, index, factionID, factionName)
     internalWatchChange = false
     observedID, observedName, observedValid = SQOL_Rep_GetWatchedFaction()
-    if ok and result and not restoring and queueReturn then queueReturn() end
+    if ok and result then
+        pendingWatch = nil
+        if not restoring and queueReturn then queueReturn() end
+    elseif ok and request and request.accepted then
+        local schedule = C_Timer and (C_Timer.After or C_Timer.NewTimer)
+        if type(schedule) == "function" then
+            schedule(2, function()
+                if pendingWatch == request then SQOL.RepMemory_OnFactionUpdate() end
+            end)
+            return true
+        end
+        pendingWatch = nil
+    else
+        pendingWatch = nil
+    end
     return ok and result or false
 end
 
@@ -707,17 +739,28 @@ local function SQOL_Rep_FindFactionIDFromMessage(msg)
 end
 
 -- Avoid switching watched reputation while Collections/Transmog is open.
+local function SQOL_Rep_FrameVisible(frame)
+    if not frame then return false end
+    -- IsShown only reports the child's own flag. Closing CharacterFrame or
+    -- CollectionsJournal can leave that flag set on its now-invisible children.
+    local query = frame.IsVisible or frame.IsShown
+    if type(query) ~= "function" then return false end
+    local ok, visible = pcall(query, frame)
+    -- An unreadable panel state must not trigger a layout-changing scan.
+    return not ok or not SQOL.CanUseValue(visible) or visible == true
+end
+
 local function SQOL_RepWatch_CollectionsOpen()
     local wardrobe = rawget(_G, "WardrobeFrame")
-    if wardrobe and wardrobe.IsShown and wardrobe:IsShown() then
+    if SQOL_Rep_FrameVisible(wardrobe) then
         return true
     end
     local collection = rawget(_G, "WardrobeCollectionFrame")
-    if collection and collection.IsShown and collection:IsShown() then
+    if SQOL_Rep_FrameVisible(collection) then
         return true
     end
     local journal = rawget(_G, "CollectionsJournal")
-    if journal and journal.IsShown and journal:IsShown() then
+    if SQOL_Rep_FrameVisible(journal) then
         return true
     end
     return false
@@ -728,10 +771,7 @@ end
 -- when the user simply clicks an expansion header to collapse/expand it.
 function SQOL.RepWatch_ReputationFrameOpen()
     local repFrame = rawget(_G, "ReputationFrame")
-    if repFrame and repFrame.IsShown and repFrame:IsShown() then
-        return true
-    end
-    return false
+    return SQOL_Rep_FrameVisible(repFrame)
 end
 
 function SQOL.RepWatch_HandleFactionChangeMessage(msg)
@@ -938,6 +978,7 @@ cancelReturn = function()
     returnGeneration = returnGeneration + 1
     if returnTimer and type(returnTimer.Cancel) == "function" then returnTimer:Cancel() end
     returnTimer, returnPending = nil, nil
+    pendingWatch = nil
     if memoryDB then memoryDB.pendingReturn = nil end
 end
 
@@ -947,9 +988,23 @@ end
 function SQOL.RepMemory_OnFactionUpdate()
     if internalWatchChange or not memoryEnabled() then return false end
     local id, name, valid = SQOL_Rep_GetWatchedFaction()
+    if pendingWatch then
+        local request = pendingWatch
+        if valid and SQOL_Rep_WatchedMatches(request.factionID, request.name) then
+            pendingWatch = nil
+            observedID, observedName, observedValid = id, name, valid
+            SQOL.dprint("RepMemory -> watched faction confirmed:", name)
+            if not request.restoring then queueReturn() end
+            return false
+        elseif GetTime() >= request.deadline then
+            pendingWatch = nil
+            SQOL.dprint("RepMemory -> watched faction was not confirmed:", request.name)
+        end
+    end
     local changed = observedValid and (not valid or id ~= observedID or name ~= observedName)
     observedID, observedName, observedValid = id, name, valid
     if changed then
+        SQOL.dprint("RepMemory -> external watched faction change; cancelling return:", name or "<none>")
         cancelReturn()
         SQOL._repPendingName, SQOL._repPendingAt = nil, nil
         SQOL._repLastStanding = nil
@@ -971,8 +1026,12 @@ local function scheduleReturn(delay)
         local preferred = memoryDB.preferredFaction
         cancelReturn()
         -- Never expand/rearrange panels that the player is currently using.
-        if SQOL.RepWatch_ReputationFrameOpen() or SQOL_RepWatch_CollectionsOpen() then return end
-        SQOL_Rep_SetWatchedFactionByIndexOrID(nil, preferred.factionID, preferred.name, true)
+        if SQOL.RepWatch_ReputationFrameOpen() or SQOL_RepWatch_CollectionsOpen() then
+            SQOL.dprint("RepMemory -> return cancelled while Reputation or Collections is open")
+            return
+        end
+        local restored = SQOL_Rep_SetWatchedFactionByIndexOrID(nil, preferred.factionID, preferred.name, true)
+        SQOL.dprint("RepMemory -> return requested:", preferred.name, "accepted:", tostring(restored))
     end
     if C_Timer and type(C_Timer.NewTimer) == "function" then
         returnTimer = C_Timer.NewTimer(delay, callback)
@@ -991,6 +1050,7 @@ queueReturn = function()
     local id, name, valid = SQOL_Rep_GetWatchedFaction()
     if not valid or not usableName(name) then cancelReturn(); return end
     returnPending = { factionID = id, name = name, deadline = GetTime() + 10 }
+    SQOL.dprint("RepMemory -> return queued:", preferred.name, "deadline:", returnPending.deadline)
     local wall = wallTime()
     memoryDB.pendingReturn = wall and { factionID = id, name = name, expiresAt = wall + 10 } or nil
     -- Bursts extend one deadline; they do not allocate one timer per gain.
