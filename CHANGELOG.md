@@ -4,8 +4,15 @@
 
 ### Added
 
+- **Reputation Memory** — optionally return to one preferred faction per character after 10 seconds without reputation gains. Save the watched faction with `/sqol repfocus`, inspect it with `status`, or forget it with `clear`. Enable **Return to preferred reputation** alongside auto-watch. External watched-faction changes cancel pending returns; preferences and matching pending returns survive reload/login. A return that expires while Reputation or Collections is open is cancelled. Translated into all supported client languages. In-game validation is required before release.
+- Reputation tests for timer deadlines, burst gains, external changes, cancellation, persisted returns, character isolation, secret values and client API fallbacks.
 - **Adventure Recap** — an optional, movable, per-character session window for completed quests, world quests, reputation gains and recorded playtime, with a most-active-faction highlight when reliable. Open it from the options window or `/sqol recap`; use `last`, `reset` or `test` for the previous session, a fresh current session or sample data. Recording is off by default, survives UI reloads, excludes offline/paused time and never opens a popup automatically. Unreadable reputation and unavailable world quest classification are clearly marked. Translated into every supported client language.
 - Automated coverage for session boundaries, duplicate turn-ins/chat events, repeatable quests, character isolation, localized reputation, secret values, missing APIs, pausing, reset and previews. In-game Retail and WoW Forever validation is still required before release.
+
+### Fixed
+
+- Reputation watching skips inaccessible messages/faction fields and ignores chat-reported losses. Newly discovered standings establish a baseline instead of being mistaken for gains.
+- Updated reputation visibility/index API fallbacks while keeping older client names supported. Index lookups happen after headers are expanded; original header/legacy visibility is restored. Header updates during a scan no longer schedule the same scan repeatedly.
 
 ## [1.2.1] - 2026-10-14
 

@@ -3,6 +3,16 @@ local _, SQOL = ...
 if SQOL.Locale ~= "ptBR" then return end
 local L = SQOL.L
 
+-- Reputation Memory
+L["Return to preferred reputation"] = "Voltar à reputação preferida"
+L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] = "Salve a facção acompanhada com /sqol repfocus. Com o acompanhamento automático ativo, volte a ela após 10 segundos sem novos ganhos de reputação. Trocar a facção acompanhada cancela o retorno pendente. Salvo por personagem."
+L["Save watched reputation; add 'clear' to forget or 'status' to inspect"] = "Salvar a reputação acompanhada; use 'clear' para apagar ou 'status' para consultar"
+L["Preferred reputation cleared."] = "Reputação preferida apagada."
+L["Preferred reputation: %s"] = "Reputação preferida: %s"
+L["No preferred reputation saved."] = "Nenhuma reputação preferida salva."
+L["Choose a watched faction in Blizzard's Reputation panel first."] = "Escolha primeiro uma facção para acompanhar no painel de reputação da Blizzard."
+L["Preferred reputation saved: %s"] = "Reputação preferida salva: %s"
+
 -- Adventure Recap
 L["Adventure Recap"] = "Resumo da aventura"
 L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "Registra missões, reputação recebida e tempo de jogo por personagem. Abra com /sqol recap. Recarregar a interface continua a sessão; entrar novamente inicia outra. Sem janelas automáticas."

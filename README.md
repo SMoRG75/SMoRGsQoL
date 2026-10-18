@@ -106,6 +106,12 @@ After updating, **restart the game** (a `/reload` is not enough), because the ic
   - Not available in WoW Forever, which replaces achievements with the Legacy system.
 - 🤝 **Auto-watch reputation gains**
   - Switches your watched faction to the one that changed when you gain reputation.
+- 🧠 **Reputation Memory (development preview)**
+  - Keep one preferred faction per character. Choose a faction to watch in Blizzard's Reputation panel, then run `/sqol repfocus` to remember that faction.
+  - Enable **Auto-watch reputation gains** and **Return to preferred reputation** under **Reputation & XP**. Both are optional and off by default. Auto-watch shows a new gain temporarily, then returns to your preferred faction after 10 seconds without new gains.
+  - Changing or clearing the watched faction cancels the pending return, including changes made by another addon. A return that expires while the Reputation or Collections panel is open is cancelled to avoid rearranging the UI.
+  - `/sqol repfocus status` shows the saved faction; `/sqol repfocus clear` forgets it. Disabling either option or resetting addon settings cancels pending work and keeps the saved preference.
+  - The preference and a pending return survive `/reload` and login. A saved return is resumed only if the watched faction still matches the temporary faction; it does not override a changed selection. Uses one return timer, with no frame polling. In-game Retail and WoW Forever validation is required before release.
 - 🏷️ **Nameplate objective counts**
   - Shows quest objective progress (e.g., 0/10 or 45%) above relevant nameplates, with fallbacks for bonus/world quests.
 - 🧾 **PlayerFrame iLvl + Speed**
@@ -162,6 +168,10 @@ Type `/sqol` to see current status, or use:
 - `/sqol splash`
 - `/sqol hideach` (or `/sqol ha`)
 - `/sqol rep` (or `/sqol rw`)
+- `/sqol repmemory` (or `/sqol rm`) — toggle returning to your preferred reputation
+- `/sqol repfocus` — save the currently watched faction for this character
+- `/sqol repfocus status` — show the preferred faction
+- `/sqol repfocus clear` — forget the preferred faction and cancel a pending return
 - `/sqol nameplate` (or `/sqol np`)
 - `/sqol ilvl` (or `/sqol stats`) — toggle item level only
 - `/sqol speed` (or `/sqol spd`) — independently toggle movement speed
@@ -189,6 +199,11 @@ and preserves recap data. As with other SavedVariables, changes reach disk when
 the client saves the UI (normally on logout or `/reload`); a crash may lose changes
 since that save. Clients without a reload flag conservatively start a new session
 on UI load.
+
+Reputation Memory stores its preferred faction and any pending return per character
+in `SQOL_CharacterDB`, separately from Adventure Recap. Account-wide option switches
+remain in `SQOL_DB`. Resetting addon settings disables memory without deleting the
+character's preferred faction.
 
 ## Translations
 
@@ -222,7 +237,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `PlayerStats.lua` | Independent item level and movement speed displays |
 | `PartyLevels.lua` | Levels on default and raid-style party frames |
 | `RangeIndicator.lua` | Range icon and distance for the target |
-| `Reputation.lua` | Reputation watching, faction lookup and header preservation |
+| `Reputation.lua` | Reputation watching, preferred faction memory, safe faction lookup and header preservation |
 | `SessionRecap.lua` | Per-character Adventure Recap tracking, persistence and movable window |
 | `Countdowns.lua` | Shared countdown implementation, ready checks and queue pops |
 | `SMoRGsQoL.lua` | Saved settings/migration, option side effects, commands, events, auto-tracking and quest completion notifications |
@@ -245,6 +260,11 @@ layout, protected UI behavior and real quest/reputation data.
 Run `lua tests/recap.lua` for focused tests of turn-ins, repeatable quests,
 duplicate events, localized reputation, secret values, fallback APIs, session
 boundaries, character isolation, paused recording, reset and preview data.
+
+Run `lua tests/reputation.lua` for reputation-memory deadlines, burst gains,
+external bar changes, cancellation, reload, per-character state, secret values,
+and modern/legacy reputation and timer APIs. These tests mock the client APIs;
+verify the actual watched bar and events in both clients before release.
 
 All visible text goes through `L["English text"]`. Run `lua tests/locales.lua` after
 changing any of it: it fails when a translation's English key is no longer used in

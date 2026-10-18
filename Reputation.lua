@@ -1,4 +1,4 @@
-local ADDON_NAME, SQOL = ...
+local _, SQOL = ...
 local L = SQOL.L
 
 ------------------------------------------------------------
@@ -9,48 +9,71 @@ SQOL._repWatchPending = false
 SQOL._repLastStanding = nil
 SQOL._repApiWarned = false
 
-local function SQOL_Rep_GetNumFactions()
-    if C_Reputation and type(C_Reputation.GetNumFactions) == "function" then
-        return C_Reputation.GetNumFactions()
+local internalWatchChange = false
+local memoryDB, observedID, observedName, observedValid
+local returnTimer, returnPending, returnGeneration = nil, nil, 0
+local queueReturn, cancelReturn
+local standingFields = { "currentStanding", "earnedValue", "barValue", "currentValue", "currentReputation" }
+local booleanFields = { "isHeader", "isCollapsed", "hasRep", "isWatched" }
+
+local function usableNumber(value)
+    return SQOL.CanUseValue(value) and type(value) == "number"
+        and value == value and math.abs(value) < math.huge
+end
+
+local function usableName(value)
+    return SQOL.CanUseValue(value) and type(value) == "string" and value ~= ""
+end
+
+-- Never copy inaccessible fields into snapshots or use them as table keys.
+local function safeFactionData(data)
+    if not SQOL.CanUseValue(data) or type(data) ~= "table" then return nil end
+    if type(canaccesstable) == "function" then
+        local ok, accessible = pcall(canaccesstable, data)
+        if not ok or not accessible then return nil end
     end
-    local legacy = rawget(_G, "GetNumFactions")
-    if type(legacy) == "function" then
-        return legacy()
+    local ok, result = pcall(function()
+        local clean = {}
+        if usableNumber(data.factionID) then clean.factionID = data.factionID end
+        if usableName(data.name) then clean.name = data.name end
+        for _, key in ipairs(standingFields) do
+            if usableNumber(data[key]) then clean.currentStanding = data[key]; break end
+        end
+        for _, key in ipairs(booleanFields) do
+            local value = data[key]
+            if SQOL.CanUseValue(value) and type(value) == "boolean" then clean[key] = value end
+        end
+        return clean
+    end)
+    return ok and result or nil
+end
+
+local function SQOL_Rep_GetNumFactions()
+    local query = C_Reputation and C_Reputation.GetNumFactions or rawget(_G, "GetNumFactions")
+    if type(query) == "function" then
+        local ok, count = pcall(query)
+        if ok and usableNumber(count) and count >= 0 then return math.floor(count) end
     end
     return nil
 end
 
 local function SQOL_Rep_GetFactionDataByIndex(index)
     if C_Reputation and type(C_Reputation.GetFactionDataByIndex) == "function" then
-        local data = C_Reputation.GetFactionDataByIndex(index)
-        if data and type(data) == "table" then
-            -- Field names have shifted a bit over time; normalize to "currentStanding" when possible.
-            if type(data.currentStanding) ~= "number" then
-                data.currentStanding =
-                    data.currentStanding
----@diagnostic disable-next-line: undefined-field
-                    or data.earnedValue
----@diagnostic disable-next-line: undefined-field
-                    or data.barValue
----@diagnostic disable-next-line: undefined-field
-                    or data.currentValue
----@diagnostic disable-next-line: undefined-field
-                    or data.currentReputation
-            end
-        end
-        return data
+        local ok, data = pcall(C_Reputation.GetFactionDataByIndex, index)
+        if ok then return safeFactionData(data) end
+        return nil
     end
 
     local legacy = rawget(_G, "GetFactionInfo")
     if type(legacy) == "function" then
-        local name, description, standingId, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar,
-            isHeader, isCollapsed, hasRep, isWatched, isChild, factionID = legacy(index)
+        local ok, name, description, standingId, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar,
+            isHeader, isCollapsed, hasRep, isWatched, isChild, factionID = pcall(legacy, index)
 
-        if not name then
+        if not ok or not usableName(name) then
             return nil
         end
 
-        return {
+        return safeFactionData({
             factionID = factionID,
             name = name,
             description = description,
@@ -66,7 +89,7 @@ local function SQOL_Rep_GetFactionDataByIndex(index)
             hasRep = hasRep,
             isWatched = isWatched,
             isChild = isChild,
-        }
+        })
     end
 
     return nil
@@ -190,21 +213,22 @@ local function SQOL_Rep_WithLegacyShown(fn)
     if type(fn) ~= "function" then
         return nil
     end
-    if not C_Reputation
-        or type(C_Reputation.AreLegacyFactionsShown) ~= "function"
-        or type(C_Reputation.SetLegacyFactionIsShown) ~= "function" then
+    local query = C_Reputation and (C_Reputation.AreLegacyReputationsShown or C_Reputation.AreLegacyFactionsShown)
+    local setter = C_Reputation and (C_Reputation.SetLegacyReputationsShown or C_Reputation.SetLegacyFactionIsShown)
+    if type(query) ~= "function" or type(setter) ~= "function" then
         return fn()
     end
 
-    local wasShown = C_Reputation.AreLegacyFactionsShown()
+    local readOK, wasShown = pcall(query)
+    if not readOK or not SQOL.CanUseValue(wasShown) or type(wasShown) ~= "boolean" then return nil end
     if not wasShown then
-        SQOL.safe_pcall(C_Reputation.SetLegacyFactionIsShown, true)
+        if not SQOL.safe_pcall(setter, true) then return nil end
     end
 
     local ok, result = pcall(fn)
 
     if not wasShown then
-        SQOL.safe_pcall(C_Reputation.SetLegacyFactionIsShown, false)
+        SQOL.safe_pcall(setter, false)
     end
 
     if not ok then
@@ -219,24 +243,23 @@ end
 
 local function SQOL_Rep_GetWatchedFaction()
     if C_Reputation and type(C_Reputation.GetWatchedFactionData) == "function" then
-        local data = C_Reputation.GetWatchedFactionData()
-        if data and type(data.factionID) == "number" then
-            return data.factionID, data.name
-        end
-        if data and type(data.name) == "string" and data.name ~= "" then
-            return nil, data.name
-        end
+        local ok, rawData = pcall(C_Reputation.GetWatchedFactionData)
+        if not ok or not SQOL.CanUseValue(rawData) then return nil, nil, false end
+        if rawData == nil then return nil, nil, true end
+        local data = safeFactionData(rawData)
+        if data and usableName(data.name) then return data.factionID, data.name, true end
+        return nil, nil, false
     end
 
     local legacy = rawget(_G, "GetWatchedFactionInfo")
     if type(legacy) == "function" then
-        local name = legacy()
-        if type(name) == "string" and name ~= "" then
-            return nil, name
-        end
+        local ok, name = pcall(legacy)
+        if not ok or not SQOL.CanUseValue(name) then return nil, nil, false end
+        if name == nil then return nil, nil, true end
+        if usableName(name) then return nil, name, true end
     end
 
-    return nil, nil
+    return nil, nil, false
 end
 
 local function SQOL_Rep_WatchedMatches(factionID, factionName)
@@ -290,27 +313,27 @@ local function SQOL_Rep_FindFactionIndexByName(name)
     return nil
 end
 
-local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID, factionName)
-    local result = SQOL_Rep_WithLegacyShown(function()
+local function SQOL_Rep_SetWatchedFactionRaw(index, factionID, factionName)
+    -- The direct ID API avoids expanding or relaying out Blizzard's panel.
+    if C_Reputation and type(C_Reputation.SetWatchedFactionByID) == "function" and usableNumber(factionID) then
+        if SQOL.safe_pcall(C_Reputation.SetWatchedFactionByID, factionID)
+            and SQOL_Rep_WatchedMatches(factionID, factionName) then return true end
+    end
+    if SQOL.RepWatch_ReputationFrameOpen() then return false end
+    return SQOL_Rep_WithLegacyShown(function()
         local ok = false
-        if C_Reputation and type(C_Reputation.SetWatchedFactionByID) == "function" and type(factionID) == "number" then
-            ok = SQOL.safe_pcall(C_Reputation.SetWatchedFactionByID, factionID)
-            if ok and SQOL_Rep_WatchedMatches(factionID, factionName) then
-                return true
-            end
-            ok = false
-        end
 
-        local legacy = rawget(_G, "SetWatchedFactionIndex")
+        local legacy = C_Reputation and C_Reputation.SetWatchedFactionByIndex or rawget(_G, "SetWatchedFactionIndex")
         if type(legacy) == "function" then
             local legacyResult = SQOL_Rep_WithExpandedHeaders(function()
-                local useIndex = index
-                if type(useIndex) ~= "number" then
-                    if type(factionID) == "number" then
-                        useIndex = SQOL_Rep_FindFactionIndexByID(factionID)
-                    elseif type(factionName) == "string" and factionName ~= "" then
-                        useIndex = SQOL_Rep_FindFactionIndexByName(factionName)
-                    end
+                local useIndex
+                -- Expanding headers can move indices. Resolve the identity again.
+                if usableNumber(factionID) then
+                    useIndex = SQOL_Rep_FindFactionIndexByID(factionID)
+                elseif usableName(factionName) then
+                    useIndex = SQOL_Rep_FindFactionIndexByName(factionName)
+                else
+                    useIndex = index
                 end
                 if type(useIndex) == "number" then
                     local legacyOk = SQOL.safe_pcall(legacy, useIndex)
@@ -327,9 +350,17 @@ local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID, factionNa
         end
 
         return ok
-    end)
+    end) or false
+end
 
-    return result or false
+local function SQOL_Rep_SetWatchedFactionByIndexOrID(index, factionID, factionName, restoring)
+    if not restoring and SQOL.RepMemory_OnFactionUpdate then SQOL.RepMemory_OnFactionUpdate() end
+    internalWatchChange = true
+    local ok, result = pcall(SQOL_Rep_SetWatchedFactionRaw, index, factionID, factionName)
+    internalWatchChange = false
+    observedID, observedName, observedValid = SQOL_Rep_GetWatchedFaction()
+    if ok and result and not restoring and queueReturn then queueReturn() end
+    return ok and result or false
 end
 
 local function SQOL_Rep_BuildSnapshot()
@@ -534,7 +565,13 @@ end
 -- For tests: parse a raw chat message, and rebuild the patterns after the
 -- templates change.
 function SQOL.Rep_ParseMessage(msg)
-    return SQOL_Rep_ParseMessage(SQOL_Rep_StripChatCodes(msg))
+    if not SQOL.CanUseValue(msg) or type(msg) ~= "string" then return nil end
+    local ok, name, amount, increased = pcall(function()
+        return SQOL_Rep_ParseMessage(SQOL_Rep_StripChatCodes(msg))
+    end)
+    if ok and SQOL.CanUseValue(name) and SQOL.CanUseValue(amount) and SQOL.CanUseValue(increased) then
+        return name, amount, increased
+    end
 end
 
 function SQOL.Rep_ResetPatterns()
@@ -542,13 +579,13 @@ function SQOL.Rep_ResetPatterns()
 end
 
 local function SQOL_Rep_ParseFactionNameFromMessage(msg)
-    if type(msg) ~= "string" then
+    if not SQOL.CanUseValue(msg) or type(msg) ~= "string" then
         return nil
     end
 
     msg = SQOL_Rep_StripChatCodes(msg)
 
-    local name = SQOL_Rep_ParseMessage(msg)
+    local name = SQOL.Rep_ParseMessage(msg)
 
     if type(name) ~= "string" then
         return nil
@@ -630,16 +667,15 @@ end
 
 function SQOL.RepGains_HandleMessage(msg)
     if not SQOL.DB or not SQOL.DB.ShowRepGains then return end
-    if issecretvalue and issecretvalue(msg) then return end
-    if type(msg) ~= "string" then return end
-    local _, amount, increased = SQOL_Rep_ParseMessage(SQOL_Rep_StripChatCodes(msg))
+    if not SQOL.CanUseValue(msg) or type(msg) ~= "string" then return end
+    local _, amount, increased = SQOL.Rep_ParseMessage(msg)
     if not increased or not amount or amount <= 0 then return end
     local name = SQOL_Rep_ParseFactionNameFromMessage(msg)
     if name then SQOL.RepGains_Show(name, amount) end
 end
 
 local function SQOL_Rep_FindFactionIDFromMessage(msg)
-    if type(msg) ~= "string" then
+    if not SQOL.CanUseValue(msg) or type(msg) ~= "string" then
         return nil, nil
     end
 
@@ -702,6 +738,11 @@ function SQOL.RepWatch_HandleFactionChangeMessage(msg)
     if not SQOL.DB or not SQOL.DB.RepWatch then
         return false
     end
+    if not SQOL.CanUseValue(msg) or type(msg) ~= "string" then return true end
+    local _, _, increased = SQOL.Rep_ParseMessage(msg)
+    if increased == false then return true end
+    if increased ~= true then return false end
+    if returnPending and queueReturn then queueReturn() end
     if SQOL_RepWatch_CollectionsOpen() then
         SQOL._repWatchDeferred = true
         return false
@@ -815,12 +856,6 @@ local function SQOL_RepWatch_ScanAndSwitch()
                             bestFactionID = id
                             bestName = data.name
                         end
-                    elseif type(cur) == "number" and cur > 0 and bestDelta <= 0 then
-                        -- New faction discovered after the snapshot: treat current standing as the delta.
-                        bestDelta = cur
-                        bestIndex = i
-                        bestFactionID = id
-                        bestName = data.name
                     end
 
                     SQOL._repLastStanding[id] = cur
@@ -875,9 +910,144 @@ function SQOL_RepWatch_ScheduleScan(reason)
     end
     SQOL._repWatchPending = true
     C_Timer.After(0.20, function()
-        SQOL._repWatchPending = false
         SQOL._repWatchDeferred = false
         SQOL_RepWatch_ScanAndSwitch()
+        -- Header changes can synchronously emit UPDATE_FACTION. Keep the scan
+        -- marked pending until it is finished to avoid rescheduling itself.
+        SQOL._repWatchPending = false
     end)
+end
+
+------------------------------------------------------------
+-- Reputation Memory: one preferred faction per character.
+------------------------------------------------------------
+local function memoryEnabled()
+    return memoryDB and SQOL.DB and SQOL.DB.RepMemory and SQOL.DB.RepWatch
+        and type(memoryDB.preferredFaction) == "table"
+end
+
+local function wallTime()
+    local query = rawget(_G, "GetServerTime") or rawget(_G, "time")
+    if type(query) == "function" then
+        local ok, value = pcall(query)
+        if ok and usableNumber(value) then return value end
+    end
+end
+
+cancelReturn = function()
+    returnGeneration = returnGeneration + 1
+    if returnTimer and type(returnTimer.Cancel) == "function" then returnTimer:Cancel() end
+    returnTimer, returnPending = nil, nil
+    if memoryDB then memoryDB.pendingReturn = nil end
+end
+
+-- Returns true when an external selection superseded our work. Checking on
+-- UPDATE_FACTION also catches selecting a different faction and switching back
+-- before the deadline; comparing only at the deadline would miss that case.
+function SQOL.RepMemory_OnFactionUpdate()
+    if internalWatchChange or not memoryEnabled() then return false end
+    local id, name, valid = SQOL_Rep_GetWatchedFaction()
+    local changed = observedValid and (not valid or id ~= observedID or name ~= observedName)
+    observedID, observedName, observedValid = id, name, valid
+    if changed then
+        cancelReturn()
+        SQOL._repPendingName, SQOL._repPendingAt = nil, nil
+        SQOL._repLastStanding = nil
+        return true
+    end
+    return false
+end
+
+local function scheduleReturn(delay)
+    local generation = returnGeneration
+    local function callback()
+        if generation ~= returnGeneration then return end
+        returnTimer = nil
+        if not returnPending or not memoryEnabled() then cancelReturn(); return end
+        if SQOL.RepMemory_OnFactionUpdate() then return end
+        if not SQOL_Rep_WatchedMatches(returnPending.factionID, returnPending.name) then cancelReturn(); return end
+        local remaining = returnPending.deadline - GetTime()
+        if remaining > 0 then scheduleReturn(remaining); return end
+        local preferred = memoryDB.preferredFaction
+        cancelReturn()
+        -- Never expand/rearrange panels that the player is currently using.
+        if SQOL.RepWatch_ReputationFrameOpen() or SQOL_RepWatch_CollectionsOpen() then return end
+        SQOL_Rep_SetWatchedFactionByIndexOrID(nil, preferred.factionID, preferred.name, true)
+    end
+    if C_Timer and type(C_Timer.NewTimer) == "function" then
+        returnTimer = C_Timer.NewTimer(delay, callback)
+    elseif C_Timer and type(C_Timer.After) == "function" then
+        returnTimer = {} -- A generation token invalidates uncancellable callbacks.
+        C_Timer.After(delay, callback)
+    else
+        cancelReturn()
+    end
+end
+
+queueReturn = function()
+    if not memoryEnabled() then return end
+    local preferred = memoryDB.preferredFaction
+    if SQOL_Rep_WatchedMatches(preferred.factionID, preferred.name) then cancelReturn(); return end
+    local id, name, valid = SQOL_Rep_GetWatchedFaction()
+    if not valid or not usableName(name) then cancelReturn(); return end
+    returnPending = { factionID = id, name = name, deadline = GetTime() + 10 }
+    local wall = wallTime()
+    memoryDB.pendingReturn = wall and { factionID = id, name = name, expiresAt = wall + 10 } or nil
+    -- Bursts extend one deadline; they do not allocate one timer per gain.
+    if not returnTimer then scheduleReturn(10) end
+end
+
+function SQOL.RepMemory_Init()
+    if type(SQOL_CharacterDB) ~= "table" then SQOL_CharacterDB = {} end
+    memoryDB = SQOL_CharacterDB
+    local preferred = memoryDB.preferredFaction
+    if type(preferred) ~= "table" or not usableName(preferred.name)
+        or (preferred.factionID ~= nil and not usableNumber(preferred.factionID)) then
+        memoryDB.preferredFaction = nil
+    end
+    observedID, observedName, observedValid = SQOL_Rep_GetWatchedFaction()
+    local saved = memoryDB.pendingReturn
+    if memoryEnabled() and type(saved) == "table" and usableName(saved.name)
+        and usableNumber(saved.expiresAt) and wallTime()
+        and SQOL_Rep_WatchedMatches(saved.factionID, saved.name) then
+        returnPending = { factionID = saved.factionID, name = saved.name,
+            deadline = GetTime() + math.min(10, math.max(0, saved.expiresAt - wallTime())) }
+        scheduleReturn(math.max(0, returnPending.deadline - GetTime()))
+    else
+        cancelReturn()
+    end
+end
+
+function SQOL.RepMemory_OnOptionChanged()
+    cancelReturn()
+    SQOL._repPendingName, SQOL._repPendingAt = nil, nil
+    SQOL._repLastStanding = nil
+    observedID, observedName, observedValid = SQOL_Rep_GetWatchedFaction()
+end
+
+function SQOL.RepMemory_Command(command)
+    if not memoryDB then SQOL.RepMemory_Init() end
+    local prefix = "|cff33ff99SQoL:|r "
+    if command == "clear" then
+        cancelReturn()
+        memoryDB.preferredFaction = nil
+        print(prefix .. L["Preferred reputation cleared."])
+    elseif command == "status" then
+        local preferred = memoryDB.preferredFaction
+        print(prefix .. (preferred and string.format(L["Preferred reputation: %s"], preferred.name)
+            or L["No preferred reputation saved."]))
+    elseif command == "" then
+        local id, name, valid = SQOL_Rep_GetWatchedFaction()
+        if not valid or not usableName(name) then
+            print(prefix .. L["Choose a watched faction in Blizzard's Reputation panel first."])
+            return
+        end
+        cancelReturn()
+        memoryDB.preferredFaction = { factionID = id, name = name }
+        observedID, observedName, observedValid = id, name, valid
+        print(prefix .. string.format(L["Preferred reputation saved: %s"], name))
+    else
+        print(prefix .. "/sqol repfocus [clear | status]")
+    end
 end
 

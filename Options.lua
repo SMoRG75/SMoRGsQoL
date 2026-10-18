@@ -54,6 +54,8 @@ SQOL.OptionSections = {
               tooltip = L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] },
             { key = "RepWatch", label = L["Auto-watch reputation gains"],
               tooltip = L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] },
+            { key = "RepMemory", label = L["Return to preferred reputation"],
+              tooltip = L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] },
             { key = "ShowRepGains", label = L["Floating reputation gains"],
               tooltip = L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] },
         },

@@ -3,6 +3,16 @@ local _, SQOL = ...
 if SQOL.Locale ~= "koKR" then return end
 local L = SQOL.L
 
+-- Reputation Memory
+L["Return to preferred reputation"] = "선호 평판으로 돌아가기"
+L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] = "/sqol repfocus로 추적 중인 진영을 저장합니다. 자동 추적이 켜져 있으면 10초 동안 새 평판을 얻지 않을 때 저장한 진영으로 돌아갑니다. 추적 진영을 바꾸면 예약된 복귀가 취소됩니다. 캐릭터별로 저장됩니다."
+L["Save watched reputation; add 'clear' to forget or 'status' to inspect"] = "추적 중인 평판 저장. 'clear'로 삭제, 'status'로 확인"
+L["Preferred reputation cleared."] = "선호 평판을 삭제했습니다."
+L["Preferred reputation: %s"] = "선호 평판: %s"
+L["No preferred reputation saved."] = "저장된 선호 평판이 없습니다."
+L["Choose a watched faction in Blizzard's Reputation panel first."] = "먼저 블리자드 평판 창에서 추적할 진영을 선택하세요."
+L["Preferred reputation saved: %s"] = "선호 평판 저장됨: %s"
+
 -- Adventure Recap
 L["Adventure Recap"] = "모험 요약"
 L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "캐릭터별로 퀘스트, 획득 평판, 플레이 시간을 기록합니다. /sqol recap으로 엽니다. UI를 다시 불러오면 세션이 이어지고, 다시 접속하면 새 세션이 시작됩니다. 자동 팝업은 없습니다."

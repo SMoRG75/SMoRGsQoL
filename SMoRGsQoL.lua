@@ -38,6 +38,7 @@ function SQOL.Init(reset)
 
     if reset then
         SQOL.Recap_OnOptionChanged()
+        SQOL.RepMemory_OnOptionChanged()
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         SQOL.RepGains_Hide()
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
@@ -428,6 +429,7 @@ function SQOL.ApplyOption(key)
         if not SQOL.DB.ShowRepGains then SQOL.RepGains_Hide() end
 
     elseif key == "RepWatch" then
+        SQOL.RepMemory_OnOptionChanged()
         if SQOL.DB.RepWatch then
             SQOL._repLastStanding = nil
             if SQOL.Rep_RebuildNameMap then
@@ -437,6 +439,9 @@ function SQOL.ApplyOption(key)
                 SQOL_RepWatch_ScheduleScan()
             end
         end
+
+    elseif key == "RepMemory" then
+        SQOL.RepMemory_OnOptionChanged()
 
     elseif key == "ShowNameplateObjectives" then
         if SQOL.DB.ShowNameplateObjectives then
@@ -529,6 +534,9 @@ local SQOL_COMMANDS = {
     { names = { "speed", "spd" }, key = "ShowMovementSpeed" },
     { names = { "barcolor", "bc" }, key = "ColorStatusBarProgress" },
     { names = { "rep", "rw" }, key = "RepWatch" },
+    { names = { "repmemory", "rm" }, key = "RepMemory" },
+    { names = { "repfocus" }, desc = L["Save watched reputation; add 'clear' to forget or 'status' to inspect"],
+      run = function(rest) SQOL.RepMemory_Command(rest) end },
     { names = { "reptext", "rt" }, key = "ShowRepGains" },
     { names = { "reptexttest" }, desc = L["Preview floating reputation gains"],
       run = function() SQOL.RepGains_Show("Valarjar", 25) end },
@@ -663,6 +671,7 @@ SQOL_RegisterOptionalEvent("LFG_PROPOSAL_SUCCEEDED")
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         SQOL.Init()
+        SQOL.RepMemory_Init()
         if SQOL.DB.ShowSplash then
             SQOL_Splash()
         end
@@ -863,10 +872,11 @@ f:SetScript("OnEvent", function(self, event, ...)
         end
 
     elseif event == "UPDATE_FACTION" then
+        local externalSelection = SQOL.RepMemory_OnFactionUpdate()
         -- Clicking an expansion header in the Reputation panel fires UPDATE_FACTION.
         -- Skip the header-expanding scan while the panel is open so the list does
         -- not jump; actual rep gains are still caught by CHAT_MSG_COMBAT_FACTION_CHANGE.
-        if SQOL.DB and SQOL.DB.RepWatch and SQOL_RepWatch_ScheduleScan
+        if not externalSelection and SQOL.DB and SQOL.DB.RepWatch and SQOL_RepWatch_ScheduleScan
             and not SQOL.RepWatch_ReputationFrameOpen() then
             SQOL_RepWatch_ScheduleScan("update_faction")
         end
@@ -878,7 +888,7 @@ f:SetScript("OnEvent", function(self, event, ...)
             local msg = ...
             local handled = false
 
-            if SQOL.DB.DebugTrack then
+            if SQOL.DB.DebugTrack and SQOL.CanUseValue(msg) then
                 SQOL.dprint("RepWatch -> CHAT_MSG_COMBAT_FACTION_CHANGE:", tostring(msg))
             end
             if SQOL.RepWatch_HandleFactionChangeMessage then

@@ -43,6 +43,7 @@ SQOL.defaults = {
     AdventureRecap = false,
     HideDoneAchievements = false,
     RepWatch     = false,
+    RepMemory    = false,
     ShowRepGains = false,
     ShowNameplateObjectives = false,
 

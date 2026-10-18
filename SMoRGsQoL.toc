@@ -15,7 +15,7 @@
 ## Version: 1.2.1
 ## IconTexture: Interface\AddOns\SMoRGsQoL\Media\smorgsqol-icon-simple-v3-400.png
 ## SavedVariables: SQOL_DB
-## SavedVariablesPerCharacter: SQOL_RecapDB
+## SavedVariablesPerCharacter: SQOL_RecapDB, SQOL_CharacterDB
 ## X-Curse-Project-ID: 1418599
 ## X-Wago-ID: 5NRgMx63
 ## X-WoWI-ID: 27251

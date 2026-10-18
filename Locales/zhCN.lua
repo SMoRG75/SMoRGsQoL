@@ -3,6 +3,16 @@ local _, SQOL = ...
 if SQOL.Locale ~= "zhCN" then return end
 local L = SQOL.L
 
+-- Reputation Memory
+L["Return to preferred reputation"] = "返回首选声望"
+L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] = "使用 /sqol repfocus 保存当前追踪的阵营。启用自动追踪后，若10秒内没有新声望获取，将返回首选阵营。更改追踪阵营会取消待执行的返回。按角色保存。"
+L["Save watched reputation; add 'clear' to forget or 'status' to inspect"] = "保存追踪声望；加 'clear' 清除，加 'status' 查看"
+L["Preferred reputation cleared."] = "首选声望已清除。"
+L["Preferred reputation: %s"] = "首选声望：%s"
+L["No preferred reputation saved."] = "尚未保存首选声望。"
+L["Choose a watched faction in Blizzard's Reputation panel first."] = "请先在暴雪声望面板中选择要追踪的阵营。"
+L["Preferred reputation saved: %s"] = "已保存首选声望：%s"
+
 -- Adventure Recap
 L["Adventure Recap"] = "冒险回顾"
 L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] = "按角色记录任务、获得的声望和游戏时间。使用 /sqol recap 打开。重载界面会继续本次游戏时段；重新登录会开始新的时段。不会自动弹窗。"

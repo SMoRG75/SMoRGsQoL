@@ -501,7 +501,25 @@ assert(SQOL_AdventureRecap.values[1].text == tostring(recapBefore + 1), 'Slash c
 fire('PLAYER_LEAVING_WORLD')
 fire('PLAYER_LOGOUT')
 assert(SQOL_RecapDB.current.quests == recapBefore + 1, 'Logout saves per-character totals')
+-- Commands and checkbox state use the same per-character preference.
+local memoryWatched = { factionID = 69, name = 'Darnassus', currentStanding = 500 }
+C_Reputation = { GetWatchedFactionData = function() return memoryWatched end }
+SlashCmdList.SQOL('repfocus')
+assert(SQOL_CharacterDB.preferredFaction.factionID == 69, 'Command saves watched faction per character')
+SlashCmdList.SQOL('repfocus status')
+SlashCmdList.SQOL('config')
+SlashCmdList.SQOL('rm')
+assert(sqol.DB.RepMemory and popupControls.RepMemory.checked, 'Memory checkbox follows slash command')
+SlashCmdList.SQOL('config')
+SlashCmdList.SQOL('rep')
+memoryWatched = { factionID = 72, name = 'Stormwind', currentStanding = 800 }
+fire('UPDATE_FACTION')
+assert(sqol._repLastStanding == nil, 'External selection invalidates pending delta baseline')
 SlashCmdList.SQOL('reset')
+assert(not sqol.DB.RepMemory and not sqol.DB.RepWatch
+    and SQOL_CharacterDB.preferredFaction.factionID == 69, 'Reset disables memory and preserves preference')
+SlashCmdList.SQOL('repfocus clear')
+assert(SQOL_CharacterDB.preferredFaction == nil, 'Clear command removes the preference')
 assert(not sqol.DB.AdventureRecap and SQOL_RecapDB.current.quests == recapBefore + 1,
     'Settings reset pauses recap while preserving session data')
 assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
