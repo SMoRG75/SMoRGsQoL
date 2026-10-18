@@ -1,5 +1,29 @@
 # TODO
 
+## Nye addon-funktioner — prioriteret plan
+
+- [x] **1. Adventure Recap — implementeret**
+  - Flytbart sessionsvindue med afsluttede quests, world quests, optjent reputation og registreret spilletid.
+  - Gemmer den aktuelle og den foregående session pr. karakter; `/reload` fortsætter sessionen.
+  - Implementeret i `SessionRecap.lua` og committet på `master` som `12047f8`.
+  - Vinduet er gennemgået i Retail og WoW Forever; automatiske tests består. Fuld funktionel validering i begge klienter er fortsat et krav før release.
+
+- [x] **2. Smart Reputation Memory — implementeret**
+  - Én foretrukken faction pr. karakter. Auto-watch viser midlertidige reputation-gevinster og vender tilbage efter 10 sekunder uden nye gevinster.
+  - Manuelle eller eksterne skift af den viste faction aflyser en ventende tilbagevenden. Valget og en eventuel ventende tilbagevenden overlever `/reload` og nyt login.
+  - Valgfri og slået fra som standard; gem faction med `/sqol repfocus`, og aktivér **Return to preferred reputation** sammen med auto-watch.
+  - Implementeret i `Reputation.lua` og committet som `d749a34` på `codex/reputation-memory`.
+  - Automatiske tests består; funktionel validering i Retail og WoW Forever mangler før release.
+
+- [ ] **3. Smart Quest Radar — næste nye funktion**
+  - Gør questrelevante fjender og NPC'er lettere at genkende med diskrete indikatorer og questprogress på deres nameplates.
+  - Start med en afgrænset prototype oven på den eksisterende nameplate-logik i `QuestProgress.lua`.
+  - Undersøg først, hvilke quest- og objektivdata Retail og WoW Forever faktisk stiller til rådighed, inklusive under combat.
+  - Brug tilgængelige, læsbare data; automatisk identifikation af alle relevante enheder kan ikke forudsættes.
+  - Hold funktionen valgfri og visuelt enkel. Kontrollér flere samtidige questmål, combat, `/reload`, login og samspil med andre addons i begge klienter.
+
+## Tidligere opgaver — afsluttet
+
 - [x] **1. Fix placering af ilvl og speed i WoW Forever**
   - `SQOL.UpdatePlayerFrameIlvlAnchor()` i `PlayerStats.lua:218` er lavet til Retail-PlayerFrame; Forever har et andet layout.
   - Brug `SQOL.IsForever` (`Core.lua:15`) til at vælge egne anchors/offsets for ilvl og speed.
