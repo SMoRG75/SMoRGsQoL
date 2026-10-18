@@ -8,13 +8,15 @@
   - Implementeret i `SessionRecap.lua` og committet på `master` som `12047f8`.
   - Vinduet er gennemgået i Retail og WoW Forever; automatiske tests består. Fuld funktionel validering i begge klienter er fortsat et krav før release.
 
-- [x] **2. Smart Reputation Memory — implementeret**
+- [x] **2. Smart Reputation Memory — implementeret, afprøvet i Retail**
   - Én foretrukken faction pr. karakter. Auto-watch viser midlertidige reputation-gevinster og vender tilbage efter 10 sekunder uden nye gevinster.
   - Manuelle eller eksterne skift af den viste faction aflyser en ventende tilbagevenden. Valget og en eventuel ventende tilbagevenden overlever `/reload` og nyt login.
   - Valgfri og slået fra som standard; gem faction med `/sqol repfocus`, og aktivér **Return to preferred reputation** sammen med auto-watch.
   - Implementeret i `Reputation.lua` og committet som `d749a34` på `codex/reputation-memory`.
-  - Lokal fejlrettelse efter Retail-rapport: skjulte underpaneler måles med `IsVisible()`, og forsinkede faction-skift får en afgrænset bekræftelse. Regressionstests dækker begge fejl; rettelsen skal bekræftes i spillet.
-  - Automatiske tests består; funktionel validering i Retail og WoW Forever mangler før release.
+  - Lokal fejlrettelse efter Retail-rapport: skjulte underpaneler måles med `IsVisible()`, og forsinkede faction-skift får en afgrænset bekræftelse. Regressionstests dækker begge fejl; brugeren har bekræftet, at rettelsen virker i Retail.
+  - Automatiske tests består.
+  - [x] Afprøvet i Retail: brugeren har bekræftet, at tilbagevenden til den foretrukne faction virker efter rettelsen (19. oktober 2026).
+  - [ ] Valider Reputation Memory og rettelsen i WoW Forever før release.
 
 - [x] **3. Smart Quest Radar — implementeret, afprøvet i Retail**
   - Quest-ikon og op til tre uafsluttede mål på én linje over relevante, synlige nameplates; yderligere mål vises som `+N`.
