@@ -25,6 +25,8 @@ Everything can be turned on and off from the options window, the in-game Setting
 [*][b]Auto-track new quests[/b] - newly accepted quests are added to the Objective Tracker.
 [*][b]Colored quest progress[/b] - progress like 3/10 or 45% is colored red -> yellow -> green in chat messages and in the quest tracker. Also covers progress-bar objectives and scenario progress bars that the default UI reports silently.
 [*][b]Nameplate objective counts[/b] - shows quest progress (e.g. 0/10 or 45%) above the nameplates of quest mobs.
+[*][b]Smart Quest Radar[/b] - a quest icon and up to three unfinished objective counts (e.g. 2/8 - 1/5) above the nameplates of units you still need for your quests. It only marks a unit when its tooltip matches your own active quests.
+[*][b]Adventure Recap[/b] - a movable window with this session's completed quests, world quests, reputation gained, playtime and your most active faction, kept per character. The previous session stays available too.
 [/list]
 
 [b]Character[/b]
@@ -38,6 +40,7 @@ Everything can be turned on and off from the options window, the in-game Setting
 [list]
 [*][b]Colored XP/reputation numbers[/b] - the current number on the standard bars goes red -> yellow -> green, and reputation shows the percentage left and your current standing.
 [*][b]Auto-watch reputation[/b] - switches your watched faction to the one you just gained reputation with.
+[*][b]Reputation Memory[/b] - save a preferred faction per character, and the reputation bar goes back to it 10 seconds after auto-watch has shown a new gain.
 [*][b]Floating reputation gains[/b] - a short "+25 Rep - Valarjar" text that floats up and fades out.
 [/list]
 
@@ -86,11 +89,15 @@ Type [b]/sqol[/b] to see the current status, or [b]/sqol help[/b] for the full l
 /sqol color     (col)  quest progress colors
 /sqol barcolor  (bc)   XP/reputation number colors
 /sqol nameplate (np)   nameplate objective counts
+/sqol radar     (qr)   Smart Quest Radar
+/sqol recap            Adventure Recap (last, reset, test)
 /sqol ilvl             item level
 /sqol speed     (spd)  movement speed
 /sqol range     (rng)  range icon and distance
 /sqol tooltiptarget (tt)  target in tooltips
 /sqol rep       (rw)   auto-watch reputation
+/sqol repmemory (rm)   return to preferred reputation
+/sqol repfocus         save the watched faction (status, clear)
 /sqol reptext   (rt)   floating reputation gains
 /sqol readycheck (rc)  ready check countdown
 /sqol lfgtimer  (lfg)  queue pop countdown
