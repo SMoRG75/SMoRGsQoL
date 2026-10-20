@@ -187,21 +187,6 @@ local function SQOL_GetPlayerHealthBarFrame(playerFrame)
     return fallback
 end
 
-local function SQOL_GetPlayerManaBarFrame(playerFrame)
-    if not playerFrame then return nil end
-
-    local globalMana = rawget(_G, "PlayerFrameManaBar")
-    if globalMana then return globalMana end
-
-    local content = rawget(playerFrame, "PlayerFrameContent")
-    local main = content and rawget(content, "PlayerFrameContentMain")
-    local manaBarArea = main and rawget(main, "ManaBarArea")
-    local mainMana = manaBarArea and rawget(manaBarArea, "ManaBar")
-    if mainMana then return mainMana end
-
-    return rawget(playerFrame, "manabar") or rawget(playerFrame, "ManaBar")
-end
-
 function SQOL.UpdatePlayerFrameIlvlAnchor()
     if not SQOL.iLvlHolder or not SQOL.iLvlText then
         return false
@@ -225,12 +210,15 @@ function SQOL.UpdatePlayerFrameIlvlAnchor()
     local levelText = rawget(_G, "PlayerLevelText")
         or rawget(playerFrame, "PlayerLevelText")
         or (playerFrame and playerFrame.PlayerLevelText)
-    local bar = SQOL_GetPlayerManaBarFrame(playerFrame) or SQOL_GetPlayerHealthBarFrame(playerFrame)
+    local foreverHealthBar = SQOL.IsForever and SQOL_GetPlayerHealthBarFrame(playerFrame)
 
-    if SQOL.IsForever and bar and bar.GetCenter then
-        -- WoW Forever puts the level in a badge at the bottom-left of the portrait,
-        -- so place the line under the health/mana bars, right-aligned with them.
-        SQOL.iLvlHolder:SetPoint("TOPRIGHT", bar, "BOTTOMRIGHT", 0, -2)
+    if foreverHealthBar and foreverHealthBar.GetCenter then
+        -- WoW Forever: above the name box like in Retail, right-aligned with the
+        -- bars. The box sits right on top of the health bar, so clear its height.
+        -- The holder lives on UIParent, so convert the offset to follow Edit Mode's
+        -- frame size.
+        local frameScale = foreverHealthBar:GetEffectiveScale() / SQOL.iLvlHolder:GetEffectiveScale()
+        SQOL.iLvlHolder:SetPoint("BOTTOMRIGHT", foreverHealthBar, "TOPRIGHT", 0, 16 * frameScale)
     elseif not SQOL.IsForever and levelText and levelText.GetCenter then
         -- Retail: just above the name/level row, right-aligned with the level.
         -- Beside the level it collides with long names, and under the bars it
@@ -298,6 +286,10 @@ local function SQOL_EnsurePlayerFrameIlvlUI()
         playerFrame:HookScript("OnHide", function()
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end)
+        if SQOL.IsForever and playerFrame.SetScale then
+            -- Edit Mode's Frame Size changes the scale; the Forever offset follows it.
+            hooksecurefunc(playerFrame, "SetScale", SQOL.UpdatePlayerFrameIlvlAnchor)
+        end
     end
 
     -- Poll speed periodically so we still show a meaningful value even when movement events are missed.

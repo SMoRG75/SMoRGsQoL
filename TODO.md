@@ -24,9 +24,14 @@
   - Slået fra som standard; aktivér under **Quests → Smart Quest Radar** eller med `/sqol radar` (`qr`). Erstatter den gamle talvisning, mens radaren er aktiv, og bruger den eksisterende indstilling for progressfarver.
   - Bruger læsbare tooltip-afsnit, der matcher karakterens aktive quests. Færdige mål, gruppemedlemmers afsnit, tvetydige questtitler og utilgængelige data springes over. Ingen scanning efter enheder uden nameplates.
   - På klienter uden tooltip-linjetyper kræves et præcist match med karakterens egen uafsluttede objektivtekst. Dækningen afhænger af klientens data, også under combat.
-  - Automatisk dækket af `tests/radar.lua`, den eksisterende integrationstest og sprogtesten. Implementeret lokalt på `codex/smart-quest-radar`; endnu ikke committet eller pushet.
+  - Automatisk dækket af `tests/radar.lua`, den eksisterende integrationstest og sprogtesten. Committet som `1d26b85` på `codex/smart-quest-radar`.
   - [x] Afprøvet i Retail: brugeren har bekræftet, at funktionen er OK (18. oktober 2026).
-  - [ ] Valider i WoW Forever: placering og læsbarhed, flere samtidige questmål, gruppespil, combat, `/reload`, login, samspil med andre addons, klientens tooltip-data og skift mellem radaren og den gamle talvisning.
+  - [x] Afprøvet i WoW Forever: brugeren har bekræftet, at radaren virker (20. oktober 2026).
+
+- [x] **4. Samme placering af ilvl og speed i Forever som i Retail**
+  - I Forever stod linjen under health/mana-barerne; i Retail står den over navnerækken, højrejusteret.
+  - `SQOL.UpdatePlayerFrameIlvlAnchor()` i `PlayerStats.lua` placerer den nu over navneboksen i Forever, højrejusteret med barerne. Offsettet over health-baren følger Edit Modes Frame Size, og linjen flyttes, når PlayerFrame skifter skala.
+  - [x] Afprøvet i WoW Forever ved 100 % og 200 %: brugeren har bekræftet, at det ser pænt ud (20. oktober 2026).
 
 ## Tidligere opgaver — afsluttet
 
