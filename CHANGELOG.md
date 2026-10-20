@@ -1,22 +1,25 @@
 # Changelog
 
-## [Unreleased]
+## [1.3.0] - 2026-10-20
 
 ### Added
 
-- **Smart Quest Radar (development preview)** — an optional quest icon with up to three unfinished objectives on relevant visible nameplates, plus `+N` for additional objectives. Toggle under **Quests** or with `/sqol radar` (`qr`). Uses readable tooltip data matched to your active quests, skips completed/ambiguous/unavailable data and party progress sections, shares existing progress colors and replaces the old counts while enabled. Off by default; translated into all supported client languages. In-game Retail and WoW Forever validation is required before release.
-- Radar tests cover quest relevance, multiple objectives, completion, party sections, text-only fallbacks, restricted values, API failures, throttled tooltip refreshes and nameplate reuse.
-- **Reputation Memory** — optionally return to one preferred faction per character after 10 seconds without reputation gains. Save the watched faction with `/sqol repfocus`, inspect it with `status`, or forget it with `clear`. Enable **Return to preferred reputation** alongside auto-watch. External watched-faction changes cancel pending returns; preferences and matching pending returns survive reload/login. A return that expires while Reputation or Collections is open is cancelled. Translated into all supported client languages. In-game validation is required before release.
-- Reputation tests for timer deadlines, burst gains, external changes, cancellation, persisted returns, character isolation, secret values and client API fallbacks.
-- **Adventure Recap** — an optional, movable, per-character session window for completed quests, world quests, reputation gains and recorded playtime, with a most-active-faction highlight when reliable. Open it from the options window or `/sqol recap`; use `last`, `reset` or `test` for the previous session, a fresh current session or sample data. Recording is off by default, survives UI reloads, excludes offline/paused time and never opens a popup automatically. Unreadable reputation and unavailable world quest classification are clearly marked. Translated into every supported client language.
-- Automated coverage for session boundaries, duplicate turn-ins/chat events, repeatable quests, character isolation, localized reputation, secret values, missing APIs, pausing, reset and previews. In-game Retail and WoW Forever validation is still required before release.
+- **Smart Quest Radar** — a quest icon and up to three unfinished objective counts on one line above the nameplates of units you still need for your quests (e.g. `2/8 · 1/5`), with `+N` for more. It reads the quest lines in the unit's tooltip and only marks a unit when they match your own active, unfinished objectives; your party's progress and data the client keeps hidden are skipped. Replaces the plain nameplate counts while it is on and uses the **Color quest progress** colors. Toggle under **Quests** or with `/sqol radar` (`qr`). Off by default.
+- **Adventure Recap** — a movable window with this session's completed quests, world quests, reputation gained, playtime and most active faction, kept per character. `/reload` continues the session, and the previous session stays available with `/sqol recap last`; `reset` starts the current session over and `test` shows sample data. Enable recording under **Quests** and open the window from the options window or with `/sqol recap`. Off by default and never pops up by itself.
+- **Reputation Memory** — save a preferred faction per character with `/sqol repfocus` (`status` shows it, `clear` forgets it). With **Auto-watch reputation gains** and **Return to preferred reputation** on, the reputation bar shows a new gain for a moment and goes back to your faction after 10 seconds without new gains. Picking another faction yourself cancels the return, and it is skipped while the Reputation or Collections panel is open. Off by default.
+- All new options and messages are translated into every supported client language.
+
+### Changed
+
+- **WoW Forever:** the item level/speed line sits above your name like on Retail, right-aligned with the bars, and keeps its place when you change the player frame's size in Edit Mode.
+- **WoW Forever:** with **Color XP/reputation numbers** on, the XP and reputation text stays visible. WoW Forever has no setting for it, so it used to show only on mouseover or with the Character window open.
 
 ### Fixed
 
-- Reputation Memory checks effective panel visibility, so a hidden Character or Collections window no longer blocks auto-watch or cancels a pending return merely because its child panel still reports `IsShown()`. Truly visible panels remain protected.
-- Delayed watched-faction acknowledgements can now start the preferred-faction return instead of being mistaken for external selections. Confirmation is bounded; manual choices, disabling memory and clearing preferences still cancel pending work. Added regression tests and debug messages for return scheduling/cancellation.
-- Reputation watching skips inaccessible messages/faction fields and ignores chat-reported losses. Newly discovered standings establish a baseline instead of being mistaken for gains.
-- Updated reputation visibility/index API fallbacks while keeping older client names supported. Index lookups happen after headers are expanded; original header/legacy visibility is restored. Header updates during a scan no longer schedule the same scan repeatedly.
+- Auto-watch reputation ignores reputation losses and messages the client keeps hidden, and a faction you discover for the first time no longer counts as a gain.
+- Auto-watch no longer rescans over and over when a reputation header changes during a scan, and collapsed headers in the Reputation panel are restored afterwards.
+
+After updating, **restart the game** (a `/reload` is not enough), because this release adds new files.
 
 ## [1.2.1] - 2026-10-14
 

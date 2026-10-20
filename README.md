@@ -9,13 +9,20 @@ Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.2.1
+## What's new in 1.3.0
+
+- 📡 **Smart Quest Radar** — a quest icon and up to three unfinished objective counts above the nameplates of units you still need for your quests, e.g. `2/8 · 1/5`. `/sqol radar` (`qr`).
+- 📖 **Adventure Recap** — a session window with the quests and world quests you completed, reputation gained, playtime and your most active faction, kept per character. `/sqol recap`.
+- 🧠 **Reputation Memory** — save a preferred faction with `/sqol repfocus`; after auto-watch has shown a new gain, the reputation bar goes back to it after 10 seconds.
+- 🌍 **WoW Forever** — the item level/speed line now sits above your name like on Retail and follows the player frame's size, and the colored XP/reputation text stays visible instead of only on mouseover.
+
+All three new features are off by default; turn them on in the options window. After updating, **restart the game** (a `/reload` is not enough), because this release adds new files. See the [changelog](CHANGELOG.md) for the full release history.
+
+### 1.2.1
 
 - 🛠️ **Updated for WoW 12.1.5.**
 - 📜 **New addon icon** — a simple quest scroll with a green check that is easy to recognize at the small sizes it is shown in: the AddOns list, the minimap button, the options window and LibDataBroker displays.
 - 🔤 **Damage text font note** — the tooltip for **Custom damage text font** and the options window now say that the font only changes after a game client restart.
-
-After updating, **restart the game** (a `/reload` is not enough), because the icon and the damage text font moved to the `Media` folder. See the [changelog](CHANGELOG.md) for the full release history.
 
 ### 1.2.0
 
@@ -71,23 +78,21 @@ After updating, **restart the game** (a `/reload` is not enough), because the ic
 
 ## Features
 
-- **Smart Quest Radar (development preview)**
-  - Marks relevant visible nameplates with a quest icon and up to three unfinished objective counts on one line, for example `2/8 · 1/5`. More objectives are summarized as `+N`.
-  - Enable **Smart Quest Radar** under **Quests**, or toggle it with `/sqol radar` (`qr`). It is off by default and works independently of **Show objective counts on nameplates**. While enabled, radar replaces the old counts in the same text region; turning it off restores the previous setting.
-  - Uses readable quest sections from `C_TooltipInfo.GetUnit` and matches their titles to your active quest log. Typed tooltip objectives are preferred. Clients without line types require an exact match to your own unfinished objective text. Ambiguous titles, completed objectives, party progress sections and unavailable data are skipped. Non-numeric objectives are marked as **Quest objective** only when explicitly unfinished.
-  - Shares existing quest caches and throttled nameplate updates. Relevant tooltip-data updates and entering/leaving combat refresh the display; no continuous scanning of nearby units is performed. **Color quest progress** also colors radar counters.
-  - Requires visible nameplates and readable tooltip data. It cannot identify objects without nameplates or guarantee every quest target, especially when the client restricts data. In-game layout, combat, grouped questing, reload/login and addon compatibility still need verification in Retail and WoW Forever.
-- 📖 **Adventure Recap (development preview)**
-  - An optional, movable window with completed quests, world quests (included in the quest total), reputation gained, recorded playtime and the most active faction when all reputation messages were readable.
-  - Enable **Adventure Recap** under **Quests**, then open it from the options window or with `/sqol recap`. There are no automatic popups; collection is off by default.
-  - `/sqol recap last` shows the previous session, `/sqol recap reset` clears only the current session, and `/sqol recap test` previews sample data without changing real statistics.
-  - Sessions are stored per character. `/reload` continues the session; logging in again starts a new one and keeps the previous session. Offline time and time with recording disabled are excluded. Disabling recording pauses it without deleting the totals.
-  - Only `QUEST_TURNED_IN` counts a quest. Being ready to turn in or abandoning a quest does not count. Reputation counts positive gains, not gains minus losses; unreadable or unrecognized messages mark the total as incomplete and hide the top-faction highlight. If world quest classification is unavailable, its displayed count is marked as a minimum.
-  - Event-driven tracking; the visible recap refreshes its clock once per second. This preview still needs in-game verification on Retail and WoW Forever before release.
 - 🔊 **Quest sounds: objective and quest completion**
   - Plays a worker voice line when an individual objective is completed before the full quest is done (Peon: *"Work, work."*).
   - Plays another voice line and prints a chat message when the whole quest is ready to turn in, or done for bonus/world quests (Peon: *"Work complete."*).
   - Choose the Horde (Peon) or Alliance (Human worker: *"More work?"* / *"Job's done!"*) sound profile, and toggle each sound on its own (`/sqol objectivesound`, `/sqol questsound`, `/sqol soundprofile`).
+- 📡 **Smart Quest Radar**
+  - Marks relevant visible nameplates with a quest icon and up to three unfinished objective counts on one line, for example `2/8 · 1/5`. More objectives are summarized as `+N`.
+  - Enable **Smart Quest Radar** under **Quests**, or toggle it with `/sqol radar` (`qr`). Off by default. While enabled, it replaces the plain nameplate objective counts; turning it off brings them back. **Color quest progress** also colors the radar counts.
+  - Reads the quest lines in the unit's tooltip and matches them to your own active quests. Finished objectives, your party's progress and anything the client keeps hidden are skipped, so a unit only gets marked when the addon is sure.
+  - Only units with a visible nameplate can be marked; quest objects without a nameplate are not.
+- 📖 **Adventure Recap**
+  - A movable window with this session's completed quests, world quests, reputation gained, playtime and your most active faction.
+  - Enable **Adventure Recap** under **Quests**, then open it from the options window or with `/sqol recap`. Recording is off by default, and the window never pops up by itself.
+  - `/sqol recap last` shows the previous session, `/sqol recap reset` starts the current session over, and `/sqol recap test` shows sample data without touching your real numbers.
+  - Sessions are kept per character. `/reload` continues the session; logging in again starts a new one and keeps the previous one. Offline time and time with recording turned off are not counted.
+  - A quest counts when you turn it in. If some reputation messages could not be read, the total is marked as incomplete and no top faction is shown.
 - 🧭 **Auto-track newly accepted quests**
   - Automatically tracks new quests in the Objective Tracker (with sanity checks to avoid unsupported edge cases).
 - 🎨 **Colorized progress messages**
@@ -97,6 +102,7 @@ After updating, **restart the game** (a `/reload` is not enough), because the ic
   - Reputation text also shows the percentage remaining in the current bar and your current standing after the total, e.g. `4995 / 6000 · 16.8% left · Friendly`.
   - Independently colors the current XP/reputation number on Blizzard's standard bars (red → yellow → green), with outlined text. Labels and maximum values stay white; bar colors are unchanged.
   - Toggle with `/sqol barcolor` (`bc`) or **Color XP/reputation numbers** in Settings. Disabled by default; independent of quest progress colors.
+  - In WoW Forever the text stays visible all the time while this is on; there it would otherwise only show on mouseover or with the Character window open.
 - ⏱️ **Ready check countdown**
   - Shows a live countdown of the seconds left on a ready check, turning red for the last 5 seconds.
   - Appears below the ready check popup, or near the top of the screen when you started the ready check yourself (Blizzard never shows the popup to the initiator).
@@ -112,13 +118,11 @@ After updating, **restart the game** (a `/reload` is not enough), because the ic
   - Not available in WoW Forever, which replaces achievements with the Legacy system.
 - 🤝 **Auto-watch reputation gains**
   - Switches your watched faction to the one that changed when you gain reputation.
-- 🧠 **Reputation Memory (development preview)**
-  - Keep one preferred faction per character. Choose a faction to watch in Blizzard's Reputation panel, then run `/sqol repfocus` to remember that faction.
-  - Enable **Auto-watch reputation gains** and **Return to preferred reputation** under **Reputation & XP**. Both are optional and off by default. Auto-watch shows a new gain temporarily, then returns to your preferred faction after 10 seconds without new gains.
-  - Changing or clearing the watched faction cancels the pending return, including changes made by another addon. A return that expires while the Reputation or Collections panel is open is cancelled to avoid rearranging the UI.
-  - `/sqol repfocus status` shows the saved faction; `/sqol repfocus clear` forgets it. Disabling either option or resetting addon settings cancels pending work and keeps the saved preference.
-  - Panel checks use effective visibility, including hidden parents. Delayed watched-faction updates are acknowledged for up to two seconds before being discarded; a confirmed temporary faction starts the return timer.
-  - The preference and a pending return survive `/reload` and login. A saved return is resumed only if the watched faction still matches the temporary faction; it does not override a changed selection. Uses one return timer, with no frame polling. In-game Retail and WoW Forever validation is required before release.
+- 🧠 **Reputation Memory**
+  - Keep one preferred faction per character. Choose a faction to watch in Blizzard's Reputation panel, then run `/sqol repfocus` to remember it.
+  - Enable **Auto-watch reputation gains** and **Return to preferred reputation** under **Reputation & XP**. Both are off by default. Auto-watch shows a new gain for a moment, then goes back to your preferred faction after 10 seconds without new gains.
+  - Picking another faction yourself (or with another addon) cancels the return. A return that comes due while the Reputation or Collections panel is open is skipped, so the list does not jump under your mouse.
+  - `/sqol repfocus status` shows the saved faction; `/sqol repfocus clear` forgets it. The preference and a pending return survive `/reload` and login.
 - 🏷️ **Nameplate objective counts**
   - Shows quest objective progress (e.g., 0/10 or 45%) above relevant nameplates, with fallbacks for bonus/world quests.
 - 🧾 **PlayerFrame iLvl + Speed**
@@ -223,10 +227,10 @@ SMoRG's QoL follows your game language: English, German, French, Spanish (Spain 
 
 SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor its development on [GitHub Sponsors](https://github.com/sponsors/SMoRG75). Bug reports and ideas are just as welcome on [CurseForge](https://www.curseforge.com/wow/addons/smorgsqol) or [GitHub](https://github.com/SMoRG75/SMoRGsQoL/issues).
 
-## Updating to 1.2.1
+## Updating to 1.3.0
 
-Install the complete addon folder, including the `Media` folder (which now holds
-the icon and the damage text font) and all files listed in `SMoRGsQoL.toc`, then
+Install the complete addon folder, including the `Media` folder and all files
+listed in `SMoRGsQoL.toc` (1.3.0 adds `QuestRadar.lua` and `SessionRecap.lua`), then
 restart the game (a `/reload` does not load new files). Keep your saved variables; existing settings are preserved. The addon
 picks the language of your game client automatically.
 
