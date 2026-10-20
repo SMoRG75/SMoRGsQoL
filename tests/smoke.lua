@@ -188,6 +188,8 @@ end
 local function progressBar(text)
     local bar = { OverlayFrame = { Text = widget() } }
     function bar:SetBarText(value) self.OverlayFrame.Text:SetText(value) end
+    -- Blizzard with xpBarText off: text only while hovered or locked.
+    function bar:UpdateTextVisibility() self.OverlayFrame.Text:SetShown(self.textLocked == true) end
     bar:SetBarText(text)
     return bar
 end
@@ -210,8 +212,18 @@ assert(plainRep() == 'Avengers of Hyjal 0 / 12000 · 100.0% left · Honored')
 repBar:SetBarText('Avengers of Hyjal')
 assert(plainRep() == 'Avengers of Hyjal')
 repBar:SetBarText('Avengers of Hyjal 6000 / 12000')
+-- Forever has no xpBarText setting, so the text stays visible after hovering.
+assert(not xpBar.OverlayFrame.Text:IsShown(), 'Retail keeps Blizzard text visibility')
+sqol.IsForever = true
+sqol.RefreshStatusBarProgress()
+assert(xpBar.OverlayFrame.Text:IsShown() and repBar.OverlayFrame.Text:IsShown())
+xpBar.textLocked = true; xpBar:UpdateTextVisibility()
+xpBar.textLocked = false; xpBar:UpdateTextVisibility()
+assert(xpBar.OverlayFrame.Text:IsShown(), 'Forever text survives mouse leave')
 sqol.SetOption('ColorStatusBarProgress', false)
 assert(repBar.OverlayFrame.Text.text == 'Avengers of Hyjal 6000 / 12000')
+assert(not repBar.OverlayFrame.Text:IsShown(), 'Disabling the option restores Blizzard visibility')
+sqol.IsForever = false
 C_Reputation, StatusTrackingBarInfo, StatusTrackingBarManager = nil, nil, nil
 
 -- Quest tracker: only the current count is colored, also on finished lines.

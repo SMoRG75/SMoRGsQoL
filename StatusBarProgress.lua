@@ -73,12 +73,23 @@ local function Apply(bar, text)
         .. current .. "|cffffffff" .. separator .. maximum .. suffix .. "|r")
 end
 
+-- WoW Forever has no setting for xpBarText, so Blizzard only shows the text on
+-- hover or while the Character frame is open. Keep the colored numbers visible.
+local function UpdateTextVisibility(bar)
+    if SQOL.IsForever and SQOL.DB and SQOL.DB.ColorStatusBarProgress then
+        bar.OverlayFrame.Text:Show()
+    end
+end
+
 local function Attach(bar, isReputation)
     if not bar or hooked[bar] or not bar.SetBarText then return end
     if bar.IsForbidden and bar:IsForbidden() then return end
     if not bar.OverlayFrame or not bar.OverlayFrame.Text then return end
     hooked[bar] = { isReputation = isReputation }
     hooksecurefunc(bar, "SetBarText", Apply)
+    if bar.UpdateTextVisibility then
+        hooksecurefunc(bar, "UpdateTextVisibility", UpdateTextVisibility)
+    end
     Apply(bar, bar.OverlayFrame.Text:GetText())
 end
 
@@ -101,6 +112,7 @@ function SQOL.RefreshStatusBarProgress()
     end
     for bar, state in pairs(hooked) do
         if state.text then Apply(bar, state.text) end
+        if bar.UpdateTextVisibility then bar:UpdateTextVisibility() end
     end
 end
 

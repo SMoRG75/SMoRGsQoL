@@ -16,7 +16,7 @@
   - Lokal fejlrettelse efter Retail-rapport: skjulte underpaneler måles med `IsVisible()`, og forsinkede faction-skift får en afgrænset bekræftelse. Regressionstests dækker begge fejl; brugeren har bekræftet, at rettelsen virker i Retail.
   - Automatiske tests består.
   - [x] Afprøvet i Retail: brugeren har bekræftet, at tilbagevenden til den foretrukne faction virker efter rettelsen (19. oktober 2026).
-  - [ ] Valider Reputation Memory og rettelsen i WoW Forever før release.
+  - [x] Afprøvet i WoW Forever: brugeren har bekræftet, at tilbagevenden til den gemte faction virker (20. oktober 2026).
 
 - [x] **3. Smart Quest Radar — implementeret, afprøvet i Retail**
   - Quest-ikon og op til tre uafsluttede mål på én linje over relevante, synlige nameplates; yderligere mål vises som `+N`.
@@ -32,6 +32,12 @@
   - I Forever stod linjen under health/mana-barerne; i Retail står den over navnerækken, højrejusteret.
   - `SQOL.UpdatePlayerFrameIlvlAnchor()` i `PlayerStats.lua` placerer den nu over navneboksen i Forever, højrejusteret med barerne. Offsettet over health-baren følger Edit Modes Frame Size, og linjen flyttes, når PlayerFrame skifter skala.
   - [x] Afprøvet i WoW Forever ved 100 % og 200 %: brugeren har bekræftet, at det ser pænt ud (20. oktober 2026).
+
+- [x] **5. Vis altid XP- og reputation-teksten i Forever**
+  - Forever har ingen indstilling for CVar'en `xpBarText`, så Blizzard viste kun teksten ved hover, eller mens Character-vinduet var åbent.
+  - `StatusBarProgress.lua` hooker `UpdateTextVisibility` og holder teksten synlig i Forever, når **Color XP/reputation numbers** er slået til. Retail følger stadig Blizzards indstilling.
+  - Dækket af `tests/smoke.lua`.
+  - [x] Afprøvet i WoW Forever: brugeren har bekræftet, at teksten altid vises (20. oktober 2026).
 
 ## Tidligere opgaver — afsluttet
 
