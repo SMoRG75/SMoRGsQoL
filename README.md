@@ -1,6 +1,6 @@
 # SMoRG's QoL
 
-**Hear your quest progress:** *"Work, work."* when you finish an objective, *"Work complete."* when the quest is done. Plus toggleable QoL tweaks for Retail and WoW Forever.
+**Hear your quest progress:** *"Work, work."* when you finish an objective, *"Work complete."* when the quest is done. Plus toggleable QoL tweaks for Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
 
 🔊 The worker voice lines are where it all started. Prefer the Alliance? Switch to the Human worker (*"More work?"* / *"Job's done!"*). Every other feature is a small, **individually toggleable** tweak.
 
@@ -9,14 +9,21 @@ Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.3.0
+## What's new in 1.4.0
+
+- 🏰 **Classic Era, Anniversary and Mists of Pandaria Classic** — the addon now runs in the three Classic clients, quest sounds included. Features a client can't support are left out of its options instead of showing up and doing nothing; see [Classic clients](#classic-clients).
+- 🏹 **Hunter range in WoW Forever** — the distance no longer reads `< 5 yd` at any range. It shows `8-35 yd` at shooting range, and out of combat `> 35 yd` with the icon when the target is too far.
+
+See the [changelog](CHANGELOG.md) for the full release history.
+
+### 1.3.0
 
 - 📡 **Smart Quest Radar** — a quest icon and up to three unfinished objective counts above the nameplates of units you still need for your quests, e.g. `2/8 · 1/5`. `/sqol radar` (`qr`).
 - 📖 **Adventure Recap** — a session window with the quests and world quests you completed, reputation gained, playtime and your most active faction, kept per character. `/sqol recap`.
 - 🧠 **Reputation Memory** — save a preferred faction with `/sqol repfocus`; after auto-watch has shown a new gain, the reputation bar goes back to it after 10 seconds.
 - 🌍 **WoW Forever** — the item level/speed line now sits above your name like on Retail and follows the player frame's size, and the colored XP/reputation text stays visible instead of only on mouseover.
 
-All three new features are off by default; turn them on in the options window. After updating, **restart the game** (a `/reload` is not enough), because this release adds new files. See the [changelog](CHANGELOG.md) for the full release history.
+All three new features are off by default; turn them on in the options window. 1.3.0 added new files, so updating from an older version needs a game restart.
 
 ### 1.2.1
 
@@ -87,6 +94,7 @@ All three new features are off by default; turn them on in the options window. A
   - Enable **Smart Quest Radar** under **Quests**, or toggle it with `/sqol radar` (`qr`). Off by default. While enabled, it replaces the plain nameplate objective counts; turning it off brings them back. **Color quest progress** also colors the radar counts.
   - Reads the quest lines in the unit's tooltip and matches them to your own active quests. Finished objectives, your party's progress and anything the client keeps hidden are skipped, so a unit only gets marked when the addon is sure.
   - Only units with a visible nameplate can be marked; quest objects without a nameplate are not.
+  - Retail and WoW Forever only.
 - 📖 **Adventure Recap**
   - A movable window with this session's completed quests, world quests, reputation gained, playtime and your most active faction.
   - Enable **Adventure Recap** under **Quests**, then open it from the options window or with `/sqol recap`. Recording is off by default, and the window never pops up by itself.
@@ -95,27 +103,31 @@ All three new features are off by default; turn them on in the options window. A
   - A quest counts when you turn it in. If some reputation messages could not be read, the total is marked as incomplete and no top faction is shown.
 - 🧭 **Auto-track newly accepted quests**
   - Automatically tracks new quests in the Objective Tracker (with sanity checks to avoid unsupported edge cases).
+  - Retail and WoW Forever only.
 - 🎨 **Colorized progress messages**
   - Colorizes common progress patterns like `3/10` or `45%` and quest objective progress (red → yellow → green).
   - Also covers progress-bar quest objectives and scenario weighted-progress bars, which the default UI reports silently.
+  - The counts in the quest tracker are colored in Retail and WoW Forever; the Classic clients color the progress messages only.
 - 🎨 **XP/reputation number colors**
   - Reputation text also shows the percentage remaining in the current bar and your current standing after the total, e.g. `4995 / 6000 · 16.8% left · Friendly`.
   - Independently colors the current XP/reputation number on Blizzard's standard bars (red → yellow → green), with outlined text. Labels and maximum values stay white; bar colors are unchanged.
   - Toggle with `/sqol barcolor` (`bc`) or **Color XP/reputation numbers** in Settings. Disabled by default; independent of quest progress colors.
   - In WoW Forever the text stays visible all the time while this is on; there it would otherwise only show on mouseover or with the Character window open.
+  - In the Classic clients it is offered only where the client has the same XP/reputation bars as Retail.
 - ⏱️ **Ready check countdown**
   - Shows a live countdown of the seconds left on a ready check, turning red for the last 5 seconds.
   - Appears below the ready check popup, or near the top of the screen when you started the ready check yourself (Blizzard never shows the popup to the initiator).
 - ⏳ **LFG queue pop countdown**
   - Shows how many of your 40 seconds are left to accept a group finder pop, turning red for the last 5.
   - Sits below the queue pop's ready status frame, so it stays useful while you wait for the rest of the group to accept.
+  - Not in Classic Era or Anniversary, which have no group finder queue.
 - 👥 **Party member levels**
   - Shows each party member's level on both default and raid-style party frames while leaving raid and arena frames unchanged.
 - 🚪 **Login splash**
   - Optional status splash on login showing which features are ON/OFF.
 - ✅ **Hide completed achievements**
   - Makes the Achievement UI default to showing incomplete achievements only.
-  - Not available in WoW Forever, which replaces achievements with the Legacy system.
+  - Not available in WoW Forever, which replaces achievements with the Legacy system, or in Classic Era and Anniversary, which have no achievements.
 - 🤝 **Auto-watch reputation gains**
   - Switches your watched faction to the one that changed when you gain reputation.
 - 🧠 **Reputation Memory**
@@ -125,22 +137,40 @@ All three new features are off by default; turn them on in the options window. A
   - `/sqol repfocus status` shows the saved faction; `/sqol repfocus clear` forgets it. The preference and a pending return survive `/reload` and login.
 - 🏷️ **Nameplate objective counts**
   - Shows quest objective progress (e.g., 0/10 or 45%) above relevant nameplates, with fallbacks for bonus/world quests.
+  - Retail and WoW Forever only.
 - 🧾 **PlayerFrame iLvl + Speed**
   - Independently toggle item level and movement speed. Shows either value alone, or both on the same line: `iLvl: xx.x  Spd: yy%`.
 - 🎯 **Target in unit tooltips**
   - Adds a `Target:` line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red `You` when it is you. Updates live while you hover.
   - Toggle with `/sqol tooltiptarget` (`tt`). Disabled by default. Skipped when the client hides the unit's data (secret values in 12.x).
+  - In the Classic clients it is offered only where the client has Retail's tooltip system (Mists of Pandaria Classic does).
 - 🏹 **Range icon and distance**
   - Shows the distance to an attackable target on its nameplate (where Blizzard's soft target sword icon sits, just above the quest objective count when one is shown), or next to the target frame portrait when the target has no nameplate, as a range in yards (`< 5 yd`, `8-30 yd`, `> 40 yd`). The client has no exact distance for enemies, so the range comes from the abilities on your action bars that do and don't reach.
   - Adds a pulsing icon when none of your offensive abilities can reach the target. Uses the same range check that tints action buttons red, so it follows druid forms and bonus bars, and needs no class-specific spell lists.
   - While enabled, Blizzard's soft target sword icon over enemy nameplates (`SoftTargetIconEnemy`) is turned off so the two aren't confused; it is turned back on when you disable the feature.
   - Toggle with `/sqol range` (`rng`). Disabled by default.
+  - Retail and WoW Forever only. In WoW Forever, a hunter's distance to a far-away target can read `< 5 yd` in combat, because the client reports Raptor Strike in range at any distance and blocks the distance check that rules it out.
 - 🖋️ **Custom damage text font**
   - Replaces floating combat text damage numbers with a custom font.
 - 🖱️ **Cursor shake highlight**
   - Highlights the cursor when you shake the mouse.
 - 🧪 **Debug tracking (optional)**
   - Enables verbose tracking output for troubleshooting.
+
+## Classic clients
+
+SMoRG's QoL runs in Classic Era, Anniversary and Mists of Pandaria Classic as well as Retail and WoW Forever, with the quest sounds working in all of them. Features a Classic client can't support are left out of the options window, the Settings page and `/sqol`, and are switched off if they were on:
+
+| Feature | Classic Era | Anniversary | Mists of Pandaria Classic |
+| --- | --- | --- | --- |
+| Auto-track, Smart Quest Radar, nameplate objective counts | – | – | – |
+| Range icon and distance | – | – | – |
+| Colored counts in the quest tracker | – | – | – |
+| Hide completed achievements | – | – | ✓ |
+| LFG queue pop countdown | – | – | ✓ |
+| Target in unit tooltips, XP/reputation number colors | where the client supports it | where the client supports it | where the client supports it |
+
+Everything else, from the quest sounds to the item level/speed line, reputation features, countdowns and party levels, works in every client.
 
 ## Configuration
 
@@ -227,12 +257,15 @@ SMoRG's QoL follows your game language: English, German, French, Spanish (Spain 
 
 SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor its development on [GitHub Sponsors](https://github.com/sponsors/SMoRG75). Bug reports and ideas are just as welcome on [CurseForge](https://www.curseforge.com/wow/addons/smorgsqol) or [GitHub](https://github.com/SMoRG75/SMoRGsQoL/issues).
 
-## Updating to 1.3.0
+## Updating to 1.4.0
 
-Install the complete addon folder, including the `Media` folder and all files
-listed in `SMoRGsQoL.toc` (1.3.0 adds `QuestRadar.lua` and `SessionRecap.lua`), then
-restart the game (a `/reload` does not load new files). Keep your saved variables; existing settings are preserved. The addon
-picks the language of your game client automatically.
+Install the complete addon folder, including the `Media` and `Sounds` folders and all
+files listed in `SMoRGsQoL.toc`. 1.4.0 adds no new files, so coming from 1.3.0 a
+`/reload` is enough; from an older version, restart the game (a `/reload` does not
+load new files). In a Classic client, install it into that client's own
+`Interface\AddOns` folder, e.g. `_classic_era_`, `_anniversary_` or `_classic_`. Keep
+your saved variables; existing settings are preserved. The addon picks the language
+of your game client automatically.
 
 ## Code structure
 
@@ -243,7 +276,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | --- | --- |
 | `Locales/Locales.lua` | The `SQOL.L` translation table (English text is the key and the fallback) |
 | `Locales/<locale>.lua` | Translations for one client language (`esES.lua` also serves esMX) |
-| `Core.lua` | Defaults, sound profiles, shared utilities and namespace setup |
+| `Core.lua` | Client detection (Retail, WoW Forever, Classic), defaults, sound profiles, shared utilities and namespace setup |
 | `VisualTweaks.lua` | Damage font, cursor highlight, achievement filter and tooltip target line |
 | `QuestRadar.lua` | Optional quest radar, safe tooltip parsing and active-quest relevance |
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |

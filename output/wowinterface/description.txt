@@ -2,7 +2,7 @@
 
 [size=5][b]SMoRG's QoL[/b][/size]
 
-[b]Hear your quest progress:[/b] [i]"Work, work."[/i] when you finish an objective, [i]"Work complete."[/i] when the quest is done. Plus toggleable QoL tweaks for Retail and WoW Forever.
+[b]Hear your quest progress:[/b] [i]"Work, work."[/i] when you finish an objective, [i]"Work complete."[/i] when the quest is done. Plus toggleable QoL tweaks for Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
 
 The worker voice lines are where it all started. Prefer the Alliance? Switch to the Human worker ([i]"More work?"[/i] / [i]"Job's done!"[/i]). Every other feature is a small, [b]individually toggleable[/b] tweak.
 
@@ -22,17 +22,17 @@ Everything can be turned on and off from the options window, the in-game Setting
 
 [b]Quests[/b]
 [list]
-[*][b]Auto-track new quests[/b] - newly accepted quests are added to the Objective Tracker.
+[*][b]Auto-track new quests[/b] - newly accepted quests are added to the Objective Tracker (Retail and WoW Forever).
 [*][b]Colored quest progress[/b] - progress like 3/10 or 45% is colored red -> yellow -> green in chat messages and in the quest tracker. Also covers progress-bar objectives and scenario progress bars that the default UI reports silently.
-[*][b]Nameplate objective counts[/b] - shows quest progress (e.g. 0/10 or 45%) above the nameplates of quest mobs.
-[*][b]Smart Quest Radar[/b] - a quest icon and up to three unfinished objective counts (e.g. 2/8 - 1/5) above the nameplates of units you still need for your quests. It only marks a unit when its tooltip matches your own active quests.
+[*][b]Nameplate objective counts[/b] - shows quest progress (e.g. 0/10 or 45%) above the nameplates of quest mobs (Retail and WoW Forever).
+[*][b]Smart Quest Radar[/b] - a quest icon and up to three unfinished objective counts (e.g. 2/8 - 1/5) above the nameplates of units you still need for your quests. It only marks a unit when its tooltip matches your own active quests (Retail and WoW Forever).
 [*][b]Adventure Recap[/b] - a movable window with this session's completed quests, world quests, reputation gained, playtime and your most active faction, kept per character. The previous session stays available too.
 [/list]
 
 [b]Character[/b]
 [list]
 [*][b]Item level and movement speed[/b] on your player frame, each toggled on its own.
-[*][b]Range icon and distance[/b] - the distance to your target in yards (e.g. 8-30 yd) on its nameplate, plus a pulsing icon when none of the offensive abilities on your bars can reach it. Works for every class with no spell lists to set up.
+[*][b]Range icon and distance[/b] - the distance to your target in yards (e.g. 8-30 yd) on its nameplate, plus a pulsing icon when none of the offensive abilities on your bars can reach it. Works for every class with no spell lists to set up (Retail and WoW Forever).
 [*][b]Target in unit tooltips[/b] - a "Target:" line showing who the unit is targeting, class- or reaction-colored, with a red "You" when it is you.
 [/list]
 
@@ -47,17 +47,22 @@ Everything can be turned on and off from the options window, the in-game Setting
 [b]Group[/b]
 [list]
 [*][b]Ready check countdown[/b] - the seconds left on a ready check, turning red for the last 5.
-[*][b]Queue pop countdown[/b] - how many of your 40 seconds are left to accept a group finder pop.
+[*][b]Queue pop countdown[/b] - how many of your 40 seconds are left to accept a group finder pop (not in Classic Era or Anniversary).
 [*][b]Party member levels[/b] on both default and raid-style party frames.
 [/list]
 
 [b]Interface[/b]
 [list]
-[*][b]Hide completed achievements[/b] - the Achievement UI opens on incomplete achievements (Retail only).
+[*][b]Hide completed achievements[/b] - the Achievement UI opens on incomplete achievements (Retail and Mists of Pandaria Classic).
 [*][b]Custom damage text font[/b] for floating combat text.
 [*][b]Cursor shake highlight[/b] - find your cursor by shaking the mouse.
 [*][b]Login splash[/b] showing which features are on.
 [/list]
+
+
+[size=4][b]Classic clients[/b][/size]
+
+SMoRG's QoL also runs in Classic Era, Anniversary and Mists of Pandaria Classic, with the quest sounds working in all of them. Features a Classic client can't support are left out of its options and switched off: auto-track, Smart Quest Radar, nameplate objective counts and the range icon in all three, and the achievement filter and queue pop countdown in Classic Era and Anniversary. The tooltip target line and XP/reputation colors are offered where the client supports them.
 
 
 [size=4][b]Options[/b][/size]

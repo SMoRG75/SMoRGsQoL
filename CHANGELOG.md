@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0] - Unreleased
+
+### Added
+
+- **Classic Era, Anniversary and Mists of Pandaria Classic** — the addon now runs in the three Classic clients. The objective and quest completion sounds, colored progress messages, Adventure Recap, the item level/speed line, the reputation features, the ready check countdown, party levels, the damage text font and the cursor highlight all work there, and the item level/speed line sits above the name box like in WoW Forever.
+- Features a Classic client can't support are left out of the options window, the Settings page and `/sqol`, and are switched off if they were on: auto-track, Smart Quest Radar, nameplate objective counts and the range icon in all three, and **Hide completed achievements** and the queue pop countdown in Classic Era and Anniversary. The tooltip target line and the XP/reputation colors are offered where the client supports them.
+
+### Fixed
+
+- **WoW Forever:** the range distance for hunters read `< 5 yd` at any range. It now shows the real range at shooting distance, e.g. `8-35 yd`, and out of combat `> 35 yd` with the icon when the target is too far. Far away in combat it can still read `< 5 yd`, because the client reports Raptor Strike in range at any distance and blocks the check that rules it out.
+- The range distance also uses the minimum range of the abilities that reach, so a target you can only hit with an 8-yard minimum range ability is shown as at least 8 yards away.
+
 ## [1.3.0] - 2026-10-20
 
 ### Added

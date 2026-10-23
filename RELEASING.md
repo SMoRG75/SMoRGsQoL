@@ -45,7 +45,7 @@ Nothing more to do: the project ID is already in the TOC
    `wowinterface.com/downloads/info12345-SMoRGsQoL.html`. Put it in the TOC:
    `## X-WoWI-ID: 12345`.
 
-WoWInterface has no WoW Forever category, so it only gets the Retail version.
+WoWInterface has no WoW Forever category, so Forever is not listed there.
 
 ## Cutting a release
 
@@ -63,9 +63,11 @@ WoWInterface has no WoW Forever category, so it only gets the Retail version.
 Tags containing `alpha` or `beta` (e.g. `v1.2.0-beta1`) are uploaded as alpha or
 beta files instead of releases.
 
-The game versions come from `## Interface: 120105, 16001`: `120105` is Retail
-12.1.5 and `16001` is WoW Forever. The whole `CHANGELOG.md` is uploaded as the
-release notes.
+The game versions come from `## Interface: 120105, 16001, 11509, 20506, 50504`:
+`120105` is Retail 12.1.5, `16001` is WoW Forever, `11509` is Classic Era 1.15.9,
+`20506` is Anniversary (TBC) 2.5.6 and `50504` is Mists of Pandaria Classic 5.5.4.
+Check each with `/dump select(4, GetBuildInfo())` in that client before a release.
+The whole `CHANGELOG.md` is uploaded as the release notes.
 
 ## Testing the package locally
 
