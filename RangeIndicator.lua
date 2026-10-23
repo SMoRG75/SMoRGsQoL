@@ -106,13 +106,33 @@ local function SQOL_Range_IsActionInRange(slot)
     return inRange and true or false
 end
 
+local function SQOL_Range_UsableRange(value)
+    return type(value) == "number" and SQOL.CanUseValue(value) and value or nil
+end
+
 -- Max range in yards, with melee abilities (max range 0) counted as melee range.
 local function SQOL_Range_GetMaxRange(spellID)
+    local maxRange
     local getSpellInfo = C_Spell and C_Spell.GetSpellInfo
-    if type(getSpellInfo) ~= "function" then return nil end
-    local ok, info = pcall(getSpellInfo, spellID)
-    local maxRange = ok and type(info) == "table" and info.maxRange
-    if type(maxRange) ~= "number" or not SQOL.CanUseValue(maxRange) then
+    if type(getSpellInfo) == "function" then
+        local ok, info = pcall(getSpellInfo, spellID)
+        maxRange = ok and type(info) == "table" and SQOL_Range_UsableRange(info.maxRange)
+    end
+
+    -- Classic clients' C_Spell.GetSpellInfo reports 0 for ranged spells too
+    -- (Fireball: 0, while the legacy GetSpellInfo says 35), so ask that as well.
+    if not maxRange or maxRange <= 0 then
+        local legacy = rawget(_G, "GetSpellInfo")
+        if type(legacy) == "function" then
+            local ok, _, _, _, _, _, legacyMax = pcall(legacy, spellID)
+            legacyMax = ok and SQOL_Range_UsableRange(legacyMax)
+            if legacyMax then
+                maxRange = legacyMax
+            end
+        end
+    end
+
+    if not maxRange then
         return nil
     end
     return math.max(maxRange, MELEE_RANGE)

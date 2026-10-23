@@ -285,6 +285,11 @@ party sections, text-only clients, restricted data, API failures, tooltip refres
 and nameplate reuse. The smoke test also checks TOC loading and radar commands.
 These mocked tests do not replace testing inside both clients.
 
+Run `lua tests/classic.lua` for a mocked Classic Era client: Retail-only events
+that would fail to register, options hidden where Classic lacks the API, and quest
+sounds from the `GetQuestLogTitle` quest log fallback. It does not replace testing
+inside the Classic Era client.
+
 All visible text goes through `L["English text"]`. Run `lua tests/locales.lua` after
 changing any of it: it fails when a translation's English key is no longer used in
 the code or its `%s`/`%d` or color codes don't match, and lists missing translations

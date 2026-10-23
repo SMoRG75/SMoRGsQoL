@@ -10,10 +10,35 @@ SQOL = SQOL or {}        -- addon namespace table (shared across files)
 local L = SQOL.L
 SQOL.ADDON_NAME = ADDON_NAME
 
--- WoW Forever runs the Mainline client (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
--- but reports a 1.x interface version (16001), so detect it by build number.
+-- WoW Forever runs the Mainline client but reports a 1.x interface version
+-- (16001) and its own project ID (18, neither Mainline nor any Classic), so
+-- detect it by build number once the Classic projects are ruled out.
 local interfaceVersion = type(GetBuildInfo) == "function" and select(4, GetBuildInfo())
-SQOL.IsForever = type(interfaceVersion) == "number" and interfaceVersion < 100000
+local projectID = rawget(_G, "WOW_PROJECT_ID")
+-- Blizzard's Classic project IDs, for clients that don't define every constant.
+local SQOL_CLASSIC_PROJECTS = {
+    WOW_PROJECT_CLASSIC = 2,                 -- Classic Era
+    WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 5, -- TBC (Anniversary)
+    WOW_PROJECT_WRATH_CLASSIC = 11,
+    WOW_PROJECT_CATACLYSM_CLASSIC = 14,
+    WOW_PROJECT_MISTS_CLASSIC = 19,
+}
+local function SQOL_IsProject(name)
+    local id = rawget(_G, name) or SQOL_CLASSIC_PROJECTS[name]
+    return projectID ~= nil and projectID == id
+end
+SQOL.IsClassic = false
+for name in pairs(SQOL_CLASSIC_PROJECTS) do
+    if SQOL_IsProject(name) then
+        SQOL.IsClassic = true
+    end
+end
+SQOL.IsClassicEra = SQOL_IsProject("WOW_PROJECT_CLASSIC")
+SQOL.IsClassicTBC = SQOL_IsProject("WOW_PROJECT_BURNING_CRUSADE_CLASSIC")
+SQOL.IsForever = not SQOL.IsClassic
+    and type(interfaceVersion) == "number" and interfaceVersion < 100000
+-- The group finder queue pop arrived with Wrath.
+SQOL.HasLFGQueue = not (SQOL.IsClassicEra or SQOL.IsClassicTBC)
 
 SQOL.QuestSoundProfiles = {
     Horde = {

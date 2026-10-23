@@ -275,8 +275,9 @@ end
 ------------------------------------------------------------
 -- WoW Forever replaces achievements with the Legacy system, so the
 -- achievement filter only exists on clients that ship Blizzard_AchievementUI.
+-- Classic Era and TBC ship it too, but achievements arrived with Wrath.
 function SQOL.IsAchievementFilterSupported()
-    if SQOL.IsForever then return false end
+    if SQOL.IsForever or SQOL.IsClassicEra or SQOL.IsClassicTBC then return false end
     if not C_AddOns then return false end
     if type(C_AddOns.DoesAddOnExist) == "function" then
         return C_AddOns.DoesAddOnExist("Blizzard_AchievementUI") and true or false

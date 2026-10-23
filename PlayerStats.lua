@@ -210,16 +210,19 @@ function SQOL.UpdatePlayerFrameIlvlAnchor()
     local levelText = rawget(_G, "PlayerLevelText")
         or rawget(playerFrame, "PlayerLevelText")
         or (playerFrame and playerFrame.PlayerLevelText)
-    local foreverHealthBar = SQOL.IsForever and SQOL_GetPlayerHealthBarFrame(playerFrame)
+    -- WoW Forever and the Classic clients keep the classic player frame, where
+    -- PlayerLevelText sits in the portrait badge instead of above the name.
+    local classicFrame = SQOL.IsForever or SQOL.IsClassic
+    local classicHealthBar = classicFrame and SQOL_GetPlayerHealthBarFrame(playerFrame)
 
-    if foreverHealthBar and foreverHealthBar.GetCenter then
-        -- WoW Forever: above the name box like in Retail, right-aligned with the
-        -- bars. The box sits right on top of the health bar, so clear its height.
-        -- The holder lives on UIParent, so convert the offset to follow Edit Mode's
-        -- frame size.
-        local frameScale = foreverHealthBar:GetEffectiveScale() / SQOL.iLvlHolder:GetEffectiveScale()
-        SQOL.iLvlHolder:SetPoint("BOTTOMRIGHT", foreverHealthBar, "TOPRIGHT", 0, 16 * frameScale)
-    elseif not SQOL.IsForever and levelText and levelText.GetCenter then
+    if classicHealthBar and classicHealthBar.GetCenter then
+        -- Classic player frame: above the name box like in Retail, right-aligned
+        -- with the bars. The box sits right on top of the health bar, so clear its
+        -- height. The holder lives on UIParent, so convert the offset to follow
+        -- Edit Mode's frame size.
+        local frameScale = classicHealthBar:GetEffectiveScale() / SQOL.iLvlHolder:GetEffectiveScale()
+        SQOL.iLvlHolder:SetPoint("BOTTOMRIGHT", classicHealthBar, "TOPRIGHT", 0, 16 * frameScale)
+    elseif not classicFrame and levelText and levelText.GetCenter then
         -- Retail: just above the name/level row, right-aligned with the level.
         -- Beside the level it collides with long names, and under the bars it
         -- collides with druid mana and class resources (soul shards, runes...).
@@ -286,8 +289,8 @@ local function SQOL_EnsurePlayerFrameIlvlUI()
         playerFrame:HookScript("OnHide", function()
             if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         end)
-        if SQOL.IsForever and playerFrame.SetScale then
-            -- Edit Mode's Frame Size changes the scale; the Forever offset follows it.
+        if (SQOL.IsForever or SQOL.IsClassic) and playerFrame.SetScale then
+            -- Edit Mode's Frame Size changes the scale; the classic offset follows it.
             hooksecurefunc(playerFrame, "SetScale", SQOL.UpdatePlayerFrameIlvlAnchor)
         end
     end

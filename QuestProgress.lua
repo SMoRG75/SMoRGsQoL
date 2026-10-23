@@ -166,20 +166,63 @@ function SQOL.GetQuestObjectivesCached(questID)
     return objectives
 end
 
+local function SQOL_HasModernQuestLog()
+    return C_QuestLog and type(C_QuestLog.GetNumQuestLogEntries) == "function"
+        and type(C_QuestLog.GetInfo) == "function"
+end
+
+-- Classic Era has no C_QuestLog.GetInfo; build the same fields from
+-- GetQuestLogTitle (title, level, suggestedGroup, isHeader, isCollapsed,
+-- isComplete, frequency, questID).
+local function SQOL_GetLegacyQuestLogInfo(index)
+    local getTitle = rawget(_G, "GetQuestLogTitle")
+    if type(getTitle) ~= "function" then return nil end
+
+    local ok, title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID =
+        pcall(getTitle, index)
+    if not ok or not title then return nil end
+
+    return {
+        title = title,
+        level = level,
+        suggestedGroup = suggestedGroup,
+        isHeader = isHeader and true or false,
+        isCollapsed = isCollapsed and true or false,
+        isComplete = isComplete,
+        frequency = frequency,
+        questID = (type(questID) == "number" and questID > 0) and questID or nil,
+        questLogIndex = index,
+    }
+end
+
+-- Quest log entry at a log index, in C_QuestLog.GetInfo's shape.
+function SQOL.GetQuestLogInfo(index)
+    if type(index) ~= "number" then return nil end
+    if SQOL_HasModernQuestLog() then
+        local ok, info = pcall(C_QuestLog.GetInfo, index)
+        return ok and info or nil
+    end
+    return SQOL_GetLegacyQuestLogInfo(index)
+end
+
+local function SQOL_GetNumQuestLogEntries()
+    local query = SQOL_HasModernQuestLog() and C_QuestLog.GetNumQuestLogEntries
+        or rawget(_G, "GetNumQuestLogEntries")
+    if type(query) ~= "function" then return 0 end
+    local ok, numEntries = pcall(query)
+    return (ok and type(numEntries) == "number") and numEntries or 0
+end
+
 function SQOL.GetQuestLogSnapshot()
     if SQOL._questLogSnapshot then
         return SQOL._questLogSnapshot
     end
 
     local snapshot = {}
-    if C_QuestLog and type(C_QuestLog.GetNumQuestLogEntries) == "function"
-        and type(C_QuestLog.GetInfo) == "function" then
-        local numEntries = C_QuestLog.GetNumQuestLogEntries()
-        for i = 1, numEntries do
-            local info = C_QuestLog.GetInfo(i)
-            if info then
-                snapshot[#snapshot + 1] = info
-            end
+    for i = 1, SQOL_GetNumQuestLogEntries() do
+        local info = SQOL.GetQuestLogInfo(i)
+        if info then
+            snapshot[#snapshot + 1] = info
         end
     end
     SQOL._questLogSnapshot = snapshot
@@ -636,12 +679,9 @@ local function SQOL_CollectProgressBarQuestIDs()
         end
     end
 
-    if C_QuestLog and type(C_QuestLog.GetNumQuestLogEntries) == "function"
-        and type(C_QuestLog.GetInfo) == "function" then
-        for _, info in ipairs(SQOL.GetQuestLogSnapshot()) do
-            if info and not info.isHeader then
-                addQuestID(info.questID)
-            end
+    for _, info in ipairs(SQOL.GetQuestLogSnapshot()) do
+        if info and not info.isHeader then
+            addQuestID(info.questID)
         end
     end
 
@@ -666,15 +706,14 @@ local function SQOL_CollectProgressBarQuestIDs()
                 end
             end
         end
-    elseif type(GetNumQuestWatches) == "function" and type(GetQuestIndexForWatch) == "function"
-        and C_QuestLog and type(C_QuestLog.GetInfo) == "function" then
+    elseif type(GetNumQuestWatches) == "function" and type(GetQuestIndexForWatch) == "function" then
         local ok, numWatches = pcall(GetNumQuestWatches)
         if ok and type(numWatches) == "number" then
             for i = 1, numWatches do
                 local indexOk, questLogIndex = pcall(GetQuestIndexForWatch, i)
                 if indexOk and type(questLogIndex) == "number" then
-                    local infoOk, info = pcall(C_QuestLog.GetInfo, questLogIndex)
-                    if infoOk and info then
+                    local info = SQOL.GetQuestLogInfo(questLogIndex)
+                    if info then
                         addQuestID(info.questID)
                     end
                 end

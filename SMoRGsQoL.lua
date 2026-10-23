@@ -508,6 +508,21 @@ function SQOL.ToggleOption(key)
     SQOL.SetOption(key, not SQOL.DB[key])
 end
 
+-- Options this client can't offer stay off, even if they were turned on
+-- before they were hidden here. SetOption also undoes their side effects
+-- (the range icon restores Blizzard's soft target icon).
+function SQOL.DisableUnavailableOptions()
+    if not SQOL.DB or not SQOL.OptionSections then return end
+    for _, section in ipairs(SQOL.OptionSections) do
+        for _, option in ipairs(section.options) do
+            if option.isAvailable and not option.isAvailable()
+                and option.kind ~= "dropdown" and SQOL.DB[option.key] then
+                SQOL.SetOption(option.key, false)
+            end
+        end
+    end
+end
+
 ------------------------------------------------------------
 -- Slash commands
 ------------------------------------------------------------
@@ -653,13 +668,15 @@ SQOL_RegisterOptionalEvent("QUEST_CRITERIA_UPDATE")
 SQOL_RegisterOptionalEvent("SCENARIO_CRITERIA_UPDATE")
 f:RegisterEvent("UPDATE_FACTION")
 f:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
-f:RegisterEvent("QUEST_TURNED_IN")
-f:RegisterEvent("QUEST_REMOVED")
+-- Events missing from Classic clients are optional: registering an unknown
+-- event errors and would stop the rest of this file from loading.
+SQOL_RegisterOptionalEvent("QUEST_TURNED_IN")
+SQOL_RegisterOptionalEvent("QUEST_REMOVED")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-f:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
+SQOL_RegisterOptionalEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
 f:RegisterEvent("UNIT_INVENTORY_CHANGED")
-f:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
+SQOL_RegisterOptionalEvent("EDIT_MODE_LAYOUTS_UPDATED")
 f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 f:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 SQOL_RegisterOptionalEvent("PLAYER_REGEN_ENABLED")
@@ -677,6 +694,7 @@ SQOL_RegisterOptionalEvent("LFG_PROPOSAL_SUCCEEDED")
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         SQOL.Init()
+        SQOL.DisableUnavailableOptions()
         SQOL.RepMemory_Init()
         if SQOL.DB.ShowSplash then
             SQOL_Splash()
@@ -851,7 +869,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         local questIndex, questID
         if a2 then questIndex, questID = a1, a2 else questID = a1 end
         if (not questID or questID == 0) and questIndex then
-            local info = C_QuestLog.GetInfo(questIndex)
+            local info = SQOL.GetQuestLogInfo(questIndex)
             if info and info.questID then
                 questID = info.questID
                 SQOL.dprint("Recovered questID", questID, "from questIndex", questIndex)

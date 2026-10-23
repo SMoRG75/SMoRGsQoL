@@ -14,6 +14,40 @@ local L = SQOL.L
 ------------------------------------------------------------
 -- kind defaults to "checkbox"; "dropdown" entries list their values.
 -- An entry with isAvailable is left out when it returns false.
+
+-- Auto-track needs the questID-based watch API (Retail and WoW Forever).
+local function SQOL_HasQuestWatchAPI()
+    return C_QuestLog and type(C_QuestLog.AddQuestWatch) == "function"
+        and type(C_QuestLog.GetQuestWatchType) == "function"
+        and type(C_QuestLog.IsQuestTask) == "function"
+        and type(C_QuestLog.IsWorldQuest) == "function"
+end
+
+-- Classic unit tooltips and nameplates carry no quest objective data.
+local function SQOL_HasNameplateQuestData()
+    return not SQOL.IsClassic
+end
+
+-- Classic Era and TBC have no group finder queue pop.
+local function SQOL_HasLFGProposal()
+    return SQOL.HasLFGQueue
+end
+
+local function SQOL_HasStatusTrackingBars()
+    return rawget(_G, "StatusTrackingBarManager") ~= nil
+        and rawget(_G, "StatusTrackingBarInfo") ~= nil
+end
+
+local function SQOL_HasTooltipDataProcessor()
+    return rawget(_G, "TooltipDataProcessor") ~= nil
+end
+
+-- Classic hunters' minimum range (the 5-8 yd dead zone) makes the distance
+-- unreliable there, so the range icon is Retail and WoW Forever only.
+local function SQOL_HasReliableRange()
+    return not SQOL.IsClassic
+end
+
 SQOL.OptionSections = {
     {
         title = L["Quests"],
@@ -21,13 +55,16 @@ SQOL.OptionSections = {
             { key = "AdventureRecap", label = L["Adventure Recap"],
               tooltip = L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] },
             { key = "AutoTrack", label = L["Auto-track newly accepted quests"],
-              tooltip = L["Automatically track newly accepted quests in the objective tracker."] },
+              tooltip = L["Automatically track newly accepted quests in the objective tracker."],
+              isAvailable = SQOL_HasQuestWatchAPI },
             { key = "ColorProgress", label = L["Color quest progress"],
               tooltip = L["Colorize quest and scenario progress messages, the current count of quest objectives in the objective tracker, and quest objective counts on nameplates (red → yellow → green)."] },
             { key = "SmartQuestRadar", label = L["Smart Quest Radar"],
-              tooltip = L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] },
+              tooltip = L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."],
+              isAvailable = SQOL_HasNameplateQuestData },
             { key = "ShowNameplateObjectives", label = L["Show objective counts on nameplates"],
-              tooltip = L["Show quest objective counts (e.g., 0/10) above relevant nameplates."] },
+              tooltip = L["Show quest objective counts (e.g., 0/10) above relevant nameplates."],
+              isAvailable = SQOL_HasNameplateQuestData },
             { key = "QuestCompleteSound", label = L["Quest completion sound"],
               tooltip = L["Play a sound when a quest is ready to turn in (or done for bonus/world quests)."] },
             { key = "QuestObjectiveSound", label = L["Quest objective completion sound"],
@@ -53,7 +90,8 @@ SQOL.OptionSections = {
         title = L["Reputation & XP"],
         options = {
             { key = "ColorStatusBarProgress", label = L["Color XP/reputation numbers"],
-              tooltip = L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] },
+              tooltip = L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."],
+              isAvailable = SQOL_HasStatusTrackingBars },
             { key = "RepWatch", label = L["Auto-watch reputation gains"],
               tooltip = L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] },
             { key = "RepMemory", label = L["Return to preferred reputation"],
@@ -68,7 +106,8 @@ SQOL.OptionSections = {
             { key = "ShowReadyCheckTimer", label = L["Ready check countdown timer"],
               tooltip = L["Show a live countdown on the ready check popup for how long until it expires."] },
             { key = "ShowLFGProposalTimer", label = L["LFG queue pop countdown timer"],
-              tooltip = L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."] },
+              tooltip = L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."],
+              isAvailable = SQOL_HasLFGProposal },
             { key = "ShowPartyLevel", label = L["Show party member levels"],
               tooltip = L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] },
         },
@@ -77,9 +116,11 @@ SQOL.OptionSections = {
         title = L["Interface"],
         options = {
             { key = "ShowTooltipTarget", label = L["Show target in unit tooltips"],
-              tooltip = L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover."] },
+              tooltip = L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover."],
+              isAvailable = SQOL_HasTooltipDataProcessor },
             { key = "ShowRangeIndicator", label = L["Range icon and distance for your target"],
-              tooltip = L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] },
+              tooltip = L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."],
+              isAvailable = SQOL_HasReliableRange },
             { key = "DamageTextFont", label = L["Custom damage text font"],
               tooltip = L["Use the TrashHand damage text font for floating combat text. Restart the game client after changing this; the font is only loaded when the game starts."] },
             { key = "CursorShakeHighlight", label = L["Highlight cursor on shake"],
