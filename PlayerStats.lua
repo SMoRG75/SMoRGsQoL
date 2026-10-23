@@ -220,8 +220,10 @@ function SQOL.UpdatePlayerFrameIlvlAnchor()
         -- with the bars. The box sits right on top of the health bar, so clear its
         -- height. The holder lives on UIParent, so convert the offset to follow
         -- Edit Mode's frame size.
+        -- The Classic clients' frame art reaches higher above the name than Forever's.
         local frameScale = classicHealthBar:GetEffectiveScale() / SQOL.iLvlHolder:GetEffectiveScale()
-        SQOL.iLvlHolder:SetPoint("BOTTOMRIGHT", classicHealthBar, "TOPRIGHT", 0, 16 * frameScale)
+        local nameBoxHeight = SQOL.IsClassic and 20 or 16
+        SQOL.iLvlHolder:SetPoint("BOTTOMRIGHT", classicHealthBar, "TOPRIGHT", 0, nameBoxHeight * frameScale)
     elseif not classicFrame and levelText and levelText.GetCenter then
         -- Retail: just above the name/level row, right-aligned with the level.
         -- Beside the level it collides with long names, and under the bars it
