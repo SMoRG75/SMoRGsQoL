@@ -214,6 +214,48 @@ state = sqol.RangeIndicator_GetState()
 assert(state.outOfRange and sqol.RangeIndicator_FormatDistance(state) == '> 35 yd',
     'Out of Fireball range: ' .. tostring(sqol.RangeIndicator_FormatDistance(state)))
 
+-- WoW Forever hunter (seen in-game): the action check says Serpent Sting is out
+-- and Raptor Strike in range at any distance; C_Spell.IsSpellInRange is right
+-- for Serpent Sting (8-35 yd) but also reports Raptor Strike in range at 20 yd.
+sqol.IsForever = true
+spells = { [1] = 1978, [2] = 2973 }
+inRange = { [1] = false, [2] = true }
+local spellInRange = {}
+local forever = { [1978] = { minRange = 8, maxRange = 35 }, [2973] = { minRange = 0, maxRange = 0 } }
+GetSpellInfo = nil
+C_Spell = {
+    IsSpellHarmful = function() return true end,
+    GetSpellInfo = function(id) return forever[id] end,
+    IsSpellInRange = function(id) return spellInRange[id] end,
+}
+spellInRange[1978], spellInRange[2973] = true, true
+state = sqol.RangeIndicator_GetState()
+assert(not state.outOfRange and sqol.RangeIndicator_FormatDistance(state) == '8-35 yd',
+    'Forever hunter at 20 yd: ' .. tostring(sqol.RangeIndicator_FormatDistance(state)))
+spellInRange[1978] = false
+state = sqol.RangeIndicator_GetState()
+assert(not state.outOfRange and sqol.RangeIndicator_FormatDistance(state) == '< 5 yd',
+    'Forever hunter in melee: ' .. tostring(sqol.RangeIndicator_FormatDistance(state)))
+-- Far away Raptor Strike still says in range; out of combat CheckInteractDistance
+-- says the target is farther than ~10 yd (seen in-game: far false, melee true).
+local interact
+function CheckInteractDistance() return interact() end
+interact = function() return false end
+state = sqol.RangeIndicator_GetState()
+assert(state.outOfRange and sqol.RangeIndicator_FormatDistance(state) == '> 35 yd',
+    'Forever hunter far away: ' .. tostring(sqol.RangeIndicator_FormatDistance(state)))
+interact = function() return true end
+state = sqol.RangeIndicator_GetState()
+assert(not state.outOfRange and sqol.RangeIndicator_FormatDistance(state) == '< 5 yd',
+    'Forever hunter in melee with interact check: ' .. tostring(sqol.RangeIndicator_FormatDistance(state)))
+-- Restricted in combat: nothing is known, so the melee reach is kept.
+interact = function() error('restricted') end
+state = sqol.RangeIndicator_GetState()
+assert(not state.outOfRange and sqol.RangeIndicator_FormatDistance(state) == '< 5 yd',
+    'Forever hunter in combat: ' .. tostring(sqol.RangeIndicator_FormatDistance(state)))
+CheckInteractDistance = nil
+sqol.IsForever = false
+
 -- WoW Forever reports interface 16001 on its own project (18), not a Classic one.
 local function detect(project, interface)
     WOW_PROJECT_ID = project

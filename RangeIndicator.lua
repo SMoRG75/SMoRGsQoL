@@ -96,7 +96,17 @@ local function SQOL_Range_GetOffensiveSpell(slot)
     return (ok and SQOL_Range_IsTrue(harmful)) and spellID or nil
 end
 
-local function SQOL_Range_IsActionInRange(slot)
+local function SQOL_Range_IsActionInRange(slot, spellID)
+    -- WoW Forever's action check gives hunter abilities the same answer at any
+    -- distance (Serpent Sting always out of range); its spell check is right.
+    local isSpellInRange = SQOL.IsForever and C_Spell and C_Spell.IsSpellInRange
+    if type(isSpellInRange) == "function" and spellID then
+        local ok, inRange = pcall(isSpellInRange, spellID, "target")
+        if ok and inRange ~= nil and SQOL.CanUseValue(inRange) then
+            return inRange and true or false
+        end
+    end
+
     local isActionInRange = (C_ActionBar and C_ActionBar.IsActionInRange) or rawget(_G, "IsActionInRange")
     if type(isActionInRange) ~= "function" then return nil end
     local ok, inRange = pcall(isActionInRange, slot, "target")
@@ -110,13 +120,17 @@ local function SQOL_Range_UsableRange(value)
     return type(value) == "number" and SQOL.CanUseValue(value) and value or nil
 end
 
--- Max range in yards, with melee abilities (max range 0) counted as melee range.
-local function SQOL_Range_GetMaxRange(spellID)
-    local maxRange
+-- Min and max range in yards, with melee abilities (max range 0) counted as
+-- melee range. Either is nil when unknown.
+local function SQOL_Range_GetRanges(spellID)
+    local minRange, maxRange
     local getSpellInfo = C_Spell and C_Spell.GetSpellInfo
     if type(getSpellInfo) == "function" then
         local ok, info = pcall(getSpellInfo, spellID)
-        maxRange = ok and type(info) == "table" and SQOL_Range_UsableRange(info.maxRange)
+        if ok and type(info) == "table" then
+            minRange = SQOL_Range_UsableRange(info.minRange)
+            maxRange = SQOL_Range_UsableRange(info.maxRange)
+        end
     end
 
     -- Classic clients' C_Spell.GetSpellInfo reports 0 for ranged spells too
@@ -124,19 +138,28 @@ local function SQOL_Range_GetMaxRange(spellID)
     if not maxRange or maxRange <= 0 then
         local legacy = rawget(_G, "GetSpellInfo")
         if type(legacy) == "function" then
-            local ok, _, _, _, _, _, legacyMax = pcall(legacy, spellID)
+            local ok, _, _, _, _, legacyMin, legacyMax = pcall(legacy, spellID)
             legacyMax = ok and SQOL_Range_UsableRange(legacyMax)
             if legacyMax then
                 maxRange = legacyMax
+                minRange = SQOL_Range_UsableRange(legacyMin) or minRange
             end
         end
     end
 
-    if not maxRange then
-        return nil
-    end
-    return math.max(maxRange, MELEE_RANGE)
+    return minRange, maxRange and math.max(maxRange, MELEE_RANGE) or nil
 end
+
+-- True when the target is known to be beyond interact range (about 10 yd).
+-- The check is restricted against enemies in combat; then nothing is known.
+local function SQOL_Range_TargetBeyondInteract()
+    local check = rawget(_G, "CheckInteractDistance")
+    if type(check) ~= "function" then return false end
+    local ok, near = pcall(check, "target", 3)
+    return ok and near ~= nil and SQOL.CanUseValue(near) and not near or false
+end
+
+local reachRanges = {}   -- reused per check: max range of each action that reaches
 
 -- Returns nil without an attackable target or without any offensive action
 -- that can be range-checked against it. Otherwise returns:
@@ -148,20 +171,30 @@ function SQOL.RangeIndicator_GetState()
         return nil
     end
 
-    local checked, anyInRange = false, false
-    local shortestReach, longestMiss
+    local checked, numReaches = false, 0
+    local lowerBound, longestMiss, beyondInteract
     SQOL_Range_ForEachAction(function(slot)
         local spellID = SQOL_Range_GetOffensiveSpell(slot)
         if not spellID then return end
-        local inRange = SQOL_Range_IsActionInRange(slot)
+        local inRange = SQOL_Range_IsActionInRange(slot, spellID)
         if inRange == nil then return end
 
         checked = true
-        local maxRange = SQOL_Range_GetMaxRange(spellID)
+        local minRange, maxRange = SQOL_Range_GetRanges(spellID)
+        -- WoW Forever reports melee "next swing" abilities such as Raptor Strike
+        -- in range at any distance; out of combat the interact distance tells.
+        if inRange and SQOL.IsForever and maxRange and maxRange <= MELEE_RANGE then
+            if beyondInteract == nil then
+                beyondInteract = SQOL_Range_TargetBeyondInteract()
+            end
+            inRange = not beyondInteract
+        end
         if inRange then
-            anyInRange = true
-            if maxRange and (not shortestReach or maxRange < shortestReach) then
-                shortestReach = maxRange
+            numReaches = numReaches + 1
+            reachRanges[numReaches] = maxRange or false
+            -- Reaching a spell with a minimum range puts the target at least that far away.
+            if minRange and minRange > 0 and (not lowerBound or minRange > lowerBound) then
+                lowerBound = minRange
             end
         elseif maxRange and (not longestMiss or maxRange > longestMiss) then
             longestMiss = maxRange
@@ -171,11 +204,30 @@ function SQOL.RangeIndicator_GetState()
     if not checked then
         return nil
     end
+
+    -- In combat those melee reaches can't be checked that way, but a reach
+    -- shorter than another reaching spell's minimum range can't be true either.
+    local anyInRange, shortestReach = false, nil
+    for i = 1, numReaches do
+        local maxRange = reachRanges[i]
+        reachRanges[i] = nil
+        if not (maxRange and lowerBound and maxRange < lowerBound) then
+            anyInRange = true
+            if maxRange and (not shortestReach or maxRange < shortestReach) then
+                shortestReach = maxRange
+            end
+        end
+    end
+
     -- A miss at a longer range than a reach (e.g. a minimum range) says nothing useful.
     if shortestReach and longestMiss and longestMiss >= shortestReach then
         longestMiss = nil
     end
-    return { outOfRange = not anyInRange, minYards = longestMiss, maxYards = anyInRange and shortestReach or nil }
+    local minYards = longestMiss
+    if lowerBound and (not minYards or lowerBound > minYards) then
+        minYards = lowerBound
+    end
+    return { outOfRange = not anyInRange, minYards = minYards, maxYards = anyInRange and shortestReach or nil }
 end
 
 function SQOL.RangeIndicator_IsOutOfRange()
