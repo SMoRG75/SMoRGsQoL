@@ -12,7 +12,7 @@
 ## Notes-zhCN: 用声音感知任务进度：完成任务目标时播放工人语音，整个任务完成时再播放另一句（部落苦工："Work, work." / "Work complete."，或联盟工人："More work?" / "Job's done!"）。另有可开关的便捷功能：姓名板任务雷达、冒险回顾、任务进度着色、自动追踪任务、射程图标与距离、鼠标提示显示目标、物品等级与移动速度、经验/声望颜色、队伍等级、声望监视（可返回首选声望）、鼠标指针高亮，以及就位确认/排队倒计时。可通过 LDB、插件菜单或 /sqol config 打开设置窗口。也支持 Classic Era、Anniversary 和 Mists of Pandaria Classic。
 ## Notes-zhTW: 以聲音感受任務進度：完成任務目標時播放工人語音，整個任務完成時再播放另一句（部落苦工："Work, work." / "Work complete."，或聯盟工人："More work?" / "Job's done!"）。另有可開關的便利功能：名條任務雷達、冒險回顧、任務進度著色、自動追蹤任務、射程圖示與距離、浮動提示顯示目標、物品等級與移動速度、經驗/聲望顏色、隊伍等級、聲望監視（可返回偏好聲望）、游標高亮，以及準備確認/排隊倒數。可透過 LDB、插件選單或 /sqol config 開啟設定視窗。也支援 Classic Era、Anniversary 和 Mists of Pandaria Classic。
 ## Author: SMoRG75
-## Version: 1.3.0
+## Version: 1.4.0
 ## IconTexture: Interface\AddOns\SMoRGsQoL\Media\smorgsqol-icon-simple-v3-400.png
 ## SavedVariables: SQOL_DB
 ## SavedVariablesPerCharacter: SQOL_RecapDB, SQOL_CharacterDB
