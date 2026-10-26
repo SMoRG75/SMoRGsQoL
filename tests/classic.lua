@@ -7,7 +7,7 @@ local frames, pending, messages, sounds = {}, {}, {}, {}
 local missingEvents = {}
 for _, event in ipairs({ 'EDIT_MODE_LAYOUTS_UPDATED', 'PLAYER_AVG_ITEM_LEVEL_UPDATE',
     'QUEST_POI_UPDATE', 'QUEST_CRITERIA_UPDATE', 'SCENARIO_CRITERIA_UPDATE',
-    'QUEST_REMOVED', 'QUEST_TURNED_IN', 'TOOLTIP_DATA_UPDATE',
+    'QUEST_REMOVED', 'QUEST_TURNED_IN', 'TOOLTIP_DATA_UPDATE', 'QUEST_AUTOCOMPLETE',
     'LFG_PROPOSAL_SHOW', 'LFG_PROPOSAL_DONE', 'LFG_PROPOSAL_FAILED', 'LFG_PROPOSAL_SUCCEEDED' }) do
     missingEvents[event] = true
 end
@@ -111,6 +111,28 @@ function GetQuestLogTitle(index)
 end
 C_QuestLog = { GetQuestObjectives = function(id) return objectives[id] end }
 
+-- Classic quest frame: GetAvailableQuestInfo reports isDaily, no quest
+-- currencies, and the global GetItemInfoInstant.
+local questCalls, quest = {}, {}
+local function questCall(name)
+    return function(...) questCalls[#questCalls + 1] = table.concat({ name, ... }, ' ') end
+end
+local greeting = { active = { { 'The Fargodeep Mine', true } },
+    available = { { 'Daily Patrol', false, true }, { 'Kobold Candles', false, false } } }
+function GetNumActiveQuests() return #greeting.active end
+function GetActiveTitle(i) return greeting.active[i][1], greeting.active[i][2] end
+function GetNumAvailableQuests() return #greeting.available end
+function GetAvailableTitle(i) return greeting.available[i][1] end
+function GetAvailableQuestInfo(i) return greeting.available[i][2], greeting.available[i][3] end
+SelectActiveQuest, SelectAvailableQuest = questCall('turnin'), questCall('pick')
+function GetTitleText() return quest.title end
+function IsQuestCompletable() return true end
+function GetQuestMoneyToGet() return 0 end
+function GetNumQuestItems() return #quest.items end
+function GetQuestItemLink(_, index) return quest.items[index] end
+function GetItemInfoInstant(link) return 1, nil, nil, nil, nil, link == 'Gold Dust' and 7 or 12 end
+AcceptQuest, CompleteQuest, GetQuestReward = questCall('accept'), questCall('complete'), questCall('reward')
+
 local sqol = {}
 for line in io.lines('SMoRGsQoL.toc') do
     local file = line:match('^([^#].-%.lua)%s*$')
@@ -189,6 +211,24 @@ fire('QUEST_LOG_UPDATE')
 flush()
 assert(#sounds == 2, 'Accepting a quest plays nothing')
 assert(sqol.GetQuestLogInfo(3).questID == 88 and sqol.GetQuestLogInfo(1).isHeader)
+
+-- Quest automation works from Classic's greeting panel and quest frame.
+local function questEvent(event)
+    questCalls = {}
+    fire(event)
+    return table.concat(questCalls, ', ')
+end
+assert(available.AutoAcceptQuests and available.AutoTurnInQuests and available.QuestAutomationKey,
+    'Quest automation is offered in Classic Era')
+SlashCmdList.SQOL('qa')
+assert(questEvent('QUEST_GREETING') == 'pick 2', 'isDaily skips the daily while only regular quests are on')
+SlashCmdList.SQOL('qt')
+assert(questEvent('QUEST_GREETING') == 'turnin 1', 'Completed quests first')
+quest = { title = 'Gold Dust Exchange', items = { 'Gold Dust' } }
+assert(questEvent('QUEST_PROGRESS') == '', 'Trade goods are kept')
+quest = { title = 'The Fargodeep Mine', items = { 'Fargodeep Ore Sample' } }
+assert(questEvent('QUEST_PROGRESS') == 'complete' and questEvent('QUEST_COMPLETE') == 'reward 0')
+assert(questEvent('QUEST_DETAIL') == 'accept', 'Classic has no QuestIsDaily; quests count as regular')
 
 -- Range in yards: Classic Era's C_Spell.GetSpellInfo says 0 for Fireball, the
 -- legacy GetSpellInfo says 35 (seen in-game). Slot 1 Fireball, 2 Attack, 3 Frost Armor.
@@ -278,4 +318,4 @@ local mists = detect(19, 50504)
 assert(mists.IsClassic and not mists.IsClassicEra and not mists.IsForever and mists.HasLFGQueue, 'MoP Classic')
 
 print = function(...) io.write(table.concat({...}, ' '), '\n') end
-print('PASS: Classic Era, Anniversary and WoW Forever detection, optional events, hidden options, quest log fallback and quest sounds')
+print('PASS: Classic Era, Anniversary and WoW Forever detection, optional events, hidden options, quest log fallback, quest sounds and quest automation')

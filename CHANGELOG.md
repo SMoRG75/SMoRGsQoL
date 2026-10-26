@@ -5,6 +5,7 @@
 ### Added
 
 - **Colorful unit tooltips** — players' names, specs, the tooltip border and the health bar in their class color (reaction colors for NPCs), the guild in green as `<Guild>`, the level in the difficulty color you know from the target frame, and Horde in red or Alliance in blue, with the health on the health bar (e.g. `18.8K / 23.8K (79%)`). Toggle under **Interface** or with `/sqol tooltipcolor` (`tc`). Off by default.
+- **Quest automation** — accepts and turns in quests at quest givers, like Leatrix Plus' *Automate quests*, in every client. Separate options under **Quests** for regular, daily and weekly quests and for turn-ins (`/sqol questaccept`, `questdaily`, `questweekly`, `questturnin`), all off by default. Holding the override key (SHIFT, ALT, CONTROL or CMD, `/sqol questkey`) pauses it; with **Require override key for quest automation** (`/sqol questrequirekey`) quests are only automated while you hold it. Never picks between several rewards, never hands in money, currency or items that aren't quest items, skips quests shared by other players and quests that flag you for PvP, pauses in combat inside instances, and only clicks quest lines in gossip, never gossip options.
 
 ## [1.4.0] - 2026-10-23
 

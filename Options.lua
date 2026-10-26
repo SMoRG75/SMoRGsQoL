@@ -42,6 +42,12 @@ local function SQOL_HasTooltipDataProcessor()
     return rawget(_G, "TooltipDataProcessor") ~= nil
 end
 
+-- The quest frame and gossip quest APIs (every client so far).
+local function SQOL_HasQuestAutomationAPI()
+    return type(AcceptQuest) == "function" and type(CompleteQuest) == "function"
+        and type(GetQuestReward) == "function"
+end
+
 -- Classic hunters' minimum range (the 5-8 yd dead zone) makes the distance
 -- unreliable there, so the range icon is Retail and WoW Forever only.
 local function SQOL_HasReliableRange()
@@ -74,6 +80,30 @@ SQOL.OptionSections = {
               values = {
                   { value = "Horde", label = SQOL.QuestSoundProfiles.Horde.label },
                   { value = "Alliance", label = SQOL.QuestSoundProfiles.Alliance.label },
+              } },
+            { key = "AutoAcceptQuests", label = L["Accept regular quests automatically"],
+              tooltip = L["Accept quests from quest givers without clicking. Skips quests shared by other players, quests that flag you for PvP and low-level quests (unless the minimap shows them)."],
+              isAvailable = SQOL_HasQuestAutomationAPI },
+            { key = "AutoAcceptDailyQuests", label = L["Accept daily quests automatically"],
+              tooltip = L["Accept daily quests from quest givers without clicking."],
+              isAvailable = SQOL_HasQuestAutomationAPI },
+            { key = "AutoAcceptWeeklyQuests", label = L["Accept weekly quests automatically"],
+              tooltip = L["Accept weekly quests from quest givers without clicking."],
+              isAvailable = SQOL_HasQuestAutomationAPI },
+            { key = "AutoTurnInQuests", label = L["Turn in completed quests automatically"],
+              tooltip = L["Turn in completed quests at quest givers. Stops when you have to choose a reward, or when the quest takes money, currency or items that are not quest items."],
+              isAvailable = SQOL_HasQuestAutomationAPI },
+            { key = "QuestAutomationRequireKey", label = L["Require override key for quest automation"],
+              tooltip = L["On: quests are only automated while you hold the override key. Off: quests are automated unless you hold the override key."],
+              isAvailable = SQOL_HasQuestAutomationAPI },
+            { key = "QuestAutomationKey", label = L["Quest automation override key"], kind = "dropdown",
+              tooltip = L["The key that pauses quest automation, or that you hold to automate when the override key is required."],
+              isAvailable = SQOL_HasQuestAutomationAPI,
+              values = {
+                  { value = "SHIFT", label = L["SHIFT"] },
+                  { value = "ALT", label = L["ALT"] },
+                  { value = "CONTROL", label = L["CONTROL"] },
+                  { value = "CMD", label = L["CMD (MAC)"] },
               } },
         },
     },

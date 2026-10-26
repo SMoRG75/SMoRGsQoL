@@ -101,6 +101,12 @@ All three new features are off by default; turn them on in the options window. 1
   - `/sqol recap last` shows the previous session, `/sqol recap reset` starts the current session over, and `/sqol recap test` shows sample data without touching your real numbers.
   - Sessions are kept per character. `/reload` continues the session; logging in again starts a new one and keeps the previous one. Offline time and time with recording turned off are not counted.
   - A quest counts when you turn it in. If some reputation messages could not be read, the total is marked as incomplete and no top faction is shown.
+- 🤖 **Quest automation**
+  - Accepts quests and turns in completed quests at quest givers, from the quest window, the quest list of NPCs without gossip and the quest lines in gossip — a replacement for Leatrix Plus' *Automate quests*. With several quests on one NPC it handles one at a time, completed quests first, until nothing is left that it may take.
+  - Choose separately whether to accept regular, daily and weekly quests, and whether to turn in completed quests (`/sqol questaccept`, `/sqol questdaily`, `/sqol questweekly`, `/sqol questturnin`). All off by default.
+  - **Override key** (SHIFT, ALT, CONTROL or CMD on a Mac, `/sqol questkey`): normally, holding it pauses automation, so you can read a quest or pick it yourself. With **Require override key for quest automation** on (`/sqol questrequirekey`), it works the other way round: quests are only automated while you hold the key. Same as Leatrix Plus.
+  - Leaves the choice to you when a quest has several rewards, and never turns in a quest that takes money, currency or items that are not quest items (cloth donations, trade goods). Skips quests shared by other players (escorts, group quests in dungeons), quests that flag you for PvP, ignored quests and low-level quests (unless the minimap shows them; in the Classic clients low-level quests are always skipped).
+  - Does nothing in combat inside instances, and in gossip only clicks quest lines, never gossip options, so dungeon NPCs that start an event are left alone. A quest it leaves for you is not picked again for 30 seconds, so **Back** in the quest window returns to the NPC's list.
 - 🧭 **Auto-track newly accepted quests**
   - Automatically tracks new quests in the Objective Tracker (with sanity checks to avoid unsupported edge cases).
   - Retail and WoW Forever only.
@@ -174,7 +180,7 @@ SMoRG's QoL runs in Classic Era, Anniversary and Mists of Pandaria Classic as we
 | LFG queue pop countdown | – | – | ✓ |
 | Target in unit tooltips, colorful unit tooltips, XP/reputation number colors | where the client supports it | where the client supports it | where the client supports it |
 
-Everything else, from the quest sounds to the item level/speed line, reputation features, countdowns and party levels, works in every client.
+Everything else, from the quest sounds and quest automation to the item level/speed line, reputation features, countdowns and party levels, works in every client.
 
 ## Configuration
 
@@ -210,6 +216,12 @@ Type `/sqol` to see current status, or use:
 - `/sqol questsound` (or `/sqol qs`)
 - `/sqol objectivesound` (or `/sqol os`)
 - `/sqol soundprofile` (or `/sqol soundset`)
+- `/sqol questaccept` (or `/sqol qa`) — accept regular quests automatically
+- `/sqol questdaily` (or `/sqol qd`) — accept daily quests automatically
+- `/sqol questweekly` (or `/sqol qw`) — accept weekly quests automatically
+- `/sqol questturnin` (or `/sqol qt`) — turn in completed quests automatically
+- `/sqol questrequirekey` (or `/sqol qrk`) — only automate quests while the override key is held
+- `/sqol questkey` (or `/sqol qk`) — next override key; `/sqol questkey shift|alt|control|cmd` picks one
 - `/sqol splash`
 - `/sqol hideach` (or `/sqol ha`)
 - `/sqol rep` (or `/sqol rw`)
@@ -284,6 +296,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `Core.lua` | Client detection (Retail, WoW Forever, Classic), defaults, sound profiles, shared utilities and namespace setup |
 | `VisualTweaks.lua` | Damage font, cursor highlight, achievement filter, tooltip target line and tooltip colors |
 | `QuestRadar.lua` | Optional quest radar, safe tooltip parsing and active-quest relevance |
+| `QuestAutomation.lua` | Accepting and turning in quests at quest givers, with the override key |
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
 | `PlayerStats.lua` | Independent item level and movement speed displays |
 | `PartyLevels.lua` | Levels on default and raid-style party frames |

@@ -48,6 +48,7 @@ Core.lua
 VisualTweaks.lua
 QuestProgress.lua
 QuestRadar.lua
+QuestAutomation.lua
 PlayerStats.lua
 PartyLevels.lua
 RangeIndicator.lua

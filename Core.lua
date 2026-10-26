@@ -66,6 +66,14 @@ SQOL.defaults = {
     QuestObjectiveSound = true,
     QuestSoundProfile = "Horde",
     AdventureRecap = false,
+
+    -- Accept and turn in quests at quest givers (Leatrix Plus style).
+    AutoAcceptQuests = false,
+    AutoAcceptDailyQuests = false,
+    AutoAcceptWeeklyQuests = false,
+    AutoTurnInQuests = false,
+    QuestAutomationRequireKey = false,
+    QuestAutomationKey = "SHIFT",
     HideDoneAchievements = false,
     RepWatch     = false,
     RepMemory    = false,

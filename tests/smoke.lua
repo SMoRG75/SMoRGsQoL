@@ -78,6 +78,35 @@ function InCombatLockdown() return false end
 function hooksecurefunc() end
 function print(...) messages[#messages + 1] = table.concat({...}, ' ') end
 UISpecialFrames = {}
+-- Quest frame and gossip: record what quest automation clicks.
+local questCalls, quest, gossip, modifiers = {}, {}, { active = {}, available = {} }, {}
+local function questCall(name)
+    return function(...) questCalls[#questCalls + 1] = table.concat({ name, ... }, ' ') end
+end
+function IsShiftKeyDown() return modifiers.SHIFT end
+function IsAltKeyDown() return modifiers.ALT end
+function IsControlKeyDown() return modifiers.CONTROL end
+function IsMetaKeyDown() return modifiers.CMD end
+function GetTitleText() return quest.title end
+function QuestIsDaily() return quest.daily == true end
+function QuestIsWeekly() return quest.weekly == true end
+function QuestFlagsPVP() return quest.pvp == true end
+function QuestGetAutoAccept() return quest.autoAccept == true end
+function IsQuestCompletable() return quest.completable == true end
+function GetQuestMoneyToGet() return quest.money or 0 end
+function GetNumQuestCurrencies() return quest.currencies or 0 end
+function GetNumQuestItems() return #(quest.items or {}) end
+function GetQuestItemLink(_, index) return quest.items[index] end
+function GetNumQuestChoices() return quest.choices or 0 end
+-- Gnoll Paw is a quest item (class 12), Linen Cloth a trade good (7).
+C_Item = { GetItemInfoInstant = function(link) return 1, nil, nil, nil, nil, link == 'Gnoll Paw' and 12 or 7 end }
+AcceptQuest, AcknowledgeAutoAcceptQuest = questCall('accept'), questCall('acknowledge')
+CompleteQuest, GetQuestReward, ShowQuestComplete = questCall('complete'), questCall('reward'), questCall('show')
+C_GossipInfo = {
+    GetActiveQuests = function() return gossip.active end,
+    GetAvailableQuests = function() return gossip.available end,
+    SelectActiveQuest = questCall('turnin'), SelectAvailableQuest = questCall('pick'),
+}
 -- The embedded libraries need the real client; stand-ins record what the launcher does.
 local ldbObjects, minimapButton = {}, {}
 local fakeLibs = {
@@ -505,6 +534,119 @@ UnitExists, UnitCanAttack, UnitIsDeadOrGhost, HasAction, C_ActionBar = nil, nil,
 GetActionInfo, C_Spell, C_CVar = nil, nil, nil
 ActionBarButtonEventsFrame, TargetFrame = nil, nil
 
+-- Quest automation: off by default, the override key works both ways, and it
+-- stops wherever the player has to decide or pay.
+local function questEvent(event, ...)
+    questCalls = {}
+    fire(event, ...)
+    return table.concat(questCalls, ', ')
+end
+quest = { title = 'Wanted: Hogger' }
+assert(questEvent('QUEST_DETAIL') == '', 'Quest automation is off by default')
+assert(popupControls.AutoAcceptQuests and popupControls.QuestAutomationKey, 'Options window shows quest automation')
+SlashCmdList.SQOL('qa')
+assert(questEvent('QUEST_DETAIL') == 'accept', 'Regular quest accepted')
+quest.daily = true
+assert(questEvent('QUEST_DETAIL') == '', 'Daily quests need their own option')
+SlashCmdList.SQOL('questdaily')
+assert(questEvent('QUEST_DETAIL') == 'accept')
+quest.daily, quest.weekly = false, true
+assert(questEvent('QUEST_DETAIL') == '', 'Weekly quests need their own option')
+SlashCmdList.SQOL('qw')
+assert(questEvent('QUEST_DETAIL') == 'accept')
+quest = { title = 'Wanted: Hogger', autoAccept = true }
+assert(questEvent('QUEST_DETAIL') == 'acknowledge', 'Auto-accepted quests are only acknowledged')
+quest = { title = 'Wanted: Hogger', pvp = true }
+assert(questEvent('QUEST_DETAIL') == '', 'PvP quests are left alone')
+quest = { title = 'Escort: Corporal Keeshan' }
+function UnitIsPlayer(unit) return unit == 'npc' end
+function UnitIsUnit() return false end
+assert(questEvent('QUEST_DETAIL') == '', 'Quests shared by a player are left alone')
+function UnitIsUnit(unit, other) return unit == 'npc' and other == 'player' end
+assert(questEvent('QUEST_DETAIL') == 'accept', 'Quests from your own items are accepted')
+UnitIsPlayer, UnitIsUnit = nil, nil
+-- Override key: bypasses by default, required when the option is on.
+modifiers.SHIFT = true
+assert(questEvent('QUEST_DETAIL') == '', 'Holding SHIFT pauses automation')
+SlashCmdList.SQOL('qrk')
+assert(questEvent('QUEST_DETAIL') == 'accept', 'Required key held')
+modifiers.SHIFT = nil
+assert(questEvent('QUEST_DETAIL') == '', 'Required key not held')
+SlashCmdList.SQOL('questkey ctrl')
+assert(sqol.DB.QuestAutomationKey == 'CONTROL' and messages[#messages]:find('CONTROL', 1, true))
+modifiers.CONTROL = true
+assert(questEvent('QUEST_DETAIL') == 'accept', 'Chosen key held')
+SlashCmdList.SQOL('qk')
+assert(sqol.DB.QuestAutomationKey == 'CMD', 'Without an argument the key steps to the next one')
+SlashCmdList.SQOL('qk hyper')
+assert(sqol.DB.QuestAutomationKey == 'CMD' and messages[#messages]:find('questkey', 1, true), 'Unknown keys print the usage')
+SlashCmdList.SQOL('qk shift')
+SlashCmdList.SQOL('qrk')
+modifiers.CONTROL = nil
+-- Turn-ins: only completable quests that cost nothing but quest items.
+quest = { title = 'Wanted: Hogger', completable = true }
+assert(questEvent('QUEST_PROGRESS') == '', 'Turn-ins have their own option')
+SlashCmdList.SQOL('qt')
+assert(questEvent('QUEST_PROGRESS') == 'complete')
+quest.completable = false
+assert(questEvent('QUEST_PROGRESS') == '', 'Unfinished quests are not handed in')
+quest = { title = 'Gnoll Paws', completable = true, items = { 'Gnoll Paw' } }
+assert(questEvent('QUEST_PROGRESS') == 'complete', 'Quest items are handed in')
+quest = { title = 'Cloth Donation', completable = true, items = { 'Gnoll Paw', 'Linen Cloth' } }
+assert(questEvent('QUEST_PROGRESS') == '', 'Other items are kept')
+quest = { title = 'Pay the Toll', completable = true, money = 500 }
+assert(questEvent('QUEST_PROGRESS') == '', 'Quests that cost money are left alone')
+quest = { title = 'Spend Valor', completable = true, currencies = 1 }
+assert(questEvent('QUEST_PROGRESS') == '', 'Quests that cost currency are left alone')
+quest = { title = 'Wanted: Hogger', choices = 0 }
+assert(questEvent('QUEST_COMPLETE') == 'reward 0')
+quest.choices = 1
+assert(questEvent('QUEST_COMPLETE') == 'reward 1', 'A single reward is taken')
+quest.choices = 3
+assert(questEvent('QUEST_COMPLETE') == '', 'Several rewards are left to the player')
+-- Gossip lists: completed quests first, one per event, skipped quests stay skipped for a while.
+gossip.active = { { title = 'Bounty', isComplete = false, questID = 1 }, { title = 'Wanted: Hogger', isComplete = true, questID = 2 } }
+gossip.available = { { title = 'Daily Chores', frequency = 1, questID = 3 },
+    { title = 'Gray Errand', frequency = 0, isTrivial = true, questID = 4 }, { title = 'New Lead', frequency = 0, questID = 5 } }
+assert(questEvent('GOSSIP_SHOW') == 'pick 3', 'The quest with a reward choice is not reopened right away')
+local realGetTime = GetTime
+GetTime = function() return 131 end
+assert(questEvent('GOSSIP_SHOW') == 'turnin 2', 'Completed quest picked again later')
+GetTime = realGetTime
+gossip.active = { gossip.active[1] }
+assert(questEvent('GOSSIP_SHOW') == 'pick 3', 'Then available quests')
+SlashCmdList.SQOL('qd')
+assert(questEvent('GOSSIP_SHOW') == 'pick 5', 'Daily off; low-level quests skipped')
+C_Minimap = { IsTrackingHiddenQuests = function() return true end }
+assert(questEvent('GOSSIP_SHOW') == 'pick 4', 'Low-level quests while the minimap shows them')
+C_Minimap = nil
+issecretvalue = function() return true end
+assert(questEvent('GOSSIP_SHOW') == '' and questEvent('QUEST_DETAIL') == '', 'Secret values are never acted on')
+issecretvalue = nil
+-- Greeting panel (NPCs without gossip).
+local greeting = { active = { { 'Bounty', false } }, available = { { 'Daily Chores', false, 1 }, { 'New Lead', false, 0 } } }
+function GetNumActiveQuests() return #greeting.active end
+function GetActiveTitle(i) return greeting.active[i][1], greeting.active[i][2] end
+function GetNumAvailableQuests() return #greeting.available end
+function GetAvailableTitle(i) return greeting.available[i][1] end
+function GetAvailableQuestInfo(i) return greeting.available[i][2], greeting.available[i][3] end
+SelectActiveQuest, SelectAvailableQuest = questCall('greet-turnin'), questCall('greet-pick')
+assert(questEvent('QUEST_GREETING') == 'greet-pick 2', 'Greeting skips unfinished and daily quests')
+greeting.active[1][2] = true
+assert(questEvent('QUEST_GREETING') == 'greet-turnin 1', 'Greeting turns in first')
+GetNumActiveQuests, GetActiveTitle, GetNumAvailableQuests, GetAvailableTitle = nil, nil, nil, nil
+GetAvailableQuestInfo, SelectActiveQuest, SelectAvailableQuest = nil, nil, nil
+-- Combat inside instances pauses everything; auto-complete popups open the reward.
+function IsInInstance() return true end
+function InCombatLockdown() return true end
+quest = { title = 'Wanted: Hogger' }
+assert(questEvent('QUEST_DETAIL') == '' and questEvent('QUEST_AUTOCOMPLETE', 77) == '', 'No automation in instance combat')
+function InCombatLockdown() return false end
+IsInInstance = nil
+assert(questEvent('QUEST_AUTOCOMPLETE', 77) == 'show 77')
+for _, command in ipairs({ 'qa', 'qw', 'qt' }) do SlashCmdList.SQOL(command) end
+assert(questEvent('QUEST_DETAIL') == '' and questEvent('GOSSIP_SHOW') == '', 'All off stops listening')
+
 local scheduled = pending
 pending = {}
 for _, fn in ipairs(scheduled) do fn() end
@@ -606,5 +748,6 @@ assert(not sqol.DB.AdventureRecap and SQOL_RecapDB.current.quests == recapBefore
     'Settings reset pauses recap while preserving session data')
 assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
 assert(not sqol.DB.ShowItemLevel and not sqol.DB.ShowMovementSpeed)
+assert(not sqol.DB.AutoAcceptQuests and sqol.DB.QuestAutomationKey == 'SHIFT', 'Reset turns quest automation off')
 for _, message in ipairs(messages) do io.write(message, '\n') end
 io.write('PASS: TOC loading, login, commands, independent options, events, deferred callbacks, reset\n')

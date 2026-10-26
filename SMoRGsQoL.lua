@@ -32,6 +32,9 @@ function SQOL.Init(reset)
     if not SQOL.QuestSoundProfiles[SQOL_DB.QuestSoundProfile] then
         SQOL_DB.QuestSoundProfile = SQOL.defaults.QuestSoundProfile
     end
+    if not SQOL.QuestAutomation_IsKey(SQOL_DB.QuestAutomationKey) then
+        SQOL_DB.QuestAutomationKey = SQOL.defaults.QuestAutomationKey
+    end
 
     -- Bind runtime DB reference
     SQOL.DB = SQOL_DB
@@ -39,6 +42,7 @@ function SQOL.Init(reset)
     if reset then
         SQOL.Recap_OnOptionChanged()
         SQOL.RepMemory_OnOptionChanged()
+        SQOL.QuestAutomation_OnOptionChanged()
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         SQOL.RepGains_Hide()
         SQOL.NameplateObjectives_HideAll()
@@ -492,6 +496,10 @@ function SQOL.ApplyOption(key)
     elseif key == "ShowRangeIndicator" then
         SQOL.RangeIndicator_OnOptionChanged()
 
+    elseif key == "AutoAcceptQuests" or key == "AutoAcceptDailyQuests"
+        or key == "AutoAcceptWeeklyQuests" or key == "AutoTurnInQuests" then
+        SQOL.QuestAutomation_OnOptionChanged()
+
     end
 
     SQOL.SyncSettingObject(key)
@@ -548,6 +556,13 @@ local SQOL_COMMANDS = {
           SQOL.SetOption("QuestSoundProfile", SQOL.DB.QuestSoundProfile == "Alliance" and "Horde" or "Alliance")
           SQOL.PrintOptionState("QuestSoundProfile")
       end },
+    { names = { "questaccept", "qa" }, key = "AutoAcceptQuests" },
+    { names = { "questdaily", "qd" }, key = "AutoAcceptDailyQuests" },
+    { names = { "questweekly", "qw" }, key = "AutoAcceptWeeklyQuests" },
+    { names = { "questturnin", "qt" }, key = "AutoTurnInQuests" },
+    { names = { "questrequirekey", "qrk" }, key = "QuestAutomationRequireKey" },
+    { names = { "questkey", "qk" }, desc = L["Quest automation override key: /sqol questkey [shift | alt | control | cmd]"],
+      run = function(rest) SQOL.QuestAutomation_KeyCommand(rest) end },
     { names = { "ilvl", "stats" }, key = "ShowItemLevel" },
     { names = { "speed", "spd" }, key = "ShowMovementSpeed" },
     { names = { "barcolor", "bc" }, key = "ColorStatusBarProgress" },
@@ -697,6 +712,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL.Init()
         SQOL.DisableUnavailableOptions()
         SQOL.RepMemory_Init()
+        SQOL.QuestAutomation_OnOptionChanged()
         if SQOL.DB.ShowSplash then
             SQOL_Splash()
         end
