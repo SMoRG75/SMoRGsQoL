@@ -572,6 +572,7 @@ local SQOL_COMMANDS = {
       run = function() SQOL_LFGProposal_Test() end },
     { names = { "partylevel", "pl" }, key = "ShowPartyLevel" },
     { names = { "tooltiptarget", "tt" }, key = "ShowTooltipTarget" },
+    { names = { "tooltipcolor", "tc" }, key = "ColorUnitTooltips" },
     { names = { "range", "rng" }, key = "ShowRangeIndicator" },
     { names = { "damagefont", "df" }, key = "DamageTextFont" },
     { names = { "cursor", "cs" }, key = "CursorShakeHighlight" },

@@ -95,6 +95,9 @@ SQOL.defaults = {
     -- Add a "Target:" line to unit tooltips showing who the unit is targeting.
     ShowTooltipTarget = false,
 
+    -- Class, reaction, guild, level and faction colors in unit tooltips.
+    ColorUnitTooltips = false,
+
     -- Icon by the target frame when no offensive action on the bars reaches the target.
     ShowRangeIndicator = false,
 

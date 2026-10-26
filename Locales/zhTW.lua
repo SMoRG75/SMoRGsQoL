@@ -126,6 +126,8 @@ L["Show each party member's level on the party frames (both default and raid-sty
 L["Interface"] = "介面"
 L["Show target in unit tooltips"] = "在浮動提示中顯示目標"
 L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover."] = "在單位浮動提示中加入一行「目標：」，顯示該單位正在選取誰：玩家依職業著色，NPC依陣營關係著色，目標是你時顯示紅色的「你」。滑鼠停留時即時更新。"
+L["Colorful unit tooltips"] = "彩色單位浮動提示"
+L["Color unit tooltips: players' names, specs, borders and health bars in their class color (reaction colors for NPCs), the guild in green between <brackets>, the level by how hard the unit is for you, and Horde in red or Alliance in blue. Shows the health on the bar. Skipped when the client hides the unit's data."] = "為單位浮動提示著色：玩家的名字、專精、邊框和生命條使用職業顏色（NPC使用陣營關係顏色），公會以綠色顯示在<尖括號>中，等級依該單位對你的難度著色，部落為紅色，聯盟為藍色。在生命條上顯示生命值。用戶端隱藏單位資料時略過。"
 L["Range icon and distance for your target"] = "目標射程圖示與距離"
 L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."] = "在目標名條上暴雪軟目標劍形圖示的位置（沒有名條時在目標框架頭像旁），以碼為單位顯示到可攻擊目標的距離（例如「8-30碼」，依快捷列上技能的射程推算）；所有攻擊技能都打不到時顯示一個閃爍的圖示。使用與快捷鍵變紅相同的射程檢查，因此會隨形態和額外快捷列變化。開啟期間會關閉暴雪的劍形圖示（SoftTargetIconEnemy），關閉本功能後會恢復。"
 L["Custom damage text font"] = "自訂傷害數字字型"

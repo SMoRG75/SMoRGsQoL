@@ -56,6 +56,7 @@ local tooltipPostCalls = {}
 Enum = { TooltipDataType = { Unit = 2 } }
 TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn) tooltipPostCalls[kind] = fn end }
 GameTooltip = widget()
+GameTooltip.StatusBar = widget()
 GameTooltip.lines = {}
 function GameTooltip:AddLine(text)
     local line = widget()
@@ -335,6 +336,67 @@ issecretvalue = function() return true end
 assert(hoverUnit() == nil, 'Secret unit data must be skipped')
 issecretvalue = nil
 SlashCmdList.SQOL('tt')
+-- Colorful unit tooltips: class name/spec/border/bar, <guild>, level and faction colors.
+GameTooltip.NineSlice = { SetBorderColor = function(self, r, g, b) self.color = { r, g, b } end }
+function GameTooltip.StatusBar:SetStatusBarColor(r, g, b) self.color = { r, g, b } end
+units.mouseover = { name = 'Smorg', class = 'DRUID', guild = 'Danish Casuals' }
+function GetGuildInfo(unit) return units[unit] and units[unit].guild end
+function UnitLevel() return 90 end
+function UnitFactionGroup() return 'Horde', 'Horde' end
+function GetQuestDifficultyColor() return { r = 1, g = 1, b = 0 } end
+local health = { cur = 18807, max = 23771 }
+function UnitHealth() return health.cur end
+function UnitHealthMax() return health.max end
+function AbbreviateLargeNumbers(value) return string.format('%.1fK', value / 1000) end
+LEVEL = 'Level'
+local function hoverStyled(texts)
+    GameTooltip.lines = {}
+    for _, text in ipairs(texts) do GameTooltip:AddLine(text) end
+    for _, line in ipairs(GameTooltip.lines) do
+        function line:SetTextColor(r, g, b) self.color = { r, g, b } end
+    end
+    GameTooltip.unit = 'mouseover'
+    showUnitTooltip(GameTooltip, {})
+    return GameTooltip.lines
+end
+local retailLines = { 'Smorg', 'Danish Casuals', 'Level 90 Highmountain Tauren (Player)', 'Balance Druid',
+    'Horde', 'Level 86 Some of the Things' }
+local lines = hoverStyled(retailLines)
+assert(not lines[1].color and lines[2].text == 'Danish Casuals', 'Disabled option leaves the tooltip alone')
+SlashCmdList.SQOL('tc')
+lines = hoverStyled(retailLines)
+assert(lines[1].color[1] == 1 and lines[1].color[2] == 0.49, 'Player name in class color')
+assert(lines[2].text == '<Danish Casuals>' and lines[2].color[2] == 1, 'Guild in green brackets')
+assert(lines[3].text == 'Level |cffffff0090|r Highmountain Tauren (Player)', 'Level in difficulty color' .. ': ' .. tostring(lines[3].text))
+assert(lines[4].color[2] == 0.49, 'Spec line in class color')
+assert(lines[5].color[1] == 1 and lines[5].color[2] == 0.3, 'Horde in red')
+assert(lines[6].text == 'Level 86 Some of the Things' and not lines[6].color, 'Other lines are kept')
+assert(GameTooltip.NineSlice.color[2] == 0.49 and GameTooltip.StatusBar.color[2] == 0.49, 'Class border and bar')
+GameTooltip.StatusBar:SetStatusBarColor(0, 1, 0)
+GameTooltip.StatusBar.scripts.OnValueChanged(GameTooltip.StatusBar, 50)
+assert(GameTooltip.StatusBar.color[2] == 0.49, 'Health bar keeps the class color')
+local healthText = GameTooltip.StatusBar.fontStrings[1]
+assert(healthText.shown and healthText.text == '18.8K / 23.8K (79%)', 'Health on the bar: ' .. tostring(healthText.text))
+health.cur = 0
+GameTooltip.StatusBar.scripts.OnValueChanged(GameTooltip.StatusBar, 0)
+assert(healthText.text == '0.0K / 23.8K (0%)', 'Health text follows the bar')
+health.cur = 18807
+GameTooltip.scripts.OnTooltipCleared(GameTooltip)
+assert(GameTooltip.NineSlice.color[2] == 1 and GameTooltip.StatusBar.color[1] == 0, 'Clearing restores Blizzard colors')
+assert(not healthText.shown, 'Clearing hides the health text')
+lines = hoverStyled({ 'Smorg', '<Danish Casuals>', 'Level 90 Tauren Druid (Player)' })
+assert(lines[2].text == '<Danish Casuals>', 'Bracketed guild is not bracketed twice' .. ': ' .. tostring(lines[2].text))
+assert(lines[3].text == 'Level |cffffff0090|r Tauren |cffff7d0aDruid|r (Player)', 'Classic level line colors the class word' .. ': ' .. tostring(lines[3].text))
+issecretvalue = function() return true end
+lines = hoverStyled(retailLines)
+assert(lines[2].text == 'Danish Casuals' and not lines[1].color, 'Secret unit data must be skipped')
+issecretvalue = nil
+SlashCmdList.SQOL('tc')
+GameTooltip.scripts.OnTooltipCleared(GameTooltip)
+units.mouseover = nil
+GetGuildInfo, UnitLevel, UnitFactionGroup, GetQuestDifficultyColor, LEVEL = nil, nil, nil, nil, nil
+UnitHealth, UnitHealthMax, AbbreviateLargeNumbers = nil, nil, nil
+GameTooltip.NineSlice = nil
 UnitExists, UnitIsUnit, UnitName, UnitIsPlayer, UnitClass, UnitReaction = nil, nil, nil, nil, nil, nil
 RAID_CLASS_COLORS, FACTION_BAR_COLORS = nil, nil
 

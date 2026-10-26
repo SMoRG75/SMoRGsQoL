@@ -144,6 +144,10 @@ All three new features are off by default; turn them on in the options window. 1
   - Adds a `Target:` line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red `You` when it is you. Updates live while you hover.
   - Toggle with `/sqol tooltiptarget` (`tt`). Disabled by default. Skipped when the client hides the unit's data (secret values in 12.x).
   - In the Classic clients it is offered only where the client has Retail's tooltip system (Mists of Pandaria Classic does).
+- 🎨 **Colorful unit tooltips**
+  - Players' names, specs, the tooltip border and the health bar in their class color (reaction colors for NPCs, gray for tapped mobs), the guild in green as `<Guild>`, the level in Blizzard's difficulty color (red `??` for bosses), and `Horde` in red or `Alliance` in blue.
+  - Shows the health on the tooltip's health bar, e.g. `18.8K / 23.8K (79%)`.
+  - Toggle with `/sqol tooltipcolor` (`tc`). Disabled by default. Skipped when the client hides the unit's data (secret values in 12.x); offered where the tooltip target line is.
 - 🏹 **Range icon and distance**
   - Shows the distance to an attackable target on its nameplate (where Blizzard's soft target sword icon sits, just above the quest objective count when one is shown), or next to the target frame portrait when the target has no nameplate, as a range in yards (`< 5 yd`, `8-30 yd`, `> 40 yd`). The client has no exact distance for enemies, so the range comes from the abilities on your action bars that do and don't reach.
   - Adds a pulsing icon when none of your offensive abilities can reach the target. Uses the same range check that tints action buttons red, so it follows druid forms and bonus bars, and needs no class-specific spell lists.
@@ -168,7 +172,7 @@ SMoRG's QoL runs in Classic Era, Anniversary and Mists of Pandaria Classic as we
 | Colored counts in the quest tracker | – | – | – |
 | Hide completed achievements | – | – | ✓ |
 | LFG queue pop countdown | – | – | ✓ |
-| Target in unit tooltips, XP/reputation number colors | where the client supports it | where the client supports it | where the client supports it |
+| Target in unit tooltips, colorful unit tooltips, XP/reputation number colors | where the client supports it | where the client supports it | where the client supports it |
 
 Everything else, from the quest sounds to the item level/speed line, reputation features, countdowns and party levels, works in every client.
 
@@ -226,6 +230,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol lfgtest` — preview the queue pop countdown without a queue
 - `/sqol partylevel` (or `/sqol pl`)
 - `/sqol tooltiptarget` (or `/sqol tt`)
+- `/sqol tooltipcolor` (or `/sqol tc`)
 - `/sqol range` (or `/sqol rng`)
 - `/sqol debugtrack` (or `/sqol dbg`)
 - `/sqol reset`
@@ -277,7 +282,7 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `Locales/Locales.lua` | The `SQOL.L` translation table (English text is the key and the fallback) |
 | `Locales/<locale>.lua` | Translations for one client language (`esES.lua` also serves esMX) |
 | `Core.lua` | Client detection (Retail, WoW Forever, Classic), defaults, sound profiles, shared utilities and namespace setup |
-| `VisualTweaks.lua` | Damage font, cursor highlight, achievement filter and tooltip target line |
+| `VisualTweaks.lua` | Damage font, cursor highlight, achievement filter, tooltip target line and tooltip colors |
 | `QuestRadar.lua` | Optional quest radar, safe tooltip parsing and active-quest relevance |
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
 | `PlayerStats.lua` | Independent item level and movement speed displays |

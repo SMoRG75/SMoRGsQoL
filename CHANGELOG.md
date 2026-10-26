@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Colorful unit tooltips** — players' names, specs, the tooltip border and the health bar in their class color (reaction colors for NPCs), the guild in green as `<Guild>`, the level in the difficulty color you know from the target frame, and Horde in red or Alliance in blue, with the health on the health bar (e.g. `18.8K / 23.8K (79%)`). Toggle under **Interface** or with `/sqol tooltipcolor` (`tc`). Off by default.
+
 ## [1.4.0] - 2026-10-23
 
 ### Added

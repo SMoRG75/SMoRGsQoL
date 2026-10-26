@@ -330,25 +330,31 @@ local SQOL_TOOLTIP_TARGET_REFRESH = 0.2
 -- The unit and line currently showing a target on GameTooltip.
 local tooltipTarget = { unit = nil, line = nil, text = nil, elapsed = 0 }
 
-local function SQOL_TooltipTarget_ColorCode(targetUnit)
-    local color
-    local isPlayer = UnitIsPlayer(targetUnit)
-    if SQOL.CanUseValue(isPlayer) and isPlayer then
-        local _, classFile = UnitClass(targetUnit)
-        if SQOL.CanUseValue(classFile) and classFile and RAID_CLASS_COLORS then
-            color = RAID_CLASS_COLORS[classFile]
-        end
-    else
-        local reaction = UnitReaction(targetUnit, "player")
-        if SQOL.CanUseValue(reaction) and reaction and FACTION_BAR_COLORS then
-            color = FACTION_BAR_COLORS[reaction]
-        end
-    end
-    if not color then
-        return "|cffffffff"
-    end
+local function SQOL_ColorCode(color)
     return string.format("|cff%02x%02x%02x",
         math.floor(color.r * 255 + 0.5), math.floor(color.g * 255 + 0.5), math.floor(color.b * 255 + 0.5))
+end
+
+-- Class color for players, reaction color for NPCs; nil when unknown or secret.
+local function SQOL_UnitColor(unit)
+    local isPlayer = UnitIsPlayer(unit)
+    if SQOL.CanUseValue(isPlayer) and isPlayer then
+        local _, classFile = UnitClass(unit)
+        if SQOL.CanUseValue(classFile) and classFile and RAID_CLASS_COLORS then
+            return RAID_CLASS_COLORS[classFile]
+        end
+    else
+        local reaction = UnitReaction(unit, "player")
+        if SQOL.CanUseValue(reaction) and reaction and FACTION_BAR_COLORS then
+            return FACTION_BAR_COLORS[reaction]
+        end
+    end
+    return nil
+end
+
+local function SQOL_TooltipTarget_ColorCode(targetUnit)
+    local color = SQOL_UnitColor(targetUnit)
+    return color and SQOL_ColorCode(color) or "|cffffffff"
 end
 
 -- Returns the colored target name, "You", or nil when the unit has no target.
@@ -423,19 +429,299 @@ local function SQOL_TooltipTarget_OnUpdate(tooltip, elapsed)
     tooltip:Show()
 end
 
-function SQOL.TooltipTarget_Init()
-    if SQOL._tooltipTargetHooked then return end
+------------------------------------------------------------
+-- Unit tooltip: class, reaction, guild, level and faction colors
+------------------------------------------------------------
+local SQOL_TOOLTIP_GUILD_COLOR = { r = 0.25, g = 1, b = 0.25 }
+local SQOL_TOOLTIP_BOSS_LEVEL_COLOR = { r = 1, g = 0.1, b = 0.1 }
+local SQOL_TOOLTIP_TAPPED_COLOR = { r = 0.6, g = 0.6, b = 0.6 }
+local SQOL_TOOLTIP_HEALTH_COLOR = { r = 0, g = 1, b = 0 }
+local SQOL_TOOLTIP_FACTION_COLORS = {
+    Horde = { r = 1, g = 0.3, b = 0.25 },
+    Alliance = { r = 0.35, g = 0.6, b = 1 },
+}
+
+-- The color on GameTooltip's border and health bar while a styled unit is shown.
+-- The unit whose health the bar text shows.
+local tooltipStyle = { color = nil, unit = nil, healthText = nil }
+
+local function SQOL_TooltipStyle_GetLine(index)
+    local fontString = _G["GameTooltipTextLeft" .. index]
+    if not fontString then return nil, nil end
+    local text = fontString:GetText()
+    if not SQOL.CanUseValue(text) or type(text) ~= "string" or text == "" then
+        return fontString, nil
+    end
+    return fontString, text
+end
+
+local function SQOL_TooltipStyle_UnitColor(unit)
+    local isPlayer = UnitIsPlayer(unit)
+    if not (SQOL.CanUseValue(isPlayer) and isPlayer) and type(UnitIsTapDenied) == "function" then
+        local tapped = UnitIsTapDenied(unit)
+        if SQOL.CanUseValue(tapped) and tapped then return SQOL_TOOLTIP_TAPPED_COLOR end
+    end
+    return SQOL_UnitColor(unit)
+end
+
+-- Blizzard's difficulty color for the level, as on the target frame.
+local function SQOL_TooltipStyle_LevelColor(unit, level)
+    if level == -1 then return SQOL_TOOLTIP_BOSS_LEVEL_COLOR end
+    if C_PlayerInfo and type(C_PlayerInfo.GetContentDifficultyCreatureForPlayer) == "function"
+        and type(GetDifficultyColor) == "function" then
+        local difficulty = C_PlayerInfo.GetContentDifficultyCreatureForPlayer(unit)
+        if SQOL.CanUseValue(difficulty) and difficulty then
+            local color = GetDifficultyColor(difficulty)
+            if color then return color end
+        end
+    end
+    local getColor = rawget(_G, "GetCreatureDifficultyColor") or rawget(_G, "GetQuestDifficultyColor")
+    if type(getColor) == "function" then return getColor(level) end
+    return nil
+end
+
+local function SQOL_TooltipStyle_Guild(numLines, unit)
+    local guildName = GetGuildInfo(unit)
+    if not SQOL.CanUseValue(guildName) or type(guildName) ~= "string" or guildName == "" then return nil end
+
+    for i = 2, numLines do
+        local fontString, text = SQOL_TooltipStyle_GetLine(i)
+        local start = text and text:find(guildName, 1, true)
+        if start == 1 or (start == 2 and text:sub(1, 1) == "<") then
+            if start == 1 then
+                fontString:SetText("<" .. text .. ">")
+            end
+            local c = SQOL_TOOLTIP_GUILD_COLOR
+            fontString:SetTextColor(c.r, c.g, c.b)
+            return i
+        end
+    end
+    return nil
+end
+
+-- Colors the level number on the level line ("Level 90 Highmountain Tauren")
+-- and returns that line. Prefers a line with the client's word for "Level".
+local function SQOL_TooltipStyle_Level(numLines, unit, guildLine)
+    local levels = {}
+    local function addLevel(level)
+        if SQOL.CanUseValue(level) and type(level) == "number" and (level > 0 or level == -1) then
+            levels[#levels + 1] = level
+        end
+    end
+    if type(UnitEffectiveLevel) == "function" then addLevel(UnitEffectiveLevel(unit)) end
+    addLevel(UnitLevel(unit))
+    if #levels == 0 then return nil end
+
+    local label = type(LEVEL) == "string" and LEVEL ~= "" and LEVEL or nil
+    for _, needLabel in ipairs({ true, false }) do
+        for i = 2, numLines do
+            local fontString, text = SQOL_TooltipStyle_GetLine(i)
+            if text and i ~= guildLine and (not needLabel or (label and text:find(label, 1, true))) then
+                for _, level in ipairs(levels) do
+                    local shown = level == -1 and "??" or tostring(level)
+                    local pattern = level == -1 and "%?%?" or ("%f[%w]" .. shown .. "%f[%W]")
+                    if text:find(pattern) then
+                        local color = SQOL_TooltipStyle_LevelColor(unit, level)
+                        if color then
+                            fontString:SetText((text:gsub(pattern, SQOL_ColorCode(color) .. shown .. "|r", 1)))
+                        end
+                        return i
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+-- Retail's spec line ("Balance Druid") gets the class color; in Classic the
+-- class sits on the level line ("Level 60 Tauren Druid"), so only the word does.
+local function SQOL_TooltipStyle_Class(numLines, unit, color, guildLine, levelLine)
+    local className = UnitClass(unit)
+    if not SQOL.CanUseValue(className) or type(className) ~= "string" or className == "" then return end
+
+    for i = 2, numLines do
+        local fontString, text = SQOL_TooltipStyle_GetLine(i)
+        local start, stop = nil, nil
+        if text and i ~= guildLine then
+            start, stop = text:find(className, 1, true)
+        end
+        if start then
+            if i == levelLine then
+                fontString:SetText(text:sub(1, start - 1) .. SQOL_ColorCode(color) .. className .. "|r" .. text:sub(stop + 1))
+            else
+                fontString:SetTextColor(color.r, color.g, color.b)
+            end
+            return
+        end
+    end
+end
+
+local function SQOL_TooltipStyle_Faction(numLines, unit)
+    local faction, localized = UnitFactionGroup(unit)
+    if not (SQOL.CanUseValue(faction) and SQOL.CanUseValue(localized)) then return end
+    local color = SQOL_TOOLTIP_FACTION_COLORS[faction or ""]
+    if not color or type(localized) ~= "string" then return end
+
+    for i = numLines, 2, -1 do
+        local fontString, text = SQOL_TooltipStyle_GetLine(i)
+        if text == localized then
+            fontString:SetTextColor(color.r, color.g, color.b)
+            return
+        end
+    end
+end
+
+local function SQOL_TooltipStyle_SetBarColor(color)
+    local bar = GameTooltip.StatusBar or rawget(_G, "GameTooltipStatusBar")
+    if bar and bar.SetStatusBarColor then
+        bar:SetStatusBarColor(color.r, color.g, color.b)
+    end
+end
+
+local function SQOL_TooltipStyle_Abbreviate(value)
+    local abbreviate = rawget(_G, "AbbreviateLargeNumbers") or rawget(_G, "BreakUpLargeNumbers") or tostring
+    return abbreviate(value)
+end
+
+-- "18.8K / 23.8K (79%)". In 12.x other units' health can be secret: no math
+-- on it then, but the client can still abbreviate and show the numbers.
+function SQOL.TooltipStyle_GetHealthText(unit)
+    local cur, max = UnitHealth(unit), UnitHealthMax(unit)
+    if SQOL.CanUseValue(cur) and SQOL.CanUseValue(max) then
+        if type(cur) ~= "number" or type(max) ~= "number" or max <= 0 then return nil end
+        return string.format("%s / %s (%d%%)", SQOL_TooltipStyle_Abbreviate(cur),
+            SQOL_TooltipStyle_Abbreviate(max), math.floor(cur / max * 100 + 0.5))
+    end
+    local ok, text = pcall(function()
+        return SQOL_TooltipStyle_Abbreviate(cur) .. " / " .. SQOL_TooltipStyle_Abbreviate(max)
+    end)
+    return ok and text or nil
+end
+
+local function SQOL_TooltipStyle_GetHealthFontString(bar)
+    if not tooltipStyle.healthText then
+        local text = bar:CreateFontString(nil, "OVERLAY")
+        text:SetFontObject(rawget(_G, "TextStatusBarText") or GameFontHighlightSmall)
+        local font = text:GetFont()
+        if font then text:SetFont(font, 10, "OUTLINE") end
+        text:SetPoint("CENTER", bar, "CENTER", 0, 0)
+        tooltipStyle.healthText = text
+    end
+    return tooltipStyle.healthText
+end
+
+local function SQOL_TooltipStyle_UpdateHealthText()
+    local bar = GameTooltip.StatusBar or rawget(_G, "GameTooltipStatusBar")
+    if not (bar and bar.CreateFontString) then return end
+    local fontString = SQOL_TooltipStyle_GetHealthFontString(bar)
+
+    -- The mouseover unit is gone while the tooltip fades out; keep the last value.
+    local unit = tooltipStyle.unit
+    local exists = unit and UnitExists(unit)
+    if unit and not (SQOL.CanUseValue(exists) and exists) then return end
+
+    local ok, text = pcall(SQOL.TooltipStyle_GetHealthText, unit)
+    if unit and ok and text and pcall(fontString.SetText, fontString, text) then
+        fontString:Show()
+    else
+        fontString:Hide()
+    end
+end
+
+local function SQOL_TooltipStyle_SetBorderColor(tooltip, color)
+    if tooltip.NineSlice and tooltip.NineSlice.SetBorderColor then
+        tooltip.NineSlice:SetBorderColor(color.r, color.g, color.b)
+    elseif tooltip.SetBackdropBorderColor then
+        tooltip:SetBackdropBorderColor(color.r, color.g, color.b)
+    end
+end
+
+function SQOL.TooltipStyle_Apply(tooltip, unit)
+    local numLines = tooltip:NumLines()
+    local color = SQOL_TooltipStyle_UnitColor(unit)
+    local isPlayer = UnitIsPlayer(unit)
+    isPlayer = SQOL.CanUseValue(isPlayer) and isPlayer
+
+    local guildLine = isPlayer and SQOL_TooltipStyle_Guild(numLines, unit) or nil
+    local levelLine = SQOL_TooltipStyle_Level(numLines, unit, guildLine)
+    if isPlayer and color then
+        local nameLine = SQOL_TooltipStyle_GetLine(1)
+        if nameLine then nameLine:SetTextColor(color.r, color.g, color.b) end
+        SQOL_TooltipStyle_Class(numLines, unit, color, guildLine, levelLine)
+    end
+    SQOL_TooltipStyle_Faction(numLines, unit)
+
+    if color then
+        tooltipStyle.color = color
+        SQOL_TooltipStyle_SetBorderColor(tooltip, color)
+        SQOL_TooltipStyle_SetBarColor(color)
+    end
+    tooltipStyle.unit = unit
+    SQOL_TooltipStyle_UpdateHealthText()
+end
+
+-- Puts Blizzard's white border and plain green health bar back for the next tooltip.
+local function SQOL_TooltipStyle_Reset()
+    if tooltipStyle.unit then
+        tooltipStyle.unit = nil
+        SQOL_TooltipStyle_UpdateHealthText()
+    end
+    if not tooltipStyle.color then return end
+    tooltipStyle.color = nil
+    SQOL_TooltipStyle_SetBorderColor(GameTooltip, TOOLTIP_DEFAULT_COLOR or { r = 1, g = 1, b = 1 })
+    SQOL_TooltipStyle_SetBarColor(SQOL_TOOLTIP_HEALTH_COLOR)
+end
+
+-- Blizzard recolors the health bar as the value changes; keep ours and the text.
+local function SQOL_TooltipStyle_OnBarValueChanged()
+    if tooltipStyle.color then
+        SQOL_TooltipStyle_SetBarColor(tooltipStyle.color)
+    end
+    if tooltipStyle.unit then
+        SQOL_TooltipStyle_UpdateHealthText()
+    end
+end
+
+local function SQOL_TooltipStyle_OnUnitTooltip(tooltip)
+    if tooltip ~= GameTooltip or not (SQOL.DB and SQOL.DB.ColorUnitTooltips) then return end
+
+    local ok, _, unit = pcall(tooltip.GetUnit, tooltip)
+    if not ok or type(unit) ~= "string" or not SQOL.CanUseValue(unit) then return end
+    SQOL.safe_pcall(SQOL.TooltipStyle_Apply, tooltip, unit)
+end
+
+------------------------------------------------------------
+-- Unit tooltip hooks
+------------------------------------------------------------
+local function SQOL_UnitTooltip_OnPostCall(tooltip)
+    SQOL_TooltipStyle_OnUnitTooltip(tooltip)
+    SQOL_TooltipTarget_OnUnitTooltip(tooltip)
+end
+
+local function SQOL_UnitTooltip_OnClear()
+    SQOL_TooltipTarget_Reset()
+    SQOL_TooltipStyle_Reset()
+end
+
+function SQOL.UnitTooltip_Init()
+    if SQOL._unitTooltipHooked then return end
     if not (TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall
         and Enum and Enum.TooltipDataType and GameTooltip and GameTooltip.HookScript) then
         return
     end
-    SQOL._tooltipTargetHooked = true
+    SQOL._unitTooltipHooked = true
 
-    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, SQOL_TooltipTarget_OnUnitTooltip)
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, SQOL_UnitTooltip_OnPostCall)
     GameTooltip:HookScript("OnUpdate", SQOL_TooltipTarget_OnUpdate)
-    GameTooltip:HookScript("OnTooltipCleared", SQOL_TooltipTarget_Reset)
-    GameTooltip:HookScript("OnHide", SQOL_TooltipTarget_Reset)
+    GameTooltip:HookScript("OnTooltipCleared", SQOL_UnitTooltip_OnClear)
+    GameTooltip:HookScript("OnHide", SQOL_UnitTooltip_OnClear)
+
+    local bar = GameTooltip.StatusBar or rawget(_G, "GameTooltipStatusBar")
+    if bar and bar.HookScript then
+        bar:HookScript("OnValueChanged", SQOL_TooltipStyle_OnBarValueChanged)
+    end
 end
 
-SQOL.TooltipTarget_Init()
+SQOL.UnitTooltip_Init()
 

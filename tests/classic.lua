@@ -143,7 +143,7 @@ assert(sqol.DB and sqol.DB.QuestCompleteSound and sqol.DB.QuestObjectiveSound)
 local available = {}
 sqol.ForEachOption(function(_, option) available[option.key] = true end)
 for _, key in ipairs({ 'AutoTrack', 'SmartQuestRadar', 'ShowNameplateObjectives',
-    'ColorStatusBarProgress', 'ShowLFGProposalTimer', 'ShowTooltipTarget', 'HideDoneAchievements',
+    'ColorStatusBarProgress', 'ShowLFGProposalTimer', 'ShowTooltipTarget', 'ColorUnitTooltips', 'HideDoneAchievements',
     'ShowRangeIndicator' }) do
     assert(not available[key], key .. ' must be hidden in Classic Era')
 end
