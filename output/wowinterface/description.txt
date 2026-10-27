@@ -27,6 +27,7 @@ Everything can be turned on and off from the options window, the in-game Setting
 [*][b]Nameplate objective counts[/b] - shows quest progress (e.g. 0/10 or 45%) above the nameplates of quest mobs (Retail and WoW Forever).
 [*][b]Smart Quest Radar[/b] - a quest icon and up to three unfinished objective counts (e.g. 2/8 - 1/5) above the nameplates of units you still need for your quests. It only marks a unit when its tooltip matches your own active quests (Retail and WoW Forever).
 [*][b]Adventure Recap[/b] - a movable window with this session's completed quests, world quests, reputation gained, playtime and your most active faction, kept per character. The previous session stays available too.
+[*][b]Quest automation[/b] - accepts and turns in quests at quest givers, with separate options for regular, daily and weekly quests and for turn-ins. Hold the override key (SHIFT, ALT, CONTROL or CMD) to pause it, or require it to automate. It never picks between rewards, never hands in money, currency or items that aren't quest items, and skips quests shared by other players.
 [/list]
 
 [b]Character[/b]
@@ -34,6 +35,7 @@ Everything can be turned on and off from the options window, the in-game Setting
 [*][b]Item level and movement speed[/b] on your player frame, each toggled on its own.
 [*][b]Range icon and distance[/b] - the distance to your target in yards (e.g. 8-30 yd) on its nameplate, plus a pulsing icon when none of the offensive abilities on your bars can reach it. Works for every class with no spell lists to set up (Retail and WoW Forever).
 [*][b]Target in unit tooltips[/b] - a "Target:" line showing who the unit is targeting, class- or reaction-colored, with a red "You" when it is you.
+[*][b]Colorful unit tooltips[/b] - names, specs, border and health bar in the class color (reaction colors for NPCs), the guild in green, the level in the difficulty color and the faction in red or blue, with the health shown on the bar.
 [/list]
 
 [b]Reputation and XP[/b]
@@ -54,6 +56,7 @@ Everything can be turned on and off from the options window, the in-game Setting
 [b]Interface[/b]
 [list]
 [*][b]Hide completed achievements[/b] - the Achievement UI opens on incomplete achievements (Retail and Mists of Pandaria Classic).
+[*][b]Wowhead links[/b] - a copyable Wowhead link for the quest in the quest log and the achievement you open, plus a "Show web link" key binding that pops up a link for the item, spell, quest, NPC or player under the mouse. Links go to the Wowhead of your client (Classic, TBC, Mists, Forever) in your language.
 [*][b]Custom damage text font[/b] for floating combat text.
 [*][b]Cursor shake highlight[/b] - find your cursor by shaking the mouse.
 [*][b]Login splash[/b] showing which features are on.

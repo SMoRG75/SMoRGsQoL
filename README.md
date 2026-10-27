@@ -9,12 +9,20 @@ Everything is toggleable:
 - ⚙️ via the in-game Settings UI, or
 - 💬 via `/sqol` chat commands.
 
-## What's new in 1.4.0
+## What's new in 1.5.0
+
+- 🤖 **Quest automation** — accepts and turns in quests at quest givers, with separate options for regular, daily and weekly quests and for turn-ins, and an override key that pauses it (or that you hold to automate). It never picks between rewards or hands in money, currency or items that aren't quest items. `/sqol questaccept`, `questturnin`, `questkey`.
+- 🎨 **Colorful unit tooltips** — names, specs, border and health bar in the class color (reaction colors for NPCs), the guild in green, the level in the difficulty color and the faction in red or blue, with the health shown on the bar. `/sqol tooltipcolor` (`tc`).
+- 🔗 **Wowhead links** — a copyable Wowhead link for the quest in the quest log and the achievement you open, plus a **Show web link** key binding that pops up a link for whatever is under the mouse. `/sqol wowhead` (`wh`); bind the key under **Key Bindings > SMoRG's QoL**.
+
+With these, SMoRG's QoL covers the Leatrix Plus features *Automate quests*, *Show Wowhead links* and *Show web link*. All new features are off by default; turn them on in the options window. 1.5.0 adds new files, so restart the game after updating.
+
+See the [changelog](CHANGELOG.md) for the full release history.
+
+### 1.4.0
 
 - 🏰 **Classic Era, Anniversary and Mists of Pandaria Classic** — the addon now runs in the three Classic clients, quest sounds included. Features a client can't support are left out of its options instead of showing up and doing nothing; see [Classic clients](#classic-clients).
 - 🏹 **Hunter range in WoW Forever** — the distance no longer reads `< 5 yd` at any range. It shows `8-35 yd` at shooting range, and out of combat `> 35 yd` with the icon when the target is too far.
-
-See the [changelog](CHANGELOG.md) for the full release history.
 
 ### 1.3.0
 
@@ -279,12 +287,12 @@ SMoRG's QoL follows your game language: English, German, French, Spanish (Spain 
 
 SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor its development on [GitHub Sponsors](https://github.com/sponsors/SMoRG75). Bug reports and ideas are just as welcome on [CurseForge](https://www.curseforge.com/wow/addons/smorgsqol) or [GitHub](https://github.com/SMoRG75/SMoRGsQoL/issues).
 
-## Updating to 1.4.0
+## Updating to 1.5.0
 
-Install the complete addon folder, including the `Media` and `Sounds` folders and all
-files listed in `SMoRGsQoL.toc`. 1.4.0 adds no new files, so coming from 1.3.0 a
-`/reload` is enough; from an older version, restart the game (a `/reload` does not
-load new files). In a Classic client, install it into that client's own
+Install the complete addon folder, including the `Media` and `Sounds` folders,
+`Bindings.xml` and all files listed in `SMoRGsQoL.toc`. 1.5.0 adds new files
+(`QuestAutomation.lua`, `WowheadLinks.lua` and `Bindings.xml`), so restart the game
+after updating (a `/reload` does not load new files). In a Classic client, install it into that client's own
 `Interface\AddOns` folder, e.g. `_classic_era_`, `_anniversary_` or `_classic_`. Keep
 your saved variables; existing settings are preserved. The addon picks the language
 of your game client automatically.
