@@ -154,6 +154,10 @@ All three new features are off by default; turn them on in the options window. 1
   - Players' names, specs, the tooltip border and the health bar in their class color (reaction colors for NPCs, gray for tapped mobs), the guild in green as `<Guild>`, the level in Blizzard's difficulty color (red `??` for bosses), and `Horde` in red or `Alliance` in blue.
   - Shows the health on the tooltip's health bar, e.g. `18.8K / 23.8K (79%)`.
   - Toggle with `/sqol tooltipcolor` (`tc`). Disabled by default. Skipped when the client hides the unit's data (secret values in 12.x); offered where the tooltip target line is.
+- 🔗 **Wowhead links** — a replacement for Leatrix Plus' *Show Wowhead links* and its *Show web link* key binding.
+  - **Show Wowhead links** (under **Interface**, `/sqol wowhead` or `wh`, off by default) puts a Wowhead link for the quest in the quest log at the top of the world map (Retail and WoW Forever: the quest you have open, otherwise the one you track) or in place of the quest log title (Classic), and one for the achievement you open at the bottom of the achievement window. Hover the link and press CTRL+C to copy it.
+  - **Show web link** is a key binding under **Key Bindings > SMoRG's QoL**, without a default key (Leatrix Plus users had SHIFT-W). It works without the option: press it over a tooltip and a copyable link pops up for the item, spell, aura, quest, achievement or currency, the NPC under the mouse, a battle pet, or a player's armory page (Retail). Anything else gets a Wowhead search for the tooltip's title. Press CTRL+C to copy and close it, or Escape or right-click to close it.
+  - Links go to each client's own Wowhead: `de.wowhead.com` style in Retail, `wowhead.com/classic`, `/tbc`, `/mop-classic` and `/forever` (with `/de` and so on) elsewhere, in your client's language.
 - 🏹 **Range icon and distance**
   - Shows the distance to an attackable target on its nameplate (where Blizzard's soft target sword icon sits, just above the quest objective count when one is shown), or next to the target frame portrait when the target has no nameplate, as a range in yards (`< 5 yd`, `8-30 yd`, `> 40 yd`). The client has no exact distance for enemies, so the range comes from the abilities on your action bars that do and don't reach.
   - Adds a pulsing icon when none of your offensive abilities can reach the target. Uses the same range check that tints action buttons red, so it follows druid forms and bonus bars, and needs no class-specific spell lists.
@@ -180,7 +184,7 @@ SMoRG's QoL runs in Classic Era, Anniversary and Mists of Pandaria Classic as we
 | LFG queue pop countdown | – | – | ✓ |
 | Target in unit tooltips, colorful unit tooltips, XP/reputation number colors | where the client supports it | where the client supports it | where the client supports it |
 
-Everything else, from the quest sounds and quest automation to the item level/speed line, reputation features, countdowns and party levels, works in every client.
+Everything else, from the quest sounds, quest automation and Wowhead links to the item level/speed line, reputation features, countdowns and party levels, works in every client.
 
 ## Configuration
 
@@ -244,6 +248,7 @@ Type `/sqol` to see current status, or use:
 - `/sqol tooltiptarget` (or `/sqol tt`)
 - `/sqol tooltipcolor` (or `/sqol tc`)
 - `/sqol range` (or `/sqol rng`)
+- `/sqol wowhead` (or `/sqol wh`) — toggle the Wowhead links in the quest log and achievement window
 - `/sqol debugtrack` (or `/sqol dbg`)
 - `/sqol reset`
 
@@ -297,6 +302,8 @@ Modules share the addon's private `SQOL` namespace; implementation helpers stay 
 | `VisualTweaks.lua` | Damage font, cursor highlight, achievement filter, tooltip target line and tooltip colors |
 | `QuestRadar.lua` | Optional quest radar, safe tooltip parsing and active-quest relevance |
 | `QuestAutomation.lua` | Accepting and turning in quests at quest givers, with the override key |
+| `WowheadLinks.lua` | Wowhead links in the quest log and achievement window, and the "Show web link" popup |
+| `Bindings.xml` | The "Show web link" key binding (loaded by the client without a TOC entry) |
 | `QuestProgress.lua` | Quest data cache, progress colors/messages, scenario progress and nameplate objectives |
 | `PlayerStats.lua` | Independent item level and movement speed displays |
 | `PartyLevels.lua` | Levels on default and raid-style party frames |

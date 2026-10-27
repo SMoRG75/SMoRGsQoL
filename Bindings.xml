@@ -1,0 +1,8 @@
+<Bindings>
+	<!-- Key Bindings > SMoRG's QoL. No default key. Names are set in WowheadLinks.lua.
+	     The category names the BINDING_HEADER_SMORGSQOL global; a header attribute
+	     would add an empty spacer row above the binding. -->
+	<Binding name="SMORGSQOL_WEBLINK" category="BINDING_HEADER_SMORGSQOL">
+		SMoRGsQoL_ShowWebLink()
+	</Binding>
+</Bindings>

@@ -37,9 +37,12 @@ local function widget()
         'SetInsertMode', 'SetSpacing', 'AddMessage', 'SetToplevel', 'SetClampedToScreen',
         'SetMovable', 'RegisterForDrag', 'StartMoving', 'StopMovingOrSizing', 'SetHitRectInsets',
         'SetFontObject', 'SetColorTexture', 'SetHeight', 'SetOwner', 'SetTexCoord', 'SetShadowOffset',
-        'SetBackdrop', 'SetBackdropColor', 'SetBackdropBorderColor' }) do
+        'SetBackdrop', 'SetBackdropColor', 'SetBackdropBorderColor', 'SetAutoFocus',
+        'SetBlinkSpeed', 'HighlightText', 'SetFocus', 'ClearFocus', 'SetFrameLevel' }) do
         w[method] = function() end
     end
+    function w:IsMouseOver() return self.mouseOver == true end
+    function w:EnableKeyboard(value) self.keyboard = value end
     return w
 end
 function CreateFrame(_, name)
@@ -647,6 +650,147 @@ assert(questEvent('QUEST_AUTOCOMPLETE', 77) == 'show 77')
 for _, command in ipairs({ 'qa', 'qw', 'qt' }) do SlashCmdList.SQOL(command) end
 assert(questEvent('QUEST_DETAIL') == '' and questEvent('GOSSIP_SHOW') == '', 'All off stops listening')
 
+-- Wowhead links: the world map's quest, the opened achievement, and the
+-- "Show web link" binding for what the mouse is over.
+local plainHook = hooksecurefunc
+function hooksecurefunc(object, method, callback)
+    if type(object) == 'string' then object, method, callback = _G, object, method end
+    local original = object[method]
+    object[method] = function(...) original(...) callback(...) end
+end
+WorldMapFrame = widget()
+WorldMapFrame.BorderFrame = widget()
+WorldMapFrameTitleText = widget()
+WorldMapFrameTitleText:Show()
+QuestMapFrame = { DetailsFrame = widget() }
+local superTracked, detailQuest = 0, nil
+C_SuperTrack = { GetSuperTrackedQuestID = function() return superTracked end }
+function QuestMapFrame_GetDetailQuestID() return detailQuest end
+function QuestMapFrame_ShowQuestDetails(questID) detailQuest = questID QuestMapFrame.DetailsFrame:Show() end
+function QuestMapFrame_CloseQuestDetails() QuestMapFrame.DetailsFrame:Hide() end
+local savedQuestLog = C_QuestLog
+C_QuestLog = { GetTitleForQuestID = function(id) return id == 176 and 'Wanted: Hogger' or nil end }
+local before = #frames
+SlashCmdList.SQOL('wowhead')
+local mapBox = frames[before + 1]
+assert(sqol.DB.ShowWowheadLinks and mapBox and not mapBox:IsShown(), 'No quest, no link')
+assert(mapBox.keyboard == true, 'CTRL+C must reach the link, not the C key binding')
+assert(WorldMapFrameTitleText:IsShown())
+superTracked = 176
+fire('SUPER_TRACKING_CHANGED')
+assert(mapBox:IsShown() and mapBox.text == 'https://wowhead.com/quest=176' and mapBox.title == 'Wanted: Hogger')
+assert(not WorldMapFrameTitleText:IsShown(), 'The link takes the place of the map title')
+QuestMapFrame_ShowQuestDetails(26)
+assert(mapBox.text == 'https://wowhead.com/quest=26', 'Quest details win over the super-tracked quest')
+QuestMapFrame_CloseQuestDetails()
+assert(mapBox.text == 'https://wowhead.com/quest=176')
+mapBox:SetText('typed')
+mapBox.scripts.OnTextChanged(mapBox, true)
+assert(mapBox.text == 'https://wowhead.com/quest=176', 'The link cannot be edited')
+sqol.Locale = 'deDE'
+fire('SUPER_TRACKING_CHANGED')
+assert(mapBox.text == 'https://de.wowhead.com/quest=176', 'Retail uses language subdomains')
+sqol.Locale = 'enUS'
+AchievementFrame = widget()
+AchievementTemplateMixin = { DisplayObjectives = function() end }
+function AchievementFrameComparisonTab_OnClick() end
+function GetAchievementInfo(id) return id, 'Explore Elwynn Forest' end
+before = #frames
+fire('ADDON_LOADED', 'Blizzard_AchievementUI')
+local achievementBox = frames[before + 1]
+assert(achievementBox.keyboard == true, 'CTRL+C must reach the achievement link')
+AchievementTemplateMixin:DisplayObjectives(776, false)
+assert(achievementBox:IsShown() and achievementBox.text == 'https://wowhead.com/achievement=776'
+    and achievementBox.title == 'Explore Elwynn Forest')
+AchievementFrameComparisonTab_OnClick(2)
+assert(not achievementBox:IsShown(), 'Comparison hides the link')
+SlashCmdList.SQOL('wh')
+AchievementTemplateMixin:DisplayObjectives(776, false)
+assert(not sqol.DB.ShowWowheadLinks and not mapBox:IsShown() and not achievementBox:IsShown())
+assert(WorldMapFrameTitleText:IsShown(), 'Turning the option off restores the map title')
+
+-- "Show web link" works without the option, in this order: item, spell,
+-- tooltip data, a link the tooltip was given, NPC, player, search.
+ItemRefTooltip = widget()
+function GameTooltip:GetName() return 'GameTooltip' end
+function ItemRefTooltip:GetName() return 'ItemRefTooltip' end
+local function tooltipShows(title)
+    GameTooltip.lines = {}
+    GameTooltip:AddLine(title)
+    GameTooltip:Show()
+end
+local function webLink()
+    if SQOL_WebLinkPopup then SQOL_WebLinkPopup:Hide() end
+    SMoRGsQoL_ShowWebLink()
+    local popup = SQOL_WebLinkPopup
+    return popup and popup:IsShown() and popup.box.text or nil, popup and popup.label.text
+end
+tooltipShows('Thunderfury, Blessed Blade of the Windseeker')
+GameTooltip.GetItem = function() return 'Thunderfury', '|cffff8000|Hitem:19019::::::::60:::::|h[Thunderfury]|h|r' end
+local url, label = webLink()
+assert(url == 'https://wowhead.com/item=19019' and label:find('(19019)', 1, true), tostring(url))
+assert(UISpecialFrames[#UISpecialFrames] == 'SQOL_WebLinkPopup', 'Escape closes the popup')
+GameTooltip.GetItem = nil
+GameTooltip.GetSpell = function() return 'Fireball', 133 end
+assert(webLink() == 'https://wowhead.com/spell=133')
+GameTooltip.GetSpell = nil
+GameTooltip.GetPrimaryTooltipData = function() return { type = 23, id = 176 } end
+assert(webLink() == 'https://wowhead.com/quest=176', 'Quest tooltip data')
+GameTooltip.GetPrimaryTooltipData = function() return { type = 7, id = 1459 } end
+assert(webLink() == 'https://wowhead.com/spell=1459', 'Aura tooltip data')
+GameTooltip.GetPrimaryTooltipData = nil
+-- A link set on the tooltip counts while the tooltip still shows its title.
+function GameTooltip:SetHyperlink() tooltipShows('Explore Elwynn Forest') end
+sqol._webLinkTooltipsHooked = nil
+sqol.WebLink_HookTooltips()
+GameTooltip:SetHyperlink('achievement:776:Player-1:0:0:0:0:0:0:0:0')
+assert(webLink() == 'https://wowhead.com/achievement=776', 'Hyperlink on the tooltip')
+-- NPCs under the mouse; players get their armory page.
+local mouseover = { guid = 'Creature-0-1465-0-2105-448-000043F59F', name = 'Hogger' }
+function UnitGUID(unit) return unit == 'mouseover' and mouseover.guid or nil end
+function UnitName(unit) return mouseover.name, mouseover.realm end
+function UnitExists(unit) return unit == 'mouseover' end
+function UnitIsPlayer() return mouseover.player == true end
+tooltipShows('Hogger')
+assert(webLink() == 'https://wowhead.com/npc=448', 'NPC from the mouseover GUID')
+mouseover = { guid = 'Player-1305-0ABCDEF1', name = 'Smorg', realm = 'TwistingNether', player = true }
+function GetCurrentRegion() return 3 end
+tooltipShows('Smorg')
+url, label = webLink()
+assert(url == 'https://worldofwarcraft.com/en-gb/character/eu/twisting-nether/smorg', tostring(url))
+assert(label:find('Twisting Nether', 1, true))
+mouseover.realm = 'Area52'
+assert(webLink() == 'https://worldofwarcraft.com/en-gb/character/eu/area-52/smorg', 'Realm exceptions')
+UnitGUID, UnitName, UnitExists, UnitIsPlayer, GetCurrentRegion = nil, nil, nil, nil, nil
+-- Anything else searches Wowhead for the tooltip's title.
+tooltipShows('|cffffffffCharacter Info|r')
+assert(webLink() == 'https://wowhead.com/search?q=Character%20Info', 'Search fallback')
+-- ItemRefTooltip (a link clicked in chat) wins while the mouse is over it.
+ItemRefTooltip:Show()
+ItemRefTooltip.mouseOver = true
+ItemRefTooltip.GetItem = function() return 'Linen Cloth', 'item:2589' end
+assert(webLink() == 'https://wowhead.com/item=2589', 'Chat link tooltip')
+ItemRefTooltip:Hide()
+issecretvalue = function() return true end
+assert(webLink() == nil, 'Secret tooltip text is never linked')
+issecretvalue = nil
+GameTooltip:Hide()
+assert(webLink() == nil, 'Nothing under the mouse, no popup')
+-- CTRL+C closes the popup.
+tooltipShows('Hogger')
+webLink()
+modifiers.CONTROL = true
+SQOL_WebLinkPopup.box.scripts.OnKeyDown(SQOL_WebLinkPopup.box, 'C')
+modifiers.CONTROL = nil
+pending[#pending]()
+table.remove(pending)
+assert(not SQOL_WebLinkPopup:IsShown(), 'Copying closes the popup')
+assert(BINDING_HEADER_SMORGSQOL == "SMoRG's QoL" and BINDING_NAME_SMORGSQOL_WEBLINK == 'Show web link')
+GameTooltip.lines, GameTooltip.SetHyperlink, GameTooltip.GetName = {}, nil, nil
+C_QuestLog, C_SuperTrack, QuestMapFrame = savedQuestLog, nil, nil
+QuestMapFrame_GetDetailQuestID, QuestMapFrame_ShowQuestDetails, QuestMapFrame_CloseQuestDetails = nil, nil, nil
+hooksecurefunc = plainHook
+
 local scheduled = pending
 pending = {}
 for _, fn in ipairs(scheduled) do fn() end
@@ -749,5 +893,6 @@ assert(not sqol.DB.AdventureRecap and SQOL_RecapDB.current.quests == recapBefore
 assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
 assert(not sqol.DB.ShowItemLevel and not sqol.DB.ShowMovementSpeed)
 assert(not sqol.DB.AutoAcceptQuests and sqol.DB.QuestAutomationKey == 'SHIFT', 'Reset turns quest automation off')
+assert(not sqol.DB.ShowWowheadLinks, 'Reset turns Wowhead links off')
 for _, message in ipairs(messages) do io.write(message, '\n') end
-io.write('PASS: TOC loading, login, commands, independent options, events, deferred callbacks, reset\n')
+io.write('PASS: TOC loading, login, commands, independent options, events, deferred callbacks, Wowhead links, reset\n')

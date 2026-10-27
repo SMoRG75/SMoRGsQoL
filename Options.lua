@@ -48,6 +48,12 @@ local function SQOL_HasQuestAutomationAPI()
         and type(GetQuestReward) == "function"
 end
 
+-- Wowhead links go on the world map's quest log (Retail and WoW Forever)
+-- or on the quest log window (Classic).
+local function SQOL_HasQuestLogFrame()
+    return rawget(_G, "WorldMapFrame") ~= nil or rawget(_G, "QuestLogFrame") ~= nil
+end
+
 -- Classic hunters' minimum range (the 5-8 yd dead zone) makes the distance
 -- unreliable there, so the range icon is Retail and WoW Forever only.
 local function SQOL_HasReliableRange()
@@ -154,6 +160,9 @@ SQOL.OptionSections = {
             { key = "ShowRangeIndicator", label = L["Range icon and distance for your target"],
               tooltip = L["On your target's nameplate, where Blizzard's soft target sword icon sits (or next to the target frame portrait without a nameplate), show the distance to an attackable target in yards (e.g. \"8-30 yd\", from the range of the abilities on your action bars), and a pulsing icon when none of your offensive abilities can reach it. Uses the same range check that tints action buttons red, so it follows forms and bonus bars. While enabled, Blizzard's soft target sword icon (SoftTargetIconEnemy) is turned off; it is turned back on when you disable this."],
               isAvailable = SQOL_HasReliableRange },
+            { key = "ShowWowheadLinks", label = L["Show Wowhead links"],
+              tooltip = L["Show a Wowhead link for the quest in the quest log (on the world map in Retail and WoW Forever) and for the opened achievement. Hover the link and press CTRL+C to copy it. The \"Show web link\" key binding (Key Bindings > SMoRG's QoL) works without this option: it shows a link for the item, spell, quest, NPC or player under the mouse."],
+              isAvailable = SQOL_HasQuestLogFrame },
             { key = "DamageTextFont", label = L["Custom damage text font"],
               tooltip = L["Use the TrashHand damage text font for floating combat text. Restart the game client after changing this; the font is only loaded when the game starts."] },
             { key = "CursorShakeHighlight", label = L["Highlight cursor on shake"],

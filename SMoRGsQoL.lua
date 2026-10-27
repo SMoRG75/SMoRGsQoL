@@ -43,6 +43,7 @@ function SQOL.Init(reset)
         SQOL.Recap_OnOptionChanged()
         SQOL.RepMemory_OnOptionChanged()
         SQOL.QuestAutomation_OnOptionChanged()
+        SQOL.WowheadLinks_OnOptionChanged()
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         SQOL.RepGains_Hide()
         SQOL.NameplateObjectives_HideAll()
@@ -500,6 +501,9 @@ function SQOL.ApplyOption(key)
         or key == "AutoAcceptWeeklyQuests" or key == "AutoTurnInQuests" then
         SQOL.QuestAutomation_OnOptionChanged()
 
+    elseif key == "ShowWowheadLinks" then
+        SQOL.WowheadLinks_OnOptionChanged()
+
     end
 
     SQOL.SyncSettingObject(key)
@@ -589,6 +593,7 @@ local SQOL_COMMANDS = {
     { names = { "tooltiptarget", "tt" }, key = "ShowTooltipTarget" },
     { names = { "tooltipcolor", "tc" }, key = "ColorUnitTooltips" },
     { names = { "range", "rng" }, key = "ShowRangeIndicator" },
+    { names = { "wowhead", "wh" }, key = "ShowWowheadLinks" },
     { names = { "damagefont", "df" }, key = "DamageTextFont" },
     { names = { "cursor", "cs" }, key = "CursorShakeHighlight" },
     { names = { "cursorflash", "cf" }, desc = L["Flash the cursor highlight once"],
@@ -713,6 +718,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL.DisableUnavailableOptions()
         SQOL.RepMemory_Init()
         SQOL.QuestAutomation_OnOptionChanged()
+        SQOL.WowheadLinks_OnOptionChanged()
         if SQOL.DB.ShowSplash then
             SQOL_Splash()
         end

@@ -106,6 +106,9 @@ SQOL.defaults = {
     -- Class, reaction, guild, level and faction colors in unit tooltips.
     ColorUnitTooltips = false,
 
+    -- Copyable Wowhead links in the quest log and achievement window.
+    ShowWowheadLinks = false,
+
     -- Icon by the target frame when no offensive action on the bars reaches the target.
     ShowRangeIndicator = false,
 

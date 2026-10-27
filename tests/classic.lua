@@ -46,9 +46,11 @@ local function widget()
         'AddMessage', 'SetToplevel', 'SetClampedToScreen', 'SetMovable', 'RegisterForDrag',
         'StartMoving', 'StopMovingOrSizing', 'SetHitRectInsets', 'SetFontObject', 'SetColorTexture',
         'SetHeight', 'SetOwner', 'SetTexCoord', 'SetShadowOffset', 'AddLine',
-        'SetBackdrop', 'SetBackdropColor', 'SetBackdropBorderColor' }) do
+        'SetBackdrop', 'SetBackdropColor', 'SetBackdropBorderColor', 'SetAutoFocus',
+        'SetBlinkSpeed', 'EnableKeyboard', 'HighlightText', 'SetFocus', 'ClearFocus', 'SetFrameLevel' }) do
         w[method] = function() end
     end
+    function w:IsMouseOver() return false end
     return w
 end
 function CreateFrame(_, name)
@@ -230,6 +232,81 @@ quest = { title = 'The Fargodeep Mine', items = { 'Fargodeep Ore Sample' } }
 assert(questEvent('QUEST_PROGRESS') == 'complete' and questEvent('QUEST_COMPLETE') == 'reward 0')
 assert(questEvent('QUEST_DETAIL') == 'accept', 'Classic has no QuestIsDaily; quests count as regular')
 
+-- Wowhead links: Classic has no quest log on the world map; the link goes
+-- on the quest log window, in each client's Wowhead section.
+local plainHook = hooksecurefunc
+function hooksecurefunc(object, method, callback)
+    if type(object) == 'string' then object, method, callback = _G, object, method end
+    local original = object[method]
+    object[method] = function(...) original(...) callback(...) end
+end
+QuestLogFrame = widget()
+QuestLogTitleText = widget()
+QuestLogTitleText:Show()
+local selectedQuest = 0
+function SelectQuestLogEntry(index) selectedQuest = index end
+function GetQuestLogSelection() return selectedQuest end
+local before = #frames
+SlashCmdList.SQOL('wowhead')
+local logBox = frames[before + 1]
+assert(sqol.DB.ShowWowheadLinks and logBox and not logBox:IsShown(), 'Wowhead links are offered in Classic Era')
+SelectQuestLogEntry(2)
+assert(logBox:IsShown() and logBox.text == 'https://wowhead.com/classic/quest=33'
+    and logBox.title == 'Wolves Across the Border', tostring(logBox.text))
+assert(not QuestLogTitleText:IsShown(), 'The link takes the place of the quest log title')
+SelectQuestLogEntry(1)
+assert(not logBox:IsShown() and QuestLogTitleText:IsShown(), 'Headers have no link')
+sqol.Locale = 'esMX'
+QuestLogFrame.scripts.OnShow(QuestLogFrame)
+SelectQuestLogEntry(3)
+assert(logBox.text == 'https://wowhead.com/classic/es/quest=88', 'Language after the section')
+sqol.Locale = 'enUS'
+sqol.IsClassicEra, sqol.IsClassicTBC = false, true
+assert(sqol.WowheadURL('item', 1) == 'https://wowhead.com/tbc/item=1', 'Anniversary')
+sqol.IsClassicTBC = false
+assert(sqol.WowheadURL('item', 1) == 'https://wowhead.com/mop-classic/item=1', 'Mists of Pandaria Classic')
+sqol.IsClassic, sqol.IsForever = false, true
+sqol.Locale = 'deDE'
+assert(sqol.WowheadURL('item', 1) == 'https://wowhead.com/forever/de/item=1', 'WoW Forever')
+sqol.IsClassic, sqol.IsForever, sqol.IsClassicEra, sqol.Locale = true, false, true, 'enUS'
+-- "Show web link": Classic spells, links set on the tooltip and auras.
+GameTooltipTextLeft1 = widget()
+function GameTooltip:GetName() return 'GameTooltip' end
+GameTooltip:Show()
+GameTooltipTextLeft1:SetText('Fireball')
+GameTooltip.GetSpell = function() return 'Fireball', 133 end
+SMoRGsQoL_ShowWebLink()
+assert(SQOL_WebLinkPopup:IsShown() and SQOL_WebLinkPopup.box.text == 'https://wowhead.com/classic/spell=133')
+GameTooltip.GetSpell = nil
+function GameTooltip:SetHyperlink() GameTooltipTextLeft1:SetText('Wolves Across the Border') end
+function GameTooltip:SetUnitBuff() GameTooltipTextLeft1:SetText('Power Word: Fortitude') end
+function UnitAura(unit, index, filter)
+    if unit == 'player' and index == 1 and filter == 'HELPFUL' then
+        return 'Power Word: Fortitude', 135987, 0, 'Magic', 1800, 0, 'player', false, false, 1243
+    end
+end
+sqol._webLinkTooltipsHooked = nil
+sqol.WebLink_HookTooltips()
+GameTooltip:SetHyperlink('|cffffff00|Hquest:33:10|h[Wolves Across the Border]|h|r')
+SMoRGsQoL_ShowWebLink()
+assert(SQOL_WebLinkPopup.box.text == 'https://wowhead.com/classic/quest=33', 'Quest link on the tooltip')
+GameTooltip:SetUnitBuff('player', 1)
+SMoRGsQoL_ShowWebLink()
+assert(SQOL_WebLinkPopup.box.text == 'https://wowhead.com/classic/spell=1243', 'Buff on the tooltip')
+-- Players have no armory link in Classic, like Leatrix Plus Classic.
+SQOL_WebLinkPopup:Hide()
+GameTooltipTextLeft1:SetText('Smorg')
+function UnitExists(unit) return unit == 'mouseover' end
+function UnitIsPlayer() return true end
+SMoRGsQoL_ShowWebLink()
+assert(not SQOL_WebLinkPopup:IsShown(), 'No player link in Classic')
+UnitIsPlayer, UnitAura, GameTooltip.SetHyperlink, GameTooltip.SetUnitBuff = nil, nil, nil, nil
+function UnitExists() return false end
+GameTooltip:Hide()
+SlashCmdList.SQOL('wh')
+assert(not logBox:IsShown() and QuestLogTitleText:IsShown())
+hooksecurefunc = plainHook
+
 -- Range in yards: Classic Era's C_Spell.GetSpellInfo says 0 for Fireball, the
 -- legacy GetSpellInfo says 35 (seen in-game). Slot 1 Fireball, 2 Attack, 3 Frost Armor.
 local inRange = { [1] = true, [2] = false }
@@ -318,4 +395,4 @@ local mists = detect(19, 50504)
 assert(mists.IsClassic and not mists.IsClassicEra and not mists.IsForever and mists.HasLFGQueue, 'MoP Classic')
 
 print = function(...) io.write(table.concat({...}, ' '), '\n') end
-print('PASS: Classic Era, Anniversary and WoW Forever detection, optional events, hidden options, quest log fallback, quest sounds and quest automation')
+print('PASS: Classic Era, Anniversary and WoW Forever detection, optional events, hidden options, quest log fallback, quest sounds, quest automation and Wowhead links')
