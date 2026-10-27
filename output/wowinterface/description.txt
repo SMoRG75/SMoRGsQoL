@@ -2,133 +2,81 @@
 
 [size=5][b]SMoRG's QoL[/b][/size]
 
-[b]Hear your quest progress:[/b] [i]"Work, work."[/i] when you finish an objective, [i]"Work complete."[/i] when the quest is done. Plus toggleable QoL tweaks for Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
+[b]Hear your quest progress:[/b] [i]"Work, work."[/i] when you finish an objective, [i]"Work complete."[/i] when the quest is done. Prefer the Alliance? Switch to the Human worker ([i]"More work?"[/i] / [i]"Job's done!"[/i]).
 
-The worker voice lines are where it all started. Prefer the Alliance? Switch to the Human worker ([i]"More work?"[/i] / [i]"Job's done!"[/i]). Every other feature is a small, [b]individually toggleable[/b] tweak.
-
-Everything can be turned on and off from the options window, the in-game Settings UI or [b]/sqol[/b] chat commands.
+On top of the quest sounds come a bunch of small quality-of-life tweaks, each one [b]individually toggleable[/b]. Works in Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
 
 [img]https://raw.githubusercontent.com/SMoRG75/SMoRGsQoL/master/output/gallery/01-quest-sounds.png[/img]
 
 
 [size=4][b]Features[/b][/size]
 
-[b]Quest sounds: objective and quest completion[/b]
-[list]
-[*]Plays a worker voice line when a single objective is completed before the full quest is done (Peon: [i]"Work, work."[/i]).
-[*]Plays another voice line and prints a chat message when the whole quest is ready to turn in, or done for bonus and world quests (Peon: [i]"Work complete."[/i]).
-[*]Choose the Horde (Peon) or Alliance (Human worker) sound profile, and toggle each sound on its own.
-[/list]
-
 [b]Quests[/b]
 [list]
-[*][b]Auto-track new quests[/b] - newly accepted quests are added to the Objective Tracker (Retail and WoW Forever).
-[*][b]Colored quest progress[/b] - progress like 3/10 or 45% is colored red -> yellow -> green in chat messages and in the quest tracker. Also covers progress-bar objectives and scenario progress bars that the default UI reports silently.
-[*][b]Nameplate objective counts[/b] - shows quest progress (e.g. 0/10 or 45%) above the nameplates of quest mobs (Retail and WoW Forever).
-[*][b]Smart Quest Radar[/b] - a quest icon and up to three unfinished objective counts (e.g. 2/8 - 1/5) above the nameplates of units you still need for your quests. It only marks a unit when its tooltip matches your own active quests (Retail and WoW Forever).
-[*][b]Adventure Recap[/b] - a movable window with this session's completed quests, world quests, reputation gained, playtime and your most active faction, kept per character. The previous session stays available too.
-[*][b]Quest automation[/b] - accepts and turns in quests at quest givers, with separate options for regular, daily and weekly quests and for turn-ins. Hold the override key (SHIFT, ALT, CONTROL or CMD) to pause it, or require it to automate. It never picks between rewards, never hands in money, currency or items that aren't quest items, and skips quests shared by other players.
+[*][b]Quest sounds[/b] - Peon or Human worker voice lines when you finish an objective or a whole quest.
+[*][b]Quest automation[/b] - accepts regular, daily and weekly quests and turns in completed ones. Never picks a reward for you and never hands in gold, currency or non-quest items.
+[*][b]Smart Quest Radar[/b] - a quest icon and objective counts (e.g. 2/8 - 1/5) above the nameplates of units you still need.
+[*][b]Nameplate objective counts[/b] - quest progress above relevant nameplates.
+[*][b]Auto-track new quests[/b] in the objective tracker.
+[*][b]Colored quest progress[/b] - counts like 3/10 go from red through yellow to green, in chat and in the quest tracker.
+[*][b]Adventure Recap[/b] - a window with this session's quests, reputation, playtime and top faction.
 [/list]
 
-[b]Character[/b]
+[b]Character, reputation and XP[/b]
 [list]
-[*][b]Item level and movement speed[/b] on your player frame, each toggled on its own.
-[*][b]Range icon and distance[/b] - the distance to your target in yards (e.g. 8-30 yd) on its nameplate, plus a pulsing icon when none of the offensive abilities on your bars can reach it. Works for every class with no spell lists to set up (Retail and WoW Forever).
-[*][b]Target in unit tooltips[/b] - a "Target:" line showing who the unit is targeting, class- or reaction-colored, with a red "You" when it is you.
-[*][b]Colorful unit tooltips[/b] - names, specs, border and health bar in the class color (reaction colors for NPCs), the guild in green, the level in the difficulty color and the faction in red or blue, with the health shown on the bar.
-[/list]
-
-[b]Reputation and XP[/b]
-[list]
-[*][b]Colored XP/reputation numbers[/b] - the current number on the standard bars goes red -> yellow -> green, and reputation shows the percentage left and your current standing.
-[*][b]Auto-watch reputation[/b] - switches your watched faction to the one you just gained reputation with.
-[*][b]Reputation Memory[/b] - save a preferred faction per character, and the reputation bar goes back to it 10 seconds after auto-watch has shown a new gain.
-[*][b]Floating reputation gains[/b] - a short "+25 Rep - Valarjar" text that floats up and fades out.
+[*][b]Item level and speed[/b] on your player frame.
+[*][b]Colored XP/reputation numbers[/b], plus percentage left and standing on the reputation bar.
+[*][b]Auto-watch reputation[/b] - switches to the faction you just gained reputation with.
+[*][b]Reputation Memory[/b] - returns to your preferred faction 10 seconds later.
+[*][b]Floating reputation gains[/b] - "+25 Rep - Valarjar" near the screen center.
 [/list]
 
 [b]Group[/b]
 [list]
-[*][b]Ready check countdown[/b] - the seconds left on a ready check, turning red for the last 5.
-[*][b]Queue pop countdown[/b] - how many of your 40 seconds are left to accept a group finder pop (not in Classic Era or Anniversary).
-[*][b]Party member levels[/b] on both default and raid-style party frames.
+[*][b]Ready check countdown[/b] and [b]queue pop countdown[/b].
+[*][b]Party member levels[/b] on the party frames.
 [/list]
 
 [b]Interface[/b]
 [list]
-[*][b]Hide completed achievements[/b] - the Achievement UI opens on incomplete achievements (Retail and Mists of Pandaria Classic).
-[*][b]Wowhead links[/b] - a copyable Wowhead link for the quest in the quest log and the achievement you open, plus a "Show web link" key binding that pops up a link for the item, spell, quest, NPC or player under the mouse. Links go to the Wowhead of your client (Classic, TBC, Mists, Forever) in your language.
-[*][b]Custom damage text font[/b] for floating combat text.
-[*][b]Cursor shake highlight[/b] - find your cursor by shaking the mouse.
-[*][b]Login splash[/b] showing which features are on.
+[*][b]Target in unit tooltips[/b] - who the unit is targeting, with a red "You" when it is you.
+[*][b]Colorful unit tooltips[/b] - class colors, guild, level, faction and health on the bar.
+[*][b]Wowhead links[/b] in the quest log and achievement window, plus a "Show web link" key binding for whatever is under the mouse.
+[*][b]Range icon and distance[/b] to your target on its nameplate.
+[*][b]Hide completed achievements[/b] by default.
+[*][b]Custom damage text font[/b] and [b]cursor shake highlight[/b].
 [/list]
 
 
 [size=4][b]Classic clients[/b][/size]
 
-SMoRG's QoL also runs in Classic Era, Anniversary and Mists of Pandaria Classic, with the quest sounds working in all of them. Features a Classic client can't support are left out of its options and switched off: auto-track, Smart Quest Radar, nameplate objective counts and the range icon in all three, and the achievement filter and queue pop countdown in Classic Era and Anniversary. The tooltip target line and XP/reputation colors are offered where the client supports them.
+The quest sounds and most features work everywhere. A few need Retail-only parts of the UI and are simply left out of the options in the Classic clients: Smart Quest Radar, nameplate objective counts, auto-track, the range icon and the colored counts in the quest tracker. Classic Era and Anniversary also have no achievements or group finder, so those two features are only in Mists of Pandaria Classic.
 
 
-[size=4][b]Options[/b][/size]
+[size=4][b]Settings[/b][/size]
 
-All settings are in one movable window, grouped into Quests, Character, Reputation & XP, Group, Interface and Advanced. Open it from:
+Open the options window from:
 [list]
-[*]LibDataBroker displays such as Bazooka, Titan Panel or ChocolateBar (left-click; right-click opens Blizzard's Settings page)
+[*]a LibDataBroker display such as Bazooka or Titan Panel (right-click for Blizzard's Settings page)
 [*]the addon compartment menu by the minimap
-[*]the minimap button (off by default, enable it with [b]/sqol minimap[/b])
+[*]the optional minimap button ([b]/sqol minimap[/b])
 [*][b]/sqol config[/b]
 [/list]
 
-The same settings are also under [b]Esc -> Options -> AddOns -> SMoRG's QoL[/b], and they stay in sync with the window and the slash commands.
+Everything is also under [b]Esc -> Options -> AddOns -> SMoRG's QoL[/b], and every option has a chat command. Type [b]/sqol help[/b] for the full list.
 
 [img]https://raw.githubusercontent.com/SMoRG75/SMoRGsQoL/master/output/gallery/02-options-window.png[/img]
 
 
-[size=4][b]Slash commands[/b][/size]
-
-Type [b]/sqol[/b] to see the current status, or [b]/sqol help[/b] for the full list.
-
-[code]
-/sqol config           open the options window
-/sqol minimap   (mm)   minimap button
-/sqol questsound (qs)  quest complete sound
-/sqol objectivesound (os)  objective complete sound
-/sqol soundprofile     Horde or Alliance voice lines
-/sqol autotrack (at)   auto-track new quests
-/sqol color     (col)  quest progress colors
-/sqol barcolor  (bc)   XP/reputation number colors
-/sqol nameplate (np)   nameplate objective counts
-/sqol radar     (qr)   Smart Quest Radar
-/sqol recap            Adventure Recap (last, reset, test)
-/sqol ilvl             item level
-/sqol speed     (spd)  movement speed
-/sqol range     (rng)  range icon and distance
-/sqol tooltiptarget (tt)  target in tooltips
-/sqol rep       (rw)   auto-watch reputation
-/sqol repmemory (rm)   return to preferred reputation
-/sqol repfocus         save the watched faction (status, clear)
-/sqol reptext   (rt)   floating reputation gains
-/sqol readycheck (rc)  ready check countdown
-/sqol lfgtimer  (lfg)  queue pop countdown
-/sqol partylevel (pl)  party member levels
-/sqol hideach   (ha)   hide completed achievements
-/sqol damagefont (df)  damage text font
-/sqol cursor    (cs)   cursor shake highlight
-/sqol splash           login splash
-/sqol reset            reset all settings
-[/code]
-
-
 [size=4][b]Translations[/b][/size]
 
-SMoRG's QoL follows your game language: English, German, French, Spanish, Brazilian Portuguese, Italian, Russian, Korean, and Simplified and Traditional Chinese. The quest voice lines are always in English, and the slash commands are the same in every language.
+The addon follows your game language: English, German, French, Spanish, Brazilian Portuguese, Italian, Russian, Korean, and Simplified and Traditional Chinese. The voice lines are always in English.
 
-[b]The translations have not been checked by native speakers.[/b] They use Blizzard's own terms where possible, but some wording may be clumsy or wrong. If something reads oddly in your language, please post a better text in the comments or on [url=https://github.com/SMoRG75/SMoRGsQoL/issues]GitHub[/url]. Corrections are very welcome.
+[b]The translations have not been checked by native speakers yet.[/b] If something reads oddly, please suggest a better wording in the comments or on [url=https://github.com/SMoRG75/SMoRGsQoL/issues]GitHub[/url].
 
 
 [size=4][b]Support[/b][/size]
 
-SMoRG's QoL is free and always will be. If it makes your questing a little more fun and you'd like to say thanks, you can sponsor it on [url=https://github.com/sponsors/SMoRG75]GitHub Sponsors[/url].
-
-Bug reports and ideas are very welcome in the comments here or on [url=https://github.com/SMoRG75/SMoRGsQoL/issues]GitHub[/url].
+SMoRG's QoL is free and always will be. If you'd like to say thanks, you can sponsor it on [url=https://github.com/sponsors/SMoRG75]GitHub Sponsors[/url]. Bug reports and ideas are just as welcome in the comments here or on [url=https://github.com/SMoRG75/SMoRGsQoL/issues]GitHub[/url].
 
 Source code: [url=https://github.com/SMoRG75/SMoRGsQoL]github.com/SMoRG75/SMoRGsQoL[/url] (MIT license)
