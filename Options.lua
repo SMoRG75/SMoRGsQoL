@@ -1,6 +1,5 @@
 ------------------------------------------------------------
--- SMoRGsQoL - Settings (Interface -> AddOns)
--- Retail (11.2.7+) and WoW Forever. Uses the Settings API.
+-- SMoRGsQoL - Options list and the Settings (Interface -> AddOns) page
 -- Slash commands are kept as-is in SMoRGsQoL.lua.
 ------------------------------------------------------------
 
@@ -10,7 +9,7 @@ SQOL = SQOL or {}
 local L = SQOL.L
 
 ------------------------------------------------------------
--- Option list, shared by the Settings panel and the options popup
+-- Option list, shared by the options popup, the launcher and the slash commands
 ------------------------------------------------------------
 -- kind defaults to "checkbox"; "dropdown" entries list their values.
 -- An entry with isAvailable is left out when it returns false.
@@ -229,9 +228,11 @@ end
 ------------------------------------------------------------
 -- Settings category
 ------------------------------------------------------------
+-- The AddOns page holds only a button that opens the options window, so
+-- every route ends up in the same place.
 
 local function SQOL_CreateSettingsCategory()
-    if not Settings or not Settings.RegisterVerticalLayoutCategory then
+    if not (Settings and type(Settings.RegisterCanvasLayoutCategory) == "function") then
         return
     end
 
@@ -241,119 +242,26 @@ local function SQOL_CreateSettingsCategory()
     end
     SQOL._settingsCategoryCreated = true
 
-    -- Ensure DB exists.
-    if SQOL.Init and not SQOL.DB then
-        SQOL.Init(false)
-    end
-    if not SQOL.DB or not SQOL.defaults then
-        return
-    end
+    local panel = CreateFrame("Frame")
 
-    local category, layout = Settings.RegisterVerticalLayoutCategory("SMoRG's QoL")
-    Settings.RegisterAddOnCategory(category)
-    SQOL._settingsCategory = category
+    local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", panel, "TOPLEFT", 16, -16)
+    title:SetText("SMoRG's QoL")
 
-    local function RegisterSetting(option)
-        local defaultValue = SQOL.defaults[option.key]
-        if defaultValue == nil then
-            defaultValue = false
+    local button = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    button:SetSize(240, 26)
+    button:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -16)
+    button:SetText(L["Open the options window"])
+    button:SetScript("OnClick", function()
+        local settingsPanel = rawget(_G, "SettingsPanel")
+        if settingsPanel and settingsPanel:IsShown() then
+            HideUIPanel(settingsPanel)
         end
-
-        local variable = ("%s_%s"):format(ADDON_NAME, option.key)
-
-        -- 11.0.2+ signature:
-        -- Settings.RegisterAddOnSetting(category, variable, variableKey, variableTbl, variableType, name, defaultValue)
-        local setting = Settings.RegisterAddOnSetting(
-            category,
-            variable,
-            option.key,
-            SQOL.DB,
-            type(defaultValue),
-            option.label,
-            defaultValue
-        )
-
-        if SQOL.RegisterSettingObject then
-            SQOL.RegisterSettingObject(option.key, setting)
-        end
-        return setting, variable
-    end
-
-    local function BindSetting(option, setting, variable)
-        -- Ensure UI matches saved value without triggering re-entrant callbacks.
-        if type(setting.SetValue) == "function" and SQOL.DB[option.key] ~= nil then
-            SQOL._settingsSync = true
-            pcall(setting.SetValue, setting, SQOL.DB[option.key])
-            SQOL._settingsSync = false
-        end
-
-        -- Apply side-effects + keep slash commands in sync.
-        if type(Settings.SetOnValueChangedCallback) == "function" then
-            Settings.SetOnValueChangedCallback(variable, function(...)
-                if SQOL._settingsSync then return end
-                local args = { ... }
-                local value = args[#args]
-                if SQOL.SetOption then
-                    SQOL.SetOption(option.key, value)
-                else
-                    SQOL.DB[option.key] = value
-                end
-            end)
-        end
-    end
-
-    local function AddCheckbox(option)
-        local setting, variable = RegisterSetting(option)
-        local createCheckbox = Settings.CreateCheckBox or Settings.CreateCheckbox
-        if type(createCheckbox) == "function" then
-            createCheckbox(category, setting, option.tooltip)
-        end
-        BindSetting(option, setting, variable)
-    end
-
-    local function AddDropdown(option)
-        local setting, variable = RegisterSetting(option)
-        if type(Settings.CreateDropdown) == "function"
-            and type(Settings.CreateControlTextContainer) == "function" then
-            local function GetOptions()
-                local container = Settings.CreateControlTextContainer()
-                for _, value in ipairs(option.values) do
-                    container:Add(value.value, value.label)
-                end
-                return container:GetData()
-            end
-            Settings.CreateDropdown(category, setting, GetOptions, option.tooltip)
-        end
-        BindSetting(option, setting, variable)
-    end
-
-    local canAddHeaders = layout and type(layout.AddInitializer) == "function"
-        and type(CreateSettingsListSectionHeaderInitializer) == "function"
-    local lastSection
-    SQOL.ForEachOption(function(section, option)
-        if section ~= lastSection then
-            lastSection = section
-            if canAddHeaders then
-                layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(section.title))
-            end
-        end
-        if option.kind == "dropdown" then
-            AddDropdown(option)
-        else
-            AddCheckbox(option)
-        end
+        SQOL.OptionsPopup_Open()
     end)
-end
 
--- Opens Blizzard's Settings panel on the SMoRG's QoL page.
-function SQOL.OpenBlizzardSettings()
-    SQOL_CreateSettingsCategory()
-    local category = SQOL._settingsCategory
-    if not (category and Settings and type(Settings.OpenToCategory) == "function") then
-        return
-    end
-    local id = type(category.GetID) == "function" and category:GetID() or category.ID
-    Settings.OpenToCategory(id)
+    local category = Settings.RegisterCanvasLayoutCategory(panel, "SMoRG's QoL")
+    Settings.RegisterAddOnCategory(category)
 end
 
 local eventFrame = CreateFrame("Frame")

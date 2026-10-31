@@ -82,10 +82,8 @@ L["Show this command list"] = "이 명령어 목록 표시"
 -- Options window and Settings page
 L["Quality-of-life tweaks. Changes apply immediately."] = "편의 기능 모음. 변경 사항은 즉시 적용됩니다."
 L["The custom damage text font only changes after a game client restart."] = "사용자 지정 피해 숫자 글꼴은 게임 클라이언트를 다시 시작해야 바뀝니다."
-L["Blizzard Settings"] = "블리자드 설정"
 L["%d of %d features enabled"] = "기능 %d/%d개 사용 중"
 L["|cffeda55fLeft-click|r to open options"] = "|cffeda55f왼쪽 클릭|r: 설정 열기"
-L["|cffeda55fRight-click|r to open Blizzard Settings"] = "|cffeda55f오른쪽 클릭|r: 블리자드 설정 열기"
 
 L["Quests"] = "퀘스트"
 L["Auto-track newly accepted quests"] = "새 퀘스트 자동 추적"

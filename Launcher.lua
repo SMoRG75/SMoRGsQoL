@@ -3,7 +3,7 @@
 -- LibDataBroker launcher (Bazooka, Titan Panel, ChocolateBar...), an optional
 -- LibDBIcon minimap button, and Blizzard's addon compartment menu (the TOC
 -- names the SMoRGsQoL_OnAddonCompartment* globals below).
--- Left-click opens the options popup, right-click Blizzard's Settings panel.
+-- Any click toggles the options popup.
 ------------------------------------------------------------
 
 local ADDON_NAME, SQOL = ...
@@ -15,12 +15,8 @@ local LibStub = rawget(_G, "LibStub")
 local LDB = LibStub and LibStub("LibDataBroker-1.1", true)
 local LDBIcon = LibStub and LibStub("LibDBIcon-1.0", true)
 
-local function SQOL_Launcher_OnClick(button)
-    if button == "RightButton" then
-        SQOL.OpenBlizzardSettings()
-    else
-        SQOL.OptionsPopup_Toggle()
-    end
+local function SQOL_Launcher_OnClick()
+    SQOL.OptionsPopup_Toggle()
 end
 
 -- Title, how many features are on, and the click hints.
@@ -39,14 +35,13 @@ function SQOL.Launcher_AddTooltip(tooltip)
     tooltip:AddLine(string.format(L["%d of %d features enabled"], enabled, total), 1, 1, 1)
     tooltip:AddLine(" ")
     tooltip:AddLine(L["|cffeda55fLeft-click|r to open options"], 0.2, 1, 0.2)
-    tooltip:AddLine(L["|cffeda55fRight-click|r to open Blizzard Settings"], 0.2, 1, 0.2)
 end
 
 local dataObject = LDB and LDB:NewDataObject(ADDON_NAME, {
     type = "launcher",
     label = "SMoRG's QoL",
     icon = ICON,
-    OnClick = function(_, button) SQOL_Launcher_OnClick(button) end,
+    OnClick = function() SQOL_Launcher_OnClick() end,
     OnTooltipShow = function(tooltip) SQOL.Launcher_AddTooltip(tooltip) end,
 })
 
@@ -81,8 +76,8 @@ end
 ------------------------------------------------------------
 -- Addon compartment (named in SMoRGsQoL.toc)
 ------------------------------------------------------------
-function SMoRGsQoL_OnAddonCompartmentClick(_, buttonName)
-    SQOL_Launcher_OnClick(buttonName)
+function SMoRGsQoL_OnAddonCompartmentClick()
+    SQOL_Launcher_OnClick()
 end
 
 function SMoRGsQoL_OnAddonCompartmentEnter(_, menuButton)

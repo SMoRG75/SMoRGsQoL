@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **Esc → Options → AddOns → SMoRG's QoL** now holds a single button that opens the options window, instead of a second copy of every option, so every route leads to the same window. Right-clicking the LibDataBroker launcher, the minimap button or the addon compartment entry now opens the window too, and the window no longer has a **Blizzard Settings** button.
+
 ## [1.5.0] - 2026-10-27
 
 ### Added

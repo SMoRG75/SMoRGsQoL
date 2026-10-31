@@ -82,10 +82,8 @@ L["Show this command list"] = "Mostrar esta lista de comandos"
 -- Options window and Settings page
 L["Quality-of-life tweaks. Changes apply immediately."] = "Mejoras de calidad de vida. Los cambios se aplican al instante."
 L["The custom damage text font only changes after a game client restart."] = "La fuente de daño personalizada solo cambia después de reiniciar el cliente del juego."
-L["Blizzard Settings"] = "Configuración de Blizzard"
 L["%d of %d features enabled"] = "%d de %d funciones activadas"
 L["|cffeda55fLeft-click|r to open options"] = "|cffeda55fClic izquierdo|r para abrir las opciones"
-L["|cffeda55fRight-click|r to open Blizzard Settings"] = "|cffeda55fClic derecho|r para abrir la configuración de Blizzard"
 
 L["Quests"] = "Misiones"
 L["Auto-track newly accepted quests"] = "Seguir automáticamente las misiones nuevas"

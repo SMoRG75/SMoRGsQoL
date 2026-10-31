@@ -1,9 +1,9 @@
 ------------------------------------------------------------
 -- SMoRGsQoL - Options popup
 -- A standalone, movable window opened from the LDB launcher, the addon
--- compartment, the minimap button or /sqol config. It is built from
--- SQOL.OptionSections, so it always matches the Settings panel, and every
--- change goes through SQOL.SetOption like the slash commands do.
+-- compartment, the minimap button, the button on the Settings (AddOns) page
+-- or /sqol config. It is built from SQOL.OptionSections, and every change
+-- goes through SQOL.SetOption like the slash commands do.
 ------------------------------------------------------------
 
 local ADDON_NAME, SQOL = ...
@@ -296,20 +296,11 @@ local function SQOL_Popup_Create()
 
     local recapButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     recapButton:SetSize(170, 22)
-    recapButton:SetPoint("BOTTOM", frame, "BOTTOM", 24, 12)
+    recapButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PADDING_X, 12)
     recapButton:SetText(L["Adventure Recap"])
     recapButton:SetScript("OnClick", function()
         frame:Hide()
         SQOL.Recap_Command("")
-    end)
-
-    local settingsButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    settingsButton:SetSize(160, 22)
-    settingsButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PADDING_X, 12)
-    settingsButton:SetText(L["Blizzard Settings"])
-    settingsButton:SetScript("OnClick", function()
-        frame:Hide()
-        SQOL.OpenBlizzardSettings()
     end)
 
     frame:SetScript("OnShow", function()
@@ -328,20 +319,26 @@ end
 ------------------------------------------------------------
 -- Public API
 ------------------------------------------------------------
-function SQOL.OptionsPopup_Toggle()
+function SQOL.OptionsPopup_Open()
     if not SQOL.DB then return end
     if not popup then
         popup = SQOL_Popup_Create()
     end
-    if popup:IsShown() then
-        popup:Hide()
-    else
+    if not popup:IsShown() then
         SQOL_Popup_RestorePosition(popup)
         popup:Show()
     end
 end
 
--- Keep the window in sync when options change elsewhere (slash commands, Settings panel).
+function SQOL.OptionsPopup_Toggle()
+    if popup and popup:IsShown() then
+        popup:Hide()
+    else
+        SQOL.OptionsPopup_Open()
+    end
+end
+
+-- Keep the window in sync when options change elsewhere (slash commands, reset).
 function SQOL.OptionsPopup_Refresh()
     if not popup or not popup:IsShown() then return end
     for _, control in ipairs(controls) do

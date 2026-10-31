@@ -47,8 +47,8 @@
 
 - [x] **2. Flot brugergrænseflade i addon-options**
   - Selvstændigt popup-vindue (`OptionsPopup.lua`) med sektioner, åbnes fra LDB-launcher (Bazooka), Addon Compartment, valgfri minimap-knap og `/sqol config`.
-  - Venstreklik åbner popuppen, højreklik Blizzards Settings-side; den eksisterende Settings-side bevares og får samme sektionsoverskrifter.
-  - Fælles option-liste (`SQOL.OptionSections` i `Options.lua`) bruges af både popup og Settings-side.
+  - Alle klik åbner popuppen. Blizzards Settings-side (AddOns) har kun én knap, der åbner popuppen, så alle ender samme sted.
+  - Fælles option-liste (`SQOL.OptionSections` i `Options.lua`) bruges af popup, launcher og slash-kommandoer.
   - Skal virke både i Retail og Forever.
 
 - [x] **3. Ikon når target er uden for rækkevidde**

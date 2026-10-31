@@ -354,40 +354,8 @@ local function SQOL_MarkQuestHandledTemporarily(questID)
 end
 
 ------------------------------------------------------------
--- Public option helpers (used by Settings UI and slash commands)
+-- Public option helpers (used by the options window and slash commands)
 ------------------------------------------------------------
-SQOL._settingsObjects = SQOL._settingsObjects or {}
-SQOL._settingsSync = SQOL._settingsSync or false
-
-function SQOL.RegisterSettingObject(key, settingObj)
-    if type(key) ~= "string" then return end
-    SQOL._settingsObjects[key] = settingObj
-end
-
-function SQOL.SyncSettingObject(key)
-    if SQOL.OptionsPopup_Refresh then
-        SQOL.OptionsPopup_Refresh()
-    end
-
-    local settingObj = SQOL._settingsObjects and SQOL._settingsObjects[key]
-    if not settingObj or not SQOL.DB then return end
-    if type(settingObj.GetValue) ~= "function" or type(settingObj.SetValue) ~= "function" then return end
-
-    local desired = SQOL.DB[key]
-    local ok, cur = pcall(settingObj.GetValue, settingObj)
-    if ok and cur ~= desired then
-        SQOL._settingsSync = true
-        pcall(settingObj.SetValue, settingObj, desired)
-        SQOL._settingsSync = false
-    end
-end
-
-function SQOL.SyncAllSettingsObjects()
-    if not SQOL.defaults then return end
-    for k in pairs(SQOL.defaults) do
-        SQOL.SyncSettingObject(k)
-    end
-end
 
 function SQOL.ApplyOption(key)
     if not SQOL.DB then return end
@@ -506,7 +474,9 @@ function SQOL.ApplyOption(key)
 
     end
 
-    SQOL.SyncSettingObject(key)
+    if SQOL.OptionsPopup_Refresh then
+        SQOL.OptionsPopup_Refresh()
+    end
 end
 
 function SQOL.SetOption(key, value)
@@ -608,9 +578,7 @@ local SQOL_COMMANDS = {
               SQOL.SetOption("ShowRangeIndicator", false)
           end
           SQOL.Init(true)
-          if SQOL.SyncAllSettingsObjects then
-              SQOL.SyncAllSettingsObjects()
-          end
+          SQOL.OptionsPopup_Refresh()
           SQOL.UpdateMinimapButton()
       end },
     { names = { "help" }, desc = L["Show this command list"],

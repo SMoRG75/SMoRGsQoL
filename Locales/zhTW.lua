@@ -82,10 +82,8 @@ L["Show this command list"] = "顯示此指令列表"
 -- Options window and Settings page
 L["Quality-of-life tweaks. Changes apply immediately."] = "便利功能合集。變更立即生效。"
 L["The custom damage text font only changes after a game client restart."] = "自訂傷害數字字型需要重新啟動遊戲客戶端後才會生效。"
-L["Blizzard Settings"] = "暴雪設定"
 L["%d of %d features enabled"] = "已開啟 %d/%d 項功能"
 L["|cffeda55fLeft-click|r to open options"] = "|cffeda55f左鍵點擊|r開啟設定"
-L["|cffeda55fRight-click|r to open Blizzard Settings"] = "|cffeda55f右鍵點擊|r開啟暴雪設定"
 
 L["Quests"] = "任務"
 L["Auto-track newly accepted quests"] = "自動追蹤新接受的任務"

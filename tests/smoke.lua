@@ -123,6 +123,16 @@ local fakeLibs = {
     },
 }
 LibStub = setmetatable({}, { __call = function(_, name) return fakeLibs[name] end })
+local settingsPage
+Settings = {
+    RegisterCanvasLayoutCategory = function(frame, name)
+        settingsPage = { frame = frame, name = name }
+        return settingsPage
+    end,
+    RegisterAddOnCategory = function(category) category.registered = true end,
+}
+SettingsPanel = widget()
+function HideUIPanel(frame) frame:Hide() end
 
 local sqol = {}
 local files = {}
@@ -206,6 +216,28 @@ SlashCmdList.SQOL('config')
 assert(popup:IsShown())
 SlashCmdList.SQOL('config')
 assert(not popup:IsShown())
+launcher.OnClick(nil, 'RightButton')
+assert(popup:IsShown(), 'Right-click opens the same window')
+launcher.OnClick(nil, 'RightButton')
+assert(not popup:IsShown())
+
+-- Settings (AddOns) page: only a button, which closes Settings and opens the window.
+assert(settingsPage and settingsPage.registered and settingsPage.name == "SMoRG's QoL")
+local openButtons = {}
+for _, frame in ipairs(frames) do
+    if frame.scripts.OnClick and frame.text == 'Open the options window' then
+        openButtons[#openButtons + 1] = frame
+    end
+end
+assert(#openButtons == 1, 'The Settings page has one button')
+SettingsPanel:Show()
+popup:Show()
+openButtons[1].scripts.OnClick(openButtons[1])
+assert(popup:IsShown() and not SettingsPanel:IsShown(), 'The button opens the window, never toggles it closed')
+popup:Hide()
+openButtons[1].scripts.OnClick(openButtons[1])
+assert(popup:IsShown())
+popup:Hide()
 for _, event in ipairs({ 'READY_CHECK_FINISHED', 'LFG_PROPOSAL_FAILED',
     'GROUP_ROSTER_UPDATE', 'PLAYER_EQUIPMENT_CHANGED', 'QUEST_LOG_UPDATE',
     'UPDATE_FACTION', 'EDIT_MODE_LAYOUTS_UPDATED' }) do fire(event) end

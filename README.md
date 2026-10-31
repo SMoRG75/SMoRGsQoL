@@ -49,12 +49,12 @@ The quest sounds and most features work everywhere. A few need Retail-only parts
 ## Settings
 
 Open the options window from:
-- 🧩 a **LibDataBroker display** such as Bazooka or Titan Panel (right-click for Blizzard's Settings page),
+- 🧩 a **LibDataBroker display** such as Bazooka or Titan Panel,
 - 📋 the **addon compartment** menu by the minimap,
 - 🗺️ the optional **minimap button** (`/sqol minimap`), or
 - 💬 `/sqol config`.
 
-Everything is also under **Esc → Options → AddOns → SMoRG's QoL**, and every option has a chat command. Type `/sqol help` for the full list.
+**Esc → Options → AddOns → SMoRG's QoL** has a button that opens the same window, and every option has a chat command. Type `/sqol help` for the full list.
 
 ## Translations
 
