@@ -13,12 +13,14 @@ local L = SQOL.L
 local POPUP_NAME = "SQOL_OptionsPopup"
 local ICON = "Interface\\AddOns\\SMoRGsQoL\\Media\\smorgsqol-icon-simple-v3-400.png"
 
-local COLUMN_WIDTH = 290
-local COLUMN_GAP = 20
+local COLUMN_WIDTH = 340
+local COLUMN_GAP = 24
 local PADDING_X = 18
 local CONTENT_TOP = 72     -- below the title bar, portrait and subtitle
 local FOOTER_HEIGHT = 44
-local HEADER_HEIGHT = 24
+local HEADER_HEIGHT = 28
+local HEADER_ICON_SIZE = 18
+local DROPDOWN_WIDTH = 170
 local ROW_HEIGHT = 26
 local SECTION_GAP = 12
 
@@ -87,7 +89,7 @@ local function SQOL_Popup_CreateDropdown(parent, option)
 
     local label = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     label:SetPoint("LEFT", row, "LEFT", 4, 0)
-    label:SetPoint("RIGHT", row, "RIGHT", -160, 0) -- leave room for the dropdown
+    label:SetPoint("RIGHT", row, "RIGHT", -(DROPDOWN_WIDTH + 10), 0) -- leave room for the dropdown
     label:SetJustifyH("LEFT")
     label:SetWordWrap(false)
     label:SetText(option.label)
@@ -95,7 +97,7 @@ local function SQOL_Popup_CreateDropdown(parent, option)
     -- Blizzard's menu dropdown (11.0+); fall back to a button that cycles the values.
     local ok, dropdown = pcall(CreateFrame, "DropdownButton", nil, row, "WowStyle1DropdownTemplate")
     if ok and dropdown and type(dropdown.SetupMenu) == "function" then
-        dropdown:SetWidth(150)
+        dropdown:SetWidth(DROPDOWN_WIDTH)
         dropdown:SetPoint("RIGHT", row, "RIGHT", -6, 0)
         dropdown:SetupMenu(function(_, rootDescription)
             for _, entry in ipairs(option.values) do
@@ -109,7 +111,7 @@ local function SQOL_Popup_CreateDropdown(parent, option)
         end
     else
         local button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-        button:SetSize(150, 22)
+        button:SetSize(DROPDOWN_WIDTH, 22)
         button:SetPoint("RIGHT", row, "RIGHT", -6, 0)
         button:SetScript("OnClick", function()
             local current = SQOL.DB and SQOL.DB[option.key]
@@ -126,16 +128,23 @@ local function SQOL_Popup_CreateDropdown(parent, option)
     return row
 end
 
-local function SQOL_Popup_CreateSectionHeader(parent, title)
+-- Returns the icon, which the layout anchors; the title sits to its right.
+local function SQOL_Popup_CreateSectionHeader(parent, section)
+    local icon = parent:CreateTexture(nil, "ARTWORK")
+    icon:SetSize(HEADER_ICON_SIZE, HEADER_ICON_SIZE)
+    icon:SetTexture(section.icon)
+    icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) -- trim the icon border
+
     local header = parent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    header:SetText(title)
+    header:SetPoint("LEFT", icon, "RIGHT", 6, 0)
+    header:SetText(section.title)
 
     local line = parent:CreateTexture(nil, "ARTWORK")
     line:SetColorTexture(1, 0.82, 0, 0.3)
     line:SetHeight(1)
-    line:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -3)
+    line:SetPoint("TOPLEFT", icon, "BOTTOMLEFT", 0, -3)
     line:SetWidth(COLUMN_WIDTH - 10)
-    return header
+    return icon
 end
 
 ------------------------------------------------------------
@@ -148,7 +157,7 @@ local function SQOL_Popup_GetSections()
     SQOL.ForEachOption(function(section, option)
         local entry = bySection[section]
         if not entry then
-            entry = { title = section.title, options = {} }
+            entry = { title = section.title, icon = section.icon, options = {} }
             bySection[section] = entry
             sections[#sections + 1] = entry
         end
@@ -184,7 +193,7 @@ local function SQOL_Popup_BuildContent(frame)
         local column = (i <= split) and 1 or 2
         local x = PADDING_X + (column - 1) * (COLUMN_WIDTH + COLUMN_GAP)
 
-        local header = SQOL_Popup_CreateSectionHeader(frame, section.title)
+        local header = SQOL_Popup_CreateSectionHeader(frame, section)
         header:SetPoint("TOPLEFT", frame, "TOPLEFT", x, y[column])
         y[column] = y[column] - HEADER_HEIGHT
 

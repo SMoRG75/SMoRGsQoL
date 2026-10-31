@@ -12,6 +12,7 @@ local L = SQOL.L
 -- Option list, shared by the options popup, the launcher and the slash commands
 ------------------------------------------------------------
 -- kind defaults to "checkbox"; "dropdown" entries list their values.
+-- Section icons are Interface\Icons files that every client has.
 -- An entry with isAvailable is left out when it returns false.
 
 -- Auto-track needs the questID-based watch API (Retail and WoW Forever).
@@ -62,6 +63,7 @@ end
 SQOL.OptionSections = {
     {
         title = L["Quests"],
+        icon = "Interface\\Icons\\INV_Misc_Note_01",
         options = {
             { key = "AdventureRecap", label = L["Adventure Recap"],
               tooltip = L["Record quests, reputation gains and playtime per character. Open with /sqol recap. Reload continues the session; a new login starts another. No automatic popups."] },
@@ -114,6 +116,7 @@ SQOL.OptionSections = {
     },
     {
         title = L["Character"],
+        icon = "Interface\\Icons\\INV_Chest_Chain_05",
         options = {
             { key = "ShowItemLevel", label = L["Show item level on PlayerFrame"],
               tooltip = L["Show your equipped item level on the player frame, independently of movement speed."] },
@@ -123,6 +126,7 @@ SQOL.OptionSections = {
     },
     {
         title = L["Reputation & XP"],
+        icon = "Interface\\Icons\\INV_Shirt_GuildTabard_01",
         options = {
             { key = "ColorStatusBarProgress", label = L["Color XP/reputation numbers"],
               tooltip = L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."],
@@ -137,6 +141,7 @@ SQOL.OptionSections = {
     },
     {
         title = L["Group"],
+        icon = "Interface\\Icons\\INV_Misc_GroupNeedMore",
         options = {
             { key = "ShowReadyCheckTimer", label = L["Ready check countdown timer"],
               tooltip = L["Show a live countdown on the ready check popup for how long until it expires."] },
@@ -149,6 +154,7 @@ SQOL.OptionSections = {
     },
     {
         title = L["Interface"],
+        icon = "Interface\\Icons\\INV_Misc_Gear_01",
         options = {
             { key = "ShowTooltipTarget", label = L["Show target in unit tooltips"],
               tooltip = L["Add a \"Target:\" line to unit tooltips showing who the unit is targeting: class-colored for players, reaction-colored for NPCs, and a red \"You\" when it is you. Updates live while you hover."],
@@ -177,6 +183,7 @@ SQOL.OptionSections = {
     },
     {
         title = L["Advanced"],
+        icon = "Interface\\Icons\\INV_Misc_Wrench_01",
         options = {
             { key = "DebugTrack", label = L["Debug tracking"],
               tooltip = L["Print verbose debug information (for troubleshooting)."] },
