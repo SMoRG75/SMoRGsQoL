@@ -4,13 +4,13 @@
 
 On top of the quest sounds come a bunch of small quality-of-life tweaks, each one **individually toggleable**. Works in Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
 
-## What's new in 1.5.0
+## What's new in 1.5
 
 - 🤖 **Quest automation** — accepts and turns in quests for you, with an override key to pause it.
 - 🎨 **Colorful unit tooltips** — class colors, guild, level, faction and health on the bar.
 - 🔗 **Wowhead links** — copyable links in the quest log and achievement window, plus a **Show web link** key binding for whatever is under the mouse.
 
-The new features are off by default. 1.5.0 adds new files, so **restart the game** after updating (a `/reload` is not enough). See the [changelog](CHANGELOG.md) for the full release history.
+The new features are off by default. 1.5 adds new files, so **restart the game** after updating (a `/reload` is not enough). See the [changelog](CHANGELOG.md) for the full release history.
 
 ## Features
 
