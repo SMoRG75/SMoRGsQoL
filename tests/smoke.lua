@@ -922,6 +922,52 @@ assert(repFrame:IsShown())
 SlashCmdList.SQOL('rt')
 assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
 SlashCmdList.SQOL('reptexttest')
+-- Skill gains share the floating labels; off by default, independent of rep text.
+for _, fs in ipairs(repFrame.fontStrings) do fs.text = nil end
+fire('CHAT_MSG_SKILL', 'Your skill in Staves has increased to 17.')
+for _, fs in ipairs(repFrame.fontStrings) do assert(fs.text == nil or fs.text:find('Rep'), 'Disabled skill text') end
+SlashCmdList.SQOL('sk')
+assert(sqol.DB.ShowSkillGains)
+GetNumSkillLines = function() return 2 end
+GetSkillLineInfo = function(i)
+    if i == 1 then return 'Weapon Skills', true end
+    return 'Staves', false, nil, 17, 0, 0, 20
+end
+local function skillShown(text)
+    for _, fs in ipairs(repFrame.fontStrings) do
+        if fs.text == text and fs:IsShown() then return true end
+    end
+end
+fire('CHAT_MSG_SKILL', '|cff5555ffYour skill in Staves has increased to 17.|r')
+assert(skillShown('+1 Staves (17/20)'), 'Skill-up shows rank and cap')
+fire('CHAT_MSG_SKILL', 'Your skill in Staves has increased to 19.')
+assert(skillShown('+2 Staves (19/20)'), 'Skill-up delta follows the last seen rank')
+GetNumSkillLines, GetSkillLineInfo = nil, nil
+-- WoW Forever: Mainline engine with weapon skills behind C_SkillInfo.
+C_SkillInfo = {
+    GetNumSkillLines = function() return 2 end,
+    GetSkillLineInfo = function(i)
+        if i == 1 then return { name = 'Weapon Skills', isHeader = true, rank = 0, maxRank = 0 } end
+        return { name = 'Staves', isHeader = false, rank = 22, maxRank = 25 }
+    end,
+}
+fire('CHAT_MSG_SKILL', 'Your skill in Staves has increased to 22.')
+assert(skillShown('+3 Staves (22/25)'), 'WoW Forever weapon skills show their cap')
+C_SkillInfo = nil
+fire('CHAT_MSG_SKILL', 'Your skill in Mining has increased to 4.')
+assert(skillShown('+1 Mining (4)'), 'Unknown cap shows rank only')
+SKILL_RANK_UP = "Eure Fertigkeit '%s' hat sich auf %d erhöht."
+sqol.Skill_ResetPatterns()
+assert(sqol.Skill_ParseMessage("Eure Fertigkeit 'Kürschnerei' hat sich auf 18 erhöht.") == 'Kürschnerei')
+assert(select(2, sqol.Skill_ParseMessage('Your skill in Skinning has increased to 18.')) == 18, 'enUS fallback stays')
+SKILL_RANK_UP = nil
+sqol.Skill_ResetPatterns()
+SlashCmdList.SQOL('reptexttest')
+SlashCmdList.SQOL('sk')
+assert(not sqol.DB.ShowSkillGains and not skillShown('+1 Mining (4)'), 'Turning skill text off hides skill labels')
+assert(repFrame:IsShown(), 'Turning skill text off keeps reputation labels')
+SlashCmdList.SQOL('skilltexttest')
+assert(skillShown('+1 Staves (18/20)'))
 -- Adventure Recap is routed independently of quest sounds and reputation text.
 sqol.SetOption('QuestCompleteSound', false)
 sqol.SetOption('QuestObjectiveSound', false)

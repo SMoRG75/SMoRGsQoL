@@ -550,6 +550,10 @@ local function SQOL_Rep_TemplateToPattern(template)
     return pattern, kinds
 end
 
+-- Shared with the skill gain parser (SkillGains.lua).
+SQOL.Chat_StripCodes = SQOL_Rep_StripChatCodes
+SQOL.Chat_TemplateToPattern = SQOL_Rep_TemplateToPattern
+
 local SQOL_RepPatterns
 local function SQOL_Rep_GetPatterns()
     if SQOL_RepPatterns then return SQOL_RepPatterns end
@@ -633,23 +637,38 @@ local function SQOL_Rep_ParseFactionNameFromMessage(msg)
     return name
 end
 
--- Small, bounded pool of floating labels. This uses chat gains rather than
+-- Small, bounded pool of floating labels shared by reputation and skill gains,
+-- so both stack instead of overlapping. Reputation uses chat gains rather than
 -- faction snapshots, so login, watched-bar changes and standing transitions
 -- cannot create synthetic reputation gains.
 local repGainFrame
 local repGainLines = {}
 local repGainDuration = 2.5
 
-function SQOL.RepGains_Hide()
+-- Hides the labels of one kind ("rep", "skill"), or all of them without a kind.
+function SQOL.FloatingGains_Hide(kind)
     if not repGainFrame then return end
+    local active = false
     for _, line in ipairs(repGainLines) do
-        line.age = nil
-        line:Hide()
+        if not kind or line.kind == kind then
+            line.age = nil
+            line:Hide()
+        elseif line.age then
+            active = true
+        end
     end
-    repGainFrame:Hide()
+    if not active then repGainFrame:Hide() end
+end
+
+function SQOL.RepGains_Hide()
+    SQOL.FloatingGains_Hide("rep")
 end
 
 function SQOL.RepGains_Show(name, amount)
+    SQOL.FloatingGains_Show("rep", string.format(L["+%d Rep — %s"], amount, name), 0.3, 1, 0.3)
+end
+
+function SQOL.FloatingGains_Show(kind, text, r, g, b)
     if not repGainFrame then
         repGainFrame = CreateFrame("Frame", nil, UIParent)
         repGainFrame:SetAllPoints(UIParent)
@@ -685,12 +704,12 @@ function SQOL.RepGains_Show(name, amount)
     if not available and #repGainLines < 3 then
         available = repGainFrame:CreateFontString(nil, "OVERLAY")
         available:SetFont(STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 22, "OUTLINE")
-        available:SetTextColor(0.3, 1, 0.3)
         repGainLines[#repGainLines + 1] = available
     end
     local line = available or oldest
-    line.age, line.offset = 0, 0
-    line:SetText(string.format(L["+%d Rep — %s"], amount, name))
+    line.age, line.offset, line.kind = 0, 0, kind
+    line:SetTextColor(r, g, b)
+    line:SetText(text)
     line:SetPoint("CENTER", repGainFrame, "CENTER", 0, 65)
     line:SetAlpha(1)
     line:Show()

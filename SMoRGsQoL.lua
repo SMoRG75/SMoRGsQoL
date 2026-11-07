@@ -46,6 +46,7 @@ function SQOL.Init(reset)
         SQOL.WowheadLinks_OnOptionChanged()
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         SQOL.RepGains_Hide()
+        SQOL.SkillGains_Hide()
         SQOL.NameplateObjectives_HideAll()
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
         print(SQOL_CHAT_PREFIX .. L["Settings have been reset to defaults."])
@@ -403,6 +404,9 @@ function SQOL.ApplyOption(key)
     elseif key == "ShowRepGains" then
         if not SQOL.DB.ShowRepGains then SQOL.RepGains_Hide() end
 
+    elseif key == "ShowSkillGains" then
+        if not SQOL.DB.ShowSkillGains then SQOL.SkillGains_Hide() end
+
     elseif key == "RepWatch" then
         SQOL.RepMemory_OnOptionChanged()
         if SQOL.DB.RepWatch then
@@ -547,6 +551,9 @@ local SQOL_COMMANDS = {
     { names = { "reptext", "rt" }, key = "ShowRepGains" },
     { names = { "reptexttest" }, desc = L["Preview floating reputation gains"],
       run = function() SQOL.RepGains_Show("Valarjar", 25) end },
+    { names = { "skilltext", "sk" }, key = "ShowSkillGains" },
+    { names = { "skilltexttest" }, desc = L["Preview floating skill gains"],
+      run = function() SQOL.SkillGains_Show("Staves", 18, 20, 1) end },
     { names = { "readycheck", "rc" }, key = "ShowReadyCheckTimer" },
     { names = { "rctest" }, desc = L["Preview the ready check countdown (add 'popup' to show the frame)"],
       run = function(rest)
@@ -657,6 +664,7 @@ SQOL_RegisterOptionalEvent("QUEST_CRITERIA_UPDATE")
 SQOL_RegisterOptionalEvent("SCENARIO_CRITERIA_UPDATE")
 f:RegisterEvent("UPDATE_FACTION")
 f:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
+SQOL_RegisterOptionalEvent("CHAT_MSG_SKILL")
 -- Events missing from Classic clients are optional: registering an unknown
 -- event errors and would stop the rest of this file from loading.
 SQOL_RegisterOptionalEvent("QUEST_TURNED_IN")
@@ -914,6 +922,9 @@ f:SetScript("OnEvent", function(self, event, ...)
             and not SQOL.RepWatch_ReputationFrameOpen() then
             SQOL_RepWatch_ScheduleScan("update_faction")
         end
+
+    elseif event == "CHAT_MSG_SKILL" then
+        SQOL.SkillGains_HandleMessage((...))
 
     elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
         SQOL.Recap_ReputationMessage((...), select(11, ...))

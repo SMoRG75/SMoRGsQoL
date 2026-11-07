@@ -78,6 +78,7 @@ SQOL.defaults = {
     RepWatch     = false,
     RepMemory    = false,
     ShowRepGains = false,
+    ShowSkillGains = false,
     ShowNameplateObjectives = false,
     SmartQuestRadar = false,
 

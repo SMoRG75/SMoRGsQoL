@@ -137,6 +137,8 @@ SQOL.OptionSections = {
               tooltip = L["Save your watched faction with /sqol repfocus. With auto-watch enabled, return to it after 10 seconds without new reputation gains. Changing the watched faction cancels the pending return. Saved per character."] },
             { key = "ShowRepGains", label = L["Floating reputation gains"],
               tooltip = L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] },
+            { key = "ShowSkillGains", label = L["Floating skill gains"],
+              tooltip = L["Show skill increases, such as professions and weapon skills, as simple blue text near your character that floats upward and fades out, with your new skill level."] },
         },
     },
     {

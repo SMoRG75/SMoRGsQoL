@@ -54,6 +54,7 @@ PlayerStats.lua
 PartyLevels.lua
 RangeIndicator.lua
 Reputation.lua
+SkillGains.lua
 SessionRecap.lua
 Countdowns.lua
 SMoRGsQoL.lua

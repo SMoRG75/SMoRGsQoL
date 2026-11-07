@@ -29,6 +29,7 @@ On top of the quest sounds come a bunch of small quality-of-life tweaks, each on
 [*][b]Auto-watch reputation[/b] - switches to the faction you just gained reputation with.
 [*][b]Reputation Memory[/b] - returns to your preferred faction 10 seconds later.
 [*][b]Floating reputation gains[/b] - "+25 Rep - Valarjar" near the screen center.
+[*][b]Floating skill gains[/b] - "+1 Staves (18/20)" the same way when a profession or weapon skill goes up.
 [/list]
 
 [b]Group[/b]

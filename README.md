@@ -29,6 +29,7 @@ The new features are off by default. 1.5 adds new files, so **restart the game**
 - 🤝 **Auto-watch reputation** — switches to the faction you just gained reputation with.
 - 🧠 **Reputation Memory** — returns to your preferred faction 10 seconds later.
 - ✨ **Floating reputation gains** — `+25 Rep — Valarjar` near the screen center.
+- 📈 **Floating skill gains** — `+1 Staves (18/20)` the same way when a profession or weapon skill goes up.
 
 **Group**
 - ⏱️ **Ready check countdown** and ⏳ **LFG queue pop countdown**.
