@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2] - 2026-11-07
+
+### Fixed
+
+- **Smart Quest Radar** and **nameplate objective counts** now show with nameplate addons that replace Blizzard's nameplates, such as Platynator. Before, they stayed hidden on those nameplates.
+- The range icon and distance no longer overlap the unit's name on those nameplates.
+
 ## [1.5.1] - 2026-11-01
 
 ### Changed
