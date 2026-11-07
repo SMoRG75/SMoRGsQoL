@@ -1,10 +1,12 @@
 # Changelog
 
-## [Unreleased]
+## [1.6.0] - 2026-11-08
 
 ### Added
 
 - **Floating skill gains** — when a profession or weapon skill goes up, it floats up near the character the same way as reputation gains, in blue with the new level and cap, e.g. `+1 Staves (18/20)` (the cap shows where the client reports it: every skill in Classic and WoW Forever, professions in Retail). Toggle under **Reputation & XP** or with `/sqol skilltext` (`sk`); `/sqol skilltexttest` previews it. Off by default.
+
+After updating, **restart the game** (a `/reload` is not enough), because this release adds a new file.
 
 ## [1.5.2] - 2026-11-07
 
