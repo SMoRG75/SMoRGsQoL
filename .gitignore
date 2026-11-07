@@ -14,6 +14,10 @@ output/video/build/*-log.txt
 output/video/build/chk/
 output/video/showcase/*.mp4
 
+# Short (build-short.py): the script is kept, the rest is rebuilt.
+output/video/build/short*
+output/video/SMoRGsQoL-short-*.mp4
+
 # BigWigs packager output (see RELEASING.md)
 /.release
 
