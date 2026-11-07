@@ -6,7 +6,13 @@ local function widget()
     function w:SetText(value) self.text = value end
     function w:Show() self.shown = true end
     function w:Hide() self.shown = false end
-    function w:CreateFontString() return widget() end
+    function w:GetParent() return self.parent end
+    function w:SetParent(parent) self.parent = parent end
+    function w:CreateFontString()
+        local text = widget()
+        text.parent = self
+        return text
+    end
     for _, method in ipairs({ "SetJustifyH", "SetWordWrap", "SetMaxLines", "ClearAllPoints", "SetPoint" }) do
         w[method] = function() end
     end
@@ -138,6 +144,7 @@ equal(text(), "2/8", "Unreadable next title ends the previous quest block")
 -- pending callbacks cannot redisplay text after disabling both options.
 prepare(quest("Wolf Hunt", "Wolves: 2/8"))
 plates.nameplate1 = { namePlateUnitToken = "nameplate1", UnitFrame = widget() }
+plates.nameplate1.UnitFrame.parent, plates.nameplate1.UnitFrame.IsShown = plates.nameplate1, function() return true end
 sqol.NameplateObjectives_RefreshVisibleUnits()
 local label = plates.nameplate1.SQOLObjectiveText
 assert(label.shown and label.text:find("ActiveQuestIcon", 1, true), "Quest icon on visible plate")

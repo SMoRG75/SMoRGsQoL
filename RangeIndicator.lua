@@ -285,7 +285,7 @@ end
 -- Where to show the icon, as point, relativeTo, relativePoint, x, y:
 -- 1. On the target's nameplate, where Blizzard's soft target sword icon sits
 --    (its SoftTargetFrame), or just above our quest objective count when that
---    is shown there.
+--    is shown there. Above the nameplate when an addon hides Blizzard's plate.
 -- 2. Otherwise (no nameplate: off screen, nameplates off, or forbidden in
 --    instances) right of the target frame portrait.
 local function SQOL_Range_GetAnchor()
@@ -297,6 +297,10 @@ local function SQOL_Range_GetAnchor()
             local objectiveText = nameplate.SQOLObjectiveText
             if objectiveText and objectiveText:IsShown() then
                 return "BOTTOM", objectiveText, "TOP", 0, 2
+            end
+            -- Blizzard's layout doesn't match a replacement plate (e.g. Platynator).
+            if SQOL.NameplateObjectives_IsUnitFrameHidden(nameplate, unitFrame) then
+                return "BOTTOM", nameplate, "TOP", 0, SQOL.NAMEPLATE_REPLACED_OFFSET
             end
             if unitFrame.SoftTargetFrame then
                 return "CENTER", unitFrame.SoftTargetFrame, "CENTER", 0, 0

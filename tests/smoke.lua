@@ -17,8 +17,11 @@ local function widget()
     function w:SetFormattedText(...) self.text = string.format(...) end
     function w:SetFont(font, size, flags) self.font, self.size, self.flags = font, size, flags end
     function w:GetFont() return self.font or 'font.ttf', self.size or 12, self.flags or '' end
+    function w:GetParent() return self.parent end
+    function w:SetParent(parent) self.parent = parent end
     function w:CreateFontString()
         local text = widget()
+        text.parent = self
         self.fontStrings = self.fontStrings or {}
         self.fontStrings[#self.fontStrings + 1] = text
         return text
@@ -332,7 +335,9 @@ local function nameplateWith(style)
     function name:GetStringWidth() return 50 end
     local unitFrame = widget()
     unitFrame.name, unitFrame.HealthBarsContainer = name, widget()
-    return { UnitFrame = unitFrame }
+    local nameplate = { UnitFrame = unitFrame }
+    unitFrame.parent, unitFrame.shown = nameplate, true
+    return nameplate
 end
 local function objectiveAnchor(nameplate)
     C_NamePlate = { GetNamePlateForUnit = function() return nameplate end }
@@ -361,6 +366,41 @@ local unknown = nameplateWith(nil)
 NamePlateSetupOptions = nil
 anchor = objectiveAnchor(unknown)
 assert(anchor[2] == unknown.UnitFrame.HealthBarsContainer and anchor[5] == 15, 'Unknown style keeps the old anchor')
+assert(unknown.SQOLObjectiveText:GetParent() == unknown.UnitFrame and not unknown.SQOLObjectiveHolder,
+    'Blizzard plates keep the text on the UnitFrame')
+
+-- Replacement nameplate addons: Platynator reparents the UnitFrame to a hidden
+-- frame, others hide it. The text must leave it, and return if it comes back.
+NamePlateSetupOptions = { unitNameAnchorStyle = 2 }
+local oldCreateFrame = CreateFrame
+CreateFrame = function(_, _, parent)
+    local holder = widget()
+    holder.parent = parent
+    return holder
+end
+local replaced = nameplateWith(2)
+replaced.UnitFrame.parent, replaced.UnitFrame.shown = widget(), true
+anchor = objectiveAnchor(replaced)
+local holder = replaced.SQOLObjectiveHolder
+assert(holder and holder:GetParent() == replaced, 'Holder sits on the nameplate')
+assert(replaced.SQOLObjectiveText:GetParent() == holder, 'Reparented UnitFrame: text is created on the holder')
+assert(anchor[1] == 'BOTTOM' and anchor[2] == replaced and anchor[3] == 'TOP' and anchor[5] == 20)
+replaced.UnitFrame.parent = replaced
+anchor = objectiveAnchor(replaced)
+assert(replaced.SQOLObjectiveText:GetParent() == replaced.UnitFrame, 'Restored UnitFrame: text returns')
+assert(anchor[2] == replaced.UnitFrame.name and anchor[5] == 3, 'Restored UnitFrame: Blizzard anchor returns')
+replaced.UnitFrame.shown = false
+anchor = objectiveAnchor(replaced)
+assert(replaced.SQOLObjectiveText:GetParent() == holder and replaced.SQOLObjectiveHolder == holder,
+    'Hidden UnitFrame: the existing text and holder are reused')
+assert(anchor[2] == replaced)
+-- Without readable UnitFrame state the text stays where Blizzard plates have it.
+local unreadable = nameplateWith(2)
+function unreadable.UnitFrame:GetParent() error('Restricted API') end
+anchor = objectiveAnchor(unreadable)
+assert(unreadable.SQOLObjectiveText:GetParent() == unreadable.UnitFrame and not unreadable.SQOLObjectiveHolder)
+assert(anchor[2] == unreadable.UnitFrame.name)
+CreateFrame = oldCreateFrame
 widget, C_NamePlate, UnitExists, NamePlateConstants = oldWidget, nil, nil, nil
 sqol.DB.ShowNameplateObjectives = false
 sqol._npUnits.nameplate1 = nil
@@ -545,6 +585,17 @@ questCount:Show()
 rangePlate.SQOLObjectiveText = questCount
 anchor = rangeAnchor()
 assert(anchor[1] == 'BOTTOM' and anchor[2] == questCount, 'Above the quest count')
+-- Replacement plates: Blizzard's sword icon spot doesn't match their layout.
+function rangePlate.UnitFrame:GetParent() return widget() end
+function rangePlate.UnitFrame:IsShown() return true end
+anchor = rangeAnchor()
+assert(anchor[2] == questCount, 'The quest count still comes first on a replacement plate')
+questCount:Hide()
+anchor = rangeAnchor()
+assert(anchor[1] == 'BOTTOM' and anchor[2] == rangePlate, 'Above a replacement plate')
+function rangePlate.UnitFrame:GetParent() return rangePlate end
+anchor = rangeAnchor()
+assert(anchor[1] == 'CENTER' and anchor[2] == softTarget, 'Back on the sword icon spot with Blizzard plates')
 C_NamePlate = nil
 anchor = rangeAnchor()
 assert(anchor[2] == TargetFrame, 'Target frame without a nameplate')

@@ -343,6 +343,7 @@ end
 SQOL._npUnits = SQOL._npUnits or {}
 SQOL._npUpdatePending = false
 local SQOL_NAMEPLATE_UPDATE_DELAY = 0.35
+SQOL.NAMEPLATE_REPLACED_OFFSET = 20
 
 local function SQOL_NameplateObjectives_SafeCall(fn, ...)
     if type(fn) ~= "function" then
@@ -1283,8 +1284,14 @@ end
 
 -- Put the count 3 px above the name when the name is above the bar; otherwise
 -- (name inside the bar, or unknown style) keep it above the health bar as before.
-local function SQOL_NameplateObjectives_AnchorText(text, nameplate, unitFrame)
+local function SQOL_NameplateObjectives_AnchorText(text, nameplate, unitFrame, unitFrameHidden)
     text:ClearAllPoints()
+    -- A replacement plate's layout is unknown, so stay clear of a name above its bar.
+    if unitFrameHidden then
+        text:SetPoint("BOTTOM", nameplate, "TOP", 0, SQOL.NAMEPLATE_REPLACED_OFFSET)
+        return
+    end
+
     local nameText = SQOL_NameplateObjectives_GetNameText(unitFrame)
     if nameText and SQOL_NameplateObjectives_IsNameAboveBar()
         and pcall(text.SetPoint, text, "BOTTOM", nameText, "TOP", 0, 3) then
@@ -1294,6 +1301,35 @@ local function SQOL_NameplateObjectives_AnchorText(text, nameplate, unitFrame)
     text:ClearAllPoints()
     local anchor = SQOL_NameplateObjectives_GetAnchor(nameplate) or unitFrame
     text:SetPoint("BOTTOM", anchor, "TOP", 0, 15)
+end
+
+-- Nameplate addons such as Platynator hide Blizzard's UnitFrame and draw their
+-- own plate on the nameplate itself. Children of a hidden UnitFrame are never
+-- seen, so the text then moves to a holder on the nameplate.
+function SQOL.NameplateObjectives_IsUnitFrameHidden(nameplate, unitFrame)
+    if unitFrame == nameplate then
+        return false
+    end
+    local ok, parent, shown = pcall(function()
+        return unitFrame:GetParent(), unitFrame:IsShown()
+    end)
+    if not ok or not SQOL.CanUseValue(parent) or not SQOL.CanUseValue(shown) then
+        return false
+    end
+    return parent ~= nameplate or not shown
+end
+
+local function SQOL_NameplateObjectives_GetHolder(nameplate)
+    local holder = nameplate.SQOLObjectiveHolder
+    if not holder then
+        holder = CreateFrame("Frame", nil, nameplate)
+        holder:SetAllPoints(nameplate)
+        -- Replacement plates draw in BACKGROUND; stay readable over neighbouring plates.
+        holder:SetFrameStrata("LOW")
+---@diagnostic disable-next-line: inject-field
+        nameplate.SQOLObjectiveHolder = holder
+    end
+    return holder
 end
 
 local function SQOL_NameplateObjectives_GetText(unit)
@@ -1312,22 +1348,25 @@ local function SQOL_NameplateObjectives_GetText(unit)
         return nil
     end
 
+---@diagnostic disable-next-line: undefined-field
+    local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
+    local unitFrameHidden = SQOL.NameplateObjectives_IsUnitFrameHidden(nameplate, unitFrame)
+    local parent = unitFrameHidden and SQOL_NameplateObjectives_GetHolder(nameplate) or unitFrame
+
     local text = nameplate.SQOLObjectiveText
     if not text then
----@diagnostic disable-next-line: undefined-field
-        local unitFrame = nameplate.UnitFrame or nameplate.unitFrame or nameplate
-
-        text = unitFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        text = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         text:SetJustifyH("CENTER")
         text:SetWordWrap(false)
         if text.SetMaxLines then text:SetMaxLines(1) end
 ---@diagnostic disable-next-line: inject-field
         nameplate.SQOLObjectiveText = text
+    elseif text:GetParent() ~= parent then
+        text:SetParent(parent)
     end
 
     -- Re-anchor on every update: Blizzard moves the name when the nameplate style changes.
----@diagnostic disable-next-line: undefined-field
-    SQOL_NameplateObjectives_AnchorText(text, nameplate, nameplate.UnitFrame or nameplate.unitFrame or nameplate)
+    SQOL_NameplateObjectives_AnchorText(text, nameplate, unitFrame, unitFrameHidden)
 
     return text, nameplate
 end
