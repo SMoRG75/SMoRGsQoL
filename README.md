@@ -4,13 +4,11 @@
 
 On top of the quest sounds come a bunch of small quality-of-life tweaks, each one **individually toggleable**. Works in Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
 
-## What's new in 1.5
+## What's new in 1.7
 
-- 🤖 **Quest automation** — accepts and turns in quests for you, with an override key to pause it.
-- 🎨 **Colorful unit tooltips** — class colors, guild, level, faction and health on the bar.
-- 🔗 **Wowhead links** — copyable links in the quest log and achievement window, plus a **Show web link** key binding for whatever is under the mouse.
+- ⭐ **New WoW Forever quests** — a small blue star marks quests that are new in WoW Forever: in the quest giver's list, the quest text, the quest log, the objective tracker and on the world map, where the tooltip also says *New in WoW Forever*.
 
-The new features are off by default. 1.5 adds new files, so **restart the game** after updating (a `/reload` is not enough). See the [changelog](CHANGELOG.md) for the full release history.
+It is off by default; turn it on under **Quests** or with `/sqol fq`. 1.7 adds a new file, so **restart the game** after updating (a `/reload` is not enough). See the [changelog](CHANGELOG.md) for the full release history.
 
 ## Features
 
