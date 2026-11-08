@@ -476,6 +476,9 @@ function SQOL.ApplyOption(key)
     elseif key == "ShowWowheadLinks" then
         SQOL.WowheadLinks_OnOptionChanged()
 
+    elseif key == "MarkForeverQuests" then
+        SQOL.ForeverQuests_OnOptionChanged()
+
     end
 
     if SQOL.OptionsPopup_Refresh then
@@ -527,6 +530,7 @@ local SQOL_COMMANDS = {
     { names = { "color", "col" }, key = "ColorProgress" },
     { names = { "nameplate", "np" }, key = "ShowNameplateObjectives" },
     { names = { "radar", "qr" }, key = "SmartQuestRadar" },
+    { names = { "foreverquests", "fq" }, key = "MarkForeverQuests" },
     { names = { "questsound", "qs" }, key = "QuestCompleteSound" },
     { names = { "objectivesound", "os" }, key = "QuestObjectiveSound" },
     { names = { "soundprofile", "soundset" }, desc = L["Switch between the Horde and Alliance quest sounds"],
@@ -695,6 +699,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL.RepMemory_Init()
         SQOL.QuestAutomation_OnOptionChanged()
         SQOL.WowheadLinks_OnOptionChanged()
+        SQOL.ForeverQuests_OnOptionChanged()
         if SQOL.DB.ShowSplash then
             SQOL_Splash()
         end

@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Mark new WoW Forever quests** — a small blue star on the quest icon of quests that are new in WoW Forever (not in the original game): in the quest giver's quest list, next to the title of the quest text and on the quest log's map pins. New quests are recognized by their quest ID (80000 and up; the original quests are far below). WoW Forever only. Toggle under **Quests** or with `/sqol foreverquests` (`fq`). Off by default.
+
+After updating, **restart the game** (a `/reload` is not enough), because this release adds a new file.
+
 ## [1.6.0] - 2026-11-08
 
 ### Added

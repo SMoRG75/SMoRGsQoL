@@ -1023,5 +1023,49 @@ assert(not repFrame:IsShown() and not sqol.DB.ShowRepGains)
 assert(not sqol.DB.ShowItemLevel and not sqol.DB.ShowMovementSpeed)
 assert(not sqol.DB.AutoAcceptQuests and sqol.DB.QuestAutomationKey == 'SHIFT', 'Reset turns quest automation off')
 assert(not sqol.DB.ShowWowheadLinks, 'Reset turns Wowhead links off')
+
+-- New WoW Forever quests: a star on quests from Forever's quest ID range.
+assert(sqol.IsNewForeverQuest(96606) and sqol.IsNewForeverQuest(97234), 'Forever quest IDs are new')
+assert(not sqol.IsNewForeverQuest(176) and not sqol.IsNewForeverQuest(29433)
+    and not sqol.IsNewForeverQuest(nil), 'Original and revamped quest IDs are not new')
+local foreverHook = hooksecurefunc
+function hooksecurefunc(object, method, callback)
+    if type(object) == 'string' then object, method, callback = _G, object, method end
+    local original = object[method]
+    object[method] = function(...) original(...) callback(...) end
+end
+local function questTitleButton(questID)
+    local button = CreateFrame('Button')
+    button.questID = questID
+    function button:GetFrameLevel() return 1 end
+    return button
+end
+local newQuestButton, oldQuestButton = questTitleButton(96606), questTitleButton(176)
+QuestScrollFrame = { titleFramePool = { EnumerateActive = function()
+    return pairs({ [newQuestButton] = true, [oldQuestButton] = true })
+end } }
+function QuestLogQuests_Update() end
+SlashCmdList.SQOL('fq')
+assert(not sqol.DB.MarkForeverQuests, 'Forever quest stars are not offered outside WoW Forever')
+sqol.IsForever = true
+local framesBefore = #frames
+SlashCmdList.SQOL('fq')
+assert(sqol.DB.MarkForeverQuests)
+QuestLogQuests_Update()
+assert(#frames == framesBefore + 1 and frames[#frames]:IsShown(), 'Only the new quest gets a star')
+local star = frames[#frames]
+SlashCmdList.SQOL('fq')
+assert(not star:IsShown(), 'Turning the option off hides the stars')
+QuestLogQuests_Update()
+assert(not star:IsShown(), 'Stars stay hidden while the option is off')
+SlashCmdList.SQOL('fq')
+assert(star:IsShown() and #frames == framesBefore + 1, 'Turning it on again reuses the star')
+newQuestButton.questID = 176
+QuestLogQuests_Update()
+assert(not star:IsShown(), 'A reused title button for an original quest hides the star')
+sqol.IsForever = false
+QuestScrollFrame, QuestLogQuests_Update = nil, nil
+hooksecurefunc = foreverHook
+
 for _, message in ipairs(messages) do io.write(message, '\n') end
 io.write('PASS: TOC loading, login, commands, independent options, events, deferred callbacks, Wowhead links, reset\n')

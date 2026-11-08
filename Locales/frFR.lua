@@ -6,6 +6,8 @@ local L = SQOL.L
 -- Smart Quest Radar
 L["Smart Quest Radar"] = "Radar de quêtes intelligent"
 L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] = "Marque les barres de nom concernées avec une icône de quête et jusqu’à trois objectifs inachevés. Utilise les données lisibles des infobulles de vos quêtes actives. Remplace les compteurs d’objectifs lorsque cette option est activée ; les données indisponibles sont masquées."
+L["Mark new WoW Forever quests"] = "Marquer les nouvelles quêtes de WoW Forever"
+L["Show a small blue star on quests that are new in WoW Forever and were not in the original game: in quest giver lists, next to the title of the quest text and on the quest log's map pins. New quests are recognized by their quest ID, which is far higher than the original quests'."] = "Affiche une petite étoile bleue sur les quêtes nouvelles dans WoW Forever, absentes du jeu d'origine : dans les listes de quêtes des PNJ, à côté du titre du texte de la quête et sur les repères de carte du journal de quêtes. Les nouvelles quêtes sont reconnues à leur ID de quête, bien plus élevé que celui des quêtes d'origine."
 L["Quest objective"] = "Objectif de quête"
 
 -- Reputation Memory

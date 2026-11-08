@@ -6,6 +6,8 @@ local L = SQOL.L
 -- Smart Quest Radar
 L["Smart Quest Radar"] = "智慧任務雷達"
 L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] = "在相關名條上顯示任務圖示和最多三個未完成的目標。使用目前任務中可讀取的浮動提示資料。啟用時取代目標計數；無法取得的資料將會隱藏。"
+L["Mark new WoW Forever quests"] = "標記 WoW Forever 新任務"
+L["Show a small blue star on quests that are new in WoW Forever and were not in the original game: in quest giver lists, next to the title of the quest text and on the quest log's map pins. New quests are recognized by their quest ID, which is far higher than the original quests'."] = "在原版遊戲中沒有、WoW Forever 新增的任務上顯示一顆藍色小星：出現在任務給予者的任務列表中、任務文字標題旁以及任務日誌的地圖標記上。新任務透過任務 ID 辨識，其 ID 遠高於原版任務。"
 L["Quest objective"] = "任務目標"
 
 -- Reputation Memory

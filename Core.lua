@@ -81,6 +81,7 @@ SQOL.defaults = {
     ShowSkillGains = false,
     ShowNameplateObjectives = false,
     SmartQuestRadar = false,
+    MarkForeverQuests = false,
 
     -- PlayerFrame line: "iLvl: xx.x  Spd: yy%"
     ShowItemLevel = false,
