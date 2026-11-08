@@ -16,6 +16,7 @@ On top of the quest sounds come a bunch of small quality-of-life tweaks, each on
 [*][b]Quest sounds[/b] - Peon or Human worker voice lines when you finish an objective or a whole quest.
 [*][b]Quest automation[/b] - accepts regular, daily and weekly quests and turns in completed ones. Never picks a reward for you and never hands in gold, currency or non-quest items.
 [*][b]Smart Quest Radar[/b] - a quest icon and objective counts (e.g. 2/8 - 1/5) above the nameplates of units you still need.
+[*][b]New WoW Forever quests[/b] - a small blue star on quests that are new in WoW Forever: in quest giver lists, the quest text, the quest log, the objective tracker and on the world map (WoW Forever only).
 [*][b]Nameplate objective counts[/b] - quest progress above relevant nameplates.
 [*][b]Auto-track new quests[/b] in the objective tracker.
 [*][b]Colored quest progress[/b] - counts like 3/10 go from red through yellow to green, in chat and in the quest tracker.
