@@ -4,7 +4,7 @@
 
 ### Added
 
-- **Mark new WoW Forever quests** — a small blue star on the quest icon of quests that are new in WoW Forever (not in the original game): in the quest giver's quest list, next to the title of the quest text and on the quest log's map pins. New quests are recognized by their quest ID (80000 and up; the original quests are far below). WoW Forever only. Toggle under **Quests** or with `/sqol foreverquests` (`fq`). Off by default.
+- **Mark new WoW Forever quests** — a small blue star on the quest icon of quests that are new in WoW Forever (not in the original game): in the quest giver's quest list, next to the title of the quest text, on the quest buttons in the quest log and the objective tracker and on the world map's quest pins (quests you can pick up and quests in your log), whose tooltips also say *New in WoW Forever*. (The `!` above a quest giver in the game world is drawn by the game itself, so addons can't mark it.) New quests are recognized by their quest ID (80000 and up; the original quests are far below). WoW Forever only. Toggle under **Quests** or with `/sqol foreverquests` (`fq`). Off by default.
 
 After updating, **restart the game** (a `/reload` is not enough), because this release adds a new file.
 

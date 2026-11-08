@@ -1032,7 +1032,11 @@ local foreverHook = hooksecurefunc
 function hooksecurefunc(object, method, callback)
     if type(object) == 'string' then object, method, callback = _G, object, method end
     local original = object[method]
-    object[method] = function(...) original(...) callback(...) end
+    object[method] = function(...)
+        local results = table.pack(original(...))
+        callback(...)
+        return table.unpack(results, 1, results.n)
+    end
 end
 local function questTitleButton(questID)
     local button = CreateFrame('Button')
@@ -1045,6 +1049,33 @@ QuestScrollFrame = { titleFramePool = { EnumerateActive = function()
     return pairs({ [newQuestButton] = true, [oldQuestButton] = true })
 end } }
 function QuestLogQuests_Update() end
+-- World map "!" pins of quests to pick up, and their tooltips.
+local mapPins = {}
+WorldMapFrame = {
+    AcquirePin = function(self, template, questOffer)
+        local pin = CreateFrame('Frame')
+        pin.Texture = widget()
+        pin.questID = questOffer and questOffer.questID
+        function pin:GetFrameLevel() return 1 end
+        mapPins[pin] = template
+        return pin
+    end,
+    EnumeratePinsByTemplate = function(self, template)
+        local list = {}
+        for pin, pinTemplate in pairs(mapPins) do
+            if pinTemplate == template then list[pin] = true end
+        end
+        return pairs(list)
+    end,
+}
+-- Objective tracker block; its "..." button comes with the layout pass.
+local trackerPOI = CreateFrame('Button')
+function trackerPOI:GetFrameLevel() return 1 end
+local trackerBlock = { id = 92474, poiQuestID = 92474 }
+QuestObjectiveTracker = { usedBlocks = { QuestBlock = { [92474] = trackerBlock } } }
+function QuestObjectiveTracker:EndLayout() end
+local registryCallbacks = {}
+EventRegistry = { RegisterCallback = function(self, event, fn, owner) registryCallbacks[event] = { fn, owner } end }
 SlashCmdList.SQOL('fq')
 assert(not sqol.DB.MarkForeverQuests, 'Forever quest stars are not offered outside WoW Forever')
 sqol.IsForever = true
@@ -1063,8 +1094,46 @@ assert(star:IsShown() and #frames == framesBefore + 1, 'Turning it on again reus
 newQuestButton.questID = 176
 QuestLogQuests_Update()
 assert(not star:IsShown(), 'A reused title button for an original quest hides the star')
+framesBefore = #frames
+WorldMapFrame:AcquirePin('QuestOfferPinTemplate', { questID = 97234 })
+assert(#frames == framesBefore + 2 and frames[#frames]:IsShown(), 'A new quest offer pin on the map gets a star')
+WorldMapFrame:AcquirePin('QuestOfferPinTemplate', { questID = 783 })
+assert(#frames == framesBefore + 3, 'An original quest offer pin gets no star')
+local tooltipShown = registryCallbacks['TaskPOI.TooltipShown']
+assert(tooltipShown, 'Map quest tooltips are hooked')
+GameTooltip.lines = {}
+GameTooltip:Show()
+tooltipShown[1](tooltipShown[2], {}, 97234, {})
+assert(#GameTooltip.lines == 1 and GameTooltip.lines[1].text == 'New in WoW Forever', 'New quest tooltips say so')
+tooltipShown[1](tooltipShown[2], {}, 783, {})
+assert(#GameTooltip.lines == 1, 'Original quest tooltips get no line')
+assert(registryCallbacks['MapCanvas.QuestPin.OnEnter'], 'Tooltips of your quests on the map are hooked too')
+-- Your quests' pins learn their quest after AcquirePin; stars follow next frame.
+framesBefore = #frames
+local questPin = WorldMapFrame:AcquirePin('QuestPinTemplate')
+function questPin:GetQuestID() return self.id end
+questPin.id = 92474 -- Falling With Style
+assert(#frames == framesBefore + 1 and #pending > 0, 'Quest pins are starred after the map places them')
+pending[#pending]()
+assert(#frames == framesBefore + 2 and frames[#frames]:IsShown(), 'A new quest in your log gets a star on the map')
+local pinStar = frames[#frames]
+questPin.id = 176
+WorldMapFrame:AcquirePin('QuestPinTemplate')
+pending[#pending]()
+assert(not pinStar:IsShown(), 'A reused quest pin for an original quest hides the star')
+framesBefore = #frames
+trackerBlock.poiButton = trackerPOI -- added by the block's OnLayout
+QuestObjectiveTracker:EndLayout()
+assert(#frames == framesBefore + 1 and frames[#frames]:IsShown(), 'A new quest in the tracker gets a star')
+local trackerStar = frames[#frames]
+trackerBlock.id, trackerBlock.poiQuestID = 176, 176
+QuestObjectiveTracker:EndLayout()
+assert(not trackerStar:IsShown(), 'A reused tracker button for an original quest hides the star')
+QuestObjectiveTracker = nil
+GameTooltip:Hide()
+GameTooltip.lines = {}
 sqol.IsForever = false
-QuestScrollFrame, QuestLogQuests_Update = nil, nil
+QuestScrollFrame, QuestLogQuests_Update, WorldMapFrame, EventRegistry = nil, nil, nil, nil
 hooksecurefunc = foreverHook
 
 for _, message in ipairs(messages) do io.write(message, '\n') end

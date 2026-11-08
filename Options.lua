@@ -76,7 +76,7 @@ SQOL.OptionSections = {
               tooltip = L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."],
               isAvailable = SQOL_HasNameplateQuestData },
             { key = "MarkForeverQuests", label = L["Mark new WoW Forever quests"],
-              tooltip = L["Show a small blue star on quests that are new in WoW Forever and were not in the original game: in quest giver lists, next to the title of the quest text and on the quest log's map pins. New quests are recognized by their quest ID, which is far higher than the original quests'."],
+              tooltip = L["Show a small blue star on quests that are new in WoW Forever and were not in the original game: in quest giver lists, next to the title of the quest text, on the quest buttons in the quest log and the objective tracker and on the world map's quest pins. New quests are recognized by their quest ID, which is far higher than the original quests'."],
               isAvailable = function() return SQOL.IsForever end },
             { key = "ShowNameplateObjectives", label = L["Show objective counts on nameplates"],
               tooltip = L["Show quest objective counts (e.g., 0/10) above relevant nameplates."],

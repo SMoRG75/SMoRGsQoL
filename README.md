@@ -18,7 +18,7 @@ The new features are off by default. 1.5 adds new files, so **restart the game**
 - 🔊 **Quest sounds** — Peon or Human worker voice lines when you finish an objective or a whole quest.
 - 🤖 **Quest automation** — accepts regular, daily and weekly quests and turns in completed ones. Never picks a reward for you and never hands in gold, currency or non-quest items.
 - 📡 **Smart Quest Radar** — a quest icon and objective counts (e.g. `2/8 · 1/5`) above the nameplates of units you still need.
-- ⭐ **New WoW Forever quests** — a blue star on quests that are new in WoW Forever, in quest giver lists, the quest text and the quest log.
+- ⭐ **New WoW Forever quests** — a blue star on quests that are new in WoW Forever, in quest giver lists, the quest text, the quest log, the objective tracker and on the world map.
 - 🏷️ **Nameplate objective counts** — quest progress above relevant nameplates.
 - 🧭 **Auto-track new quests** in the objective tracker.
 - 🎨 **Colored quest progress** — counts like `3/10` go from red through yellow to green, in chat and in the quest tracker.

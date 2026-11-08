@@ -7,7 +7,8 @@ local L = SQOL.L
 L["Smart Quest Radar"] = "스마트 퀘스트 레이더"
 L["Mark relevant nameplates with a quest icon and up to three unfinished objectives. Uses readable tooltip data for your active quests. Replaces objective counts while enabled; unavailable data is hidden."] = "관련 이름표에 퀘스트 아이콘과 최대 3개의 미완료 목표를 표시합니다. 진행 중인 퀘스트의 읽을 수 있는 툴팁 데이터를 사용합니다. 활성화하면 기존 목표 수 표시를 대체하며, 사용할 수 없는 데이터는 숨깁니다."
 L["Mark new WoW Forever quests"] = "WoW Forever 신규 퀘스트 표시"
-L["Show a small blue star on quests that are new in WoW Forever and were not in the original game: in quest giver lists, next to the title of the quest text and on the quest log's map pins. New quests are recognized by their quest ID, which is far higher than the original quests'."] = "원래 게임에는 없던 WoW Forever 신규 퀘스트에 작은 파란 별을 표시합니다. 퀘스트 제공자의 퀘스트 목록, 퀘스트 내용의 제목 옆, 퀘스트 목록의 지도 표시에 나타납니다. 신규 퀘스트는 원래 퀘스트보다 훨씬 높은 퀘스트 ID로 구분합니다."
+L["Show a small blue star on quests that are new in WoW Forever and were not in the original game: in quest giver lists, next to the title of the quest text, on the quest buttons in the quest log and the objective tracker and on the world map's quest pins. New quests are recognized by their quest ID, which is far higher than the original quests'."] = "원래 게임에는 없던 WoW Forever 신규 퀘스트에 작은 파란 별을 표시합니다. 퀘스트 제공자의 퀘스트 목록, 퀘스트 내용의 제목 옆, 퀘스트 목록과 목표 추적기의 퀘스트 버튼, 세계 지도의 퀘스트 표시에 나타납니다. 신규 퀘스트는 원래 퀘스트보다 훨씬 높은 퀘스트 ID로 구분합니다."
+L["New in WoW Forever"] = "WoW Forever 신규"
 L["Quest objective"] = "퀘스트 목표"
 
 -- Reputation Memory
