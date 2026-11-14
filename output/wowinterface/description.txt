@@ -2,6 +2,15 @@
 
 [size=5][b]SMoRG's QoL[/b][/size]
 
+[size=4][b]What's new in 1.9[/b][/size]
+[list]
+[*][b]Floating combat banter[/b] - just for fun: FIGHT when combat starts, then GG when you win, PHEW CLOSE when you get away from a living enemy, or NEXT TIME when you die. It floats up near your character. Retail and WoW Forever only. Off by default: turn it on under [b]Reputation & XP[/b] or with [b]/sqol fight[/b].
+[*][b]Up to six floating gains at once[/b] - floating reputation and skill gains now show up to six lines instead of three, so a quest that rewards five factions shows every gain.
+[*][b]Fixed:[/b] the blue star on new WoW Forever quests in the objective tracker no longer grows over the whole screen when you accept a quest.
+[/list]
+No new files: a [b]/reload[/b] is enough after updating.
+
+
 [b]Hear your quest progress:[/b] [i]"Work, work."[/i] when you finish an objective, [i]"Work complete."[/i] when the quest is done. Prefer the Alliance? Switch to the Human worker ([i]"More work?"[/i] / [i]"Job's done!"[/i]).
 
 On top of the quest sounds come a bunch of small quality-of-life tweaks, each one [b]individually toggleable[/b]. Works in Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
