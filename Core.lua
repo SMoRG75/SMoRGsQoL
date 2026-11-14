@@ -117,6 +117,9 @@ SQOL.defaults = {
     -- LibDBIcon minimap button (the LDB launcher and addon compartment are always there).
     ShowMinimapButton = false,
 
+    -- Square minimap with a thin black border (Retail and WoW Forever).
+    SquareMinimap = false,
+
 }
 
 ------------------------------------------------------------

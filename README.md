@@ -39,12 +39,13 @@ It is off by default; turn it on under **Quests** or with `/sqol fq`. 1.7 adds a
 - 🎨 **Colorful unit tooltips**.
 - 🔗 **Wowhead links** and the **Show web link** key binding.
 - 🏹 **Range icon and distance** to your target on its nameplate.
+- 🟦 **Square minimap** with a thin black border; addon minimap buttons follow the square edge.
 - ✅ **Hide completed achievements** by default.
 - 🖋️ **Custom damage text font** and 🖱️ **cursor shake highlight**.
 
 ## Classic clients
 
-The quest sounds and most features work everywhere. A few need Retail-only parts of the UI and are simply left out of the options in the Classic clients: Smart Quest Radar, nameplate objective counts, auto-track, the range icon and the colored counts in the quest tracker. Classic Era and Anniversary also have no achievements or group finder, so those two features are only in Mists of Pandaria Classic.
+The quest sounds and most features work everywhere. A few need Retail-only parts of the UI and are simply left out of the options in the Classic clients: Smart Quest Radar, nameplate objective counts, auto-track, the range icon, the square minimap and the colored counts in the quest tracker. Classic Era and Anniversary also have no achievements or group finder, so those two features are only in Mists of Pandaria Classic.
 
 ## Settings
 

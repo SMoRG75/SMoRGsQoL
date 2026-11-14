@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Square minimap** — makes the minimap square, with a thin black border in place of Blizzard's round frame. Minimap buttons from addons that use LibDBIcon line up along the square edge. In WoW Forever the day/night indicator moves into the top right corner. If Retail switches to its separate instance map, that map turns square too. Turning the option off brings the round minimap back right away. Retail and WoW Forever only. Toggle under **Interface** or with `/sqol squareminimap` (`sqm`). Off by default.
+
 ## [1.7.0] - 2026-11-08
 
 ### Added

@@ -466,6 +466,9 @@ function SQOL.ApplyOption(key)
     elseif key == "ShowMinimapButton" then
         SQOL.UpdateMinimapButton()
 
+    elseif key == "SquareMinimap" then
+        SQOL.SquareMinimap_Apply()
+
     elseif key == "ShowRangeIndicator" then
         SQOL.RangeIndicator_OnOptionChanged()
 
@@ -526,6 +529,7 @@ local SQOL_COMMANDS = {
     { names = { "config", "options", "opt" }, desc = L["Open the options window"],
       run = function() SQOL.OptionsPopup_Toggle() end },
     { names = { "minimap", "mm" }, key = "ShowMinimapButton" },
+    { names = { "squareminimap", "sqm" }, key = "SquareMinimap" },
     { names = { "autotrack", "at" }, key = "AutoTrack" },
     { names = { "color", "col" }, key = "ColorProgress" },
     { names = { "nameplate", "np" }, key = "ShowNameplateObjectives" },
@@ -591,6 +595,7 @@ local SQOL_COMMANDS = {
           SQOL.Init(true)
           SQOL.OptionsPopup_Refresh()
           SQOL.UpdateMinimapButton()
+          SQOL.SquareMinimap_Apply()
       end },
     { names = { "help" }, desc = L["Show this command list"],
       run = function() SQOL_Help() end },
@@ -700,6 +705,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL.QuestAutomation_OnOptionChanged()
         SQOL.WowheadLinks_OnOptionChanged()
         SQOL.ForeverQuests_OnOptionChanged()
+        SQOL.SquareMinimap_Apply()
         if SQOL.DB.ShowSplash then
             SQOL_Splash()
         end

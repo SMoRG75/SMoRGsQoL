@@ -725,3 +725,184 @@ end
 
 SQOL.UnitTooltip_Init()
 
+------------------------------------------------------------
+-- Square minimap (Retail and WoW Forever)
+------------------------------------------------------------
+-- A square mask, Blizzard's round border art hidden and a thin black border.
+-- GetMinimapShape tells LibDBIcon and other addons to put their buttons
+-- along the square edge.
+local SQOL_SQUARE_MINIMAP_MASK = "Interface\\Buttons\\WHITE8X8"
+local SQOL_SQUARE_MINIMAP_BORDER = 2
+-- Retail draws the ring as MinimapCompassTexture; the Classic-style frame
+-- has MinimapBorder (and shows the compass only with a rotating minimap).
+local SQOL_ROUND_MINIMAP_ART = { "MinimapBorder", "MinimapCompassTexture" }
+
+local squareMinimap = { active = false, border = nil, savedShape = nil, hybridMask = nil }
+
+local function SQOL_SquareMinimap_Shape()
+    return "SQUARE"
+end
+
+function SQOL.IsSquareMinimapSupported()
+    if SQOL.IsClassic then return false end
+    local minimap = rawget(_G, "Minimap")
+    return type(minimap) == "table" and type(minimap.SetMaskTexture) == "function"
+end
+
+local function SQOL_SquareMinimap_RoundMask()
+    if rawget(_G, "MinimapBorder") then return "Textures\\MinimapMask" end
+    return "Interface\\Masks\\CircleMaskScalable"
+end
+
+local function SQOL_SquareMinimap_GetBorder()
+    if squareMinimap.border then return squareMinimap.border end
+
+    local border = CreateFrame("Frame", nil, Minimap)
+    border:SetAllPoints(Minimap)
+    local size = SQOL_SQUARE_MINIMAP_BORDER
+    -- Four edges just outside the map, so they never cover it.
+    local edges = {
+        { "TOPLEFT", "TOPLEFT", -size, size, "BOTTOMRIGHT", "TOPRIGHT", size, 0 },
+        { "TOPLEFT", "BOTTOMLEFT", -size, 0, "BOTTOMRIGHT", "BOTTOMRIGHT", size, -size },
+        { "TOPLEFT", "TOPLEFT", -size, 0, "BOTTOMRIGHT", "BOTTOMLEFT", 0, 0 },
+        { "TOPLEFT", "TOPRIGHT", 0, 0, "BOTTOMRIGHT", "BOTTOMRIGHT", size, 0 },
+    }
+    for _, e in ipairs(edges) do
+        local tex = border:CreateTexture(nil, "BORDER")
+        tex:SetColorTexture(0, 0, 0, 1)
+        tex:SetPoint(e[1], Minimap, e[2], e[3], e[4])
+        tex:SetPoint(e[5], Minimap, e[6], e[7], e[8])
+    end
+    border:Hide()
+    squareMinimap.border = border
+    return border
+end
+
+-- The map Retail shows in some instances (Blizzard_HybridMinimap) has its own mask.
+local function SQOL_SquareMinimap_ApplyHybrid()
+    local hybrid = rawget(_G, "HybridMinimap")
+    if not (hybrid and hybrid.CircleMask and hybrid.MapCanvas
+        and hybrid.MapCanvas.SetUseMaskTexture) then
+        return
+    end
+    if squareMinimap.hybridMask == nil then
+        if not squareMinimap.active then return end
+        squareMinimap.hybridMask = hybrid.CircleMask:GetTexture() or false
+    end
+    local mask = squareMinimap.active and SQOL_SQUARE_MINIMAP_MASK or squareMinimap.hybridMask
+    if not mask then return end
+    hybrid.MapCanvas:SetUseMaskTexture(false)
+    hybrid.CircleMask:SetTexture(mask)
+    hybrid.MapCanvas:SetUseMaskTexture(true)
+end
+
+local function SQOL_SquareMinimap_SetShape(square)
+    local current = rawget(_G, "GetMinimapShape")
+    if square then
+        if current ~= SQOL_SquareMinimap_Shape then
+            squareMinimap.savedShape = current
+            GetMinimapShape = SQOL_SquareMinimap_Shape
+        end
+    elseif current == SQOL_SquareMinimap_Shape then
+        GetMinimapShape = squareMinimap.savedShape
+        squareMinimap.savedShape = nil
+    end
+
+    -- Move every LibDBIcon button to the new edge.
+    local libStub = rawget(_G, "LibStub")
+    local icon = libStub and libStub("LibDBIcon-1.0", true)
+    if icon and type(icon.SetButtonRadius) == "function" and type(icon.radius) == "number" then
+        icon:SetButtonRadius(icon.radius)
+    end
+end
+
+-- WoW Forever's day/night indicator (the sun/moon, Blizzard_Minimap's
+-- Camelot/Diel.lua) sits on the round border; on the square map it goes in
+-- the top right corner. It has no name: it is the child of
+-- MinimapCluster.MinimapContainer whose Background shows a
+-- UI-HUD-Minimap-*Cycle atlas. (GameTimeFrame is the calendar button.)
+local function SQOL_SquareMinimap_FindDayNight()
+    if squareMinimap.dayNight then return squareMinimap.dayNight end
+    local cluster = rawget(_G, "MinimapCluster")
+    local container = cluster and cluster.MinimapContainer
+    if not (container and container.GetChildren) then return nil end
+    for _, child in ipairs({ container:GetChildren() }) do
+        local background = child.Background
+        local atlas = background and background.GetAtlas and background:GetAtlas()
+        if type(atlas) == "string" and atlas:find("Cycle", 1, true)
+            and child.GetNumPoints and child.GetPoint and child.SetPoint then
+            squareMinimap.dayNight = child
+            return child
+        end
+    end
+    return nil
+end
+
+local function SQOL_SquareMinimap_PlaceDayNight(frame)
+    squareMinimap.placingDayNight = true
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", 0, 0)
+    squareMinimap.placingDayNight = false
+end
+
+local function SQOL_SquareMinimap_MoveDayNight(square)
+    if not SQOL.IsForever then return end
+    local frame = SQOL_SquareMinimap_FindDayNight()
+    if not frame then return end
+
+    if square then
+        if not squareMinimap.dayNightPoints then
+            local points = {}
+            for i = 1, frame:GetNumPoints() do
+                points[i] = { frame:GetPoint(i) }
+            end
+            squareMinimap.dayNightPoints = points
+        end
+        -- Keep it in the corner if Blizzard anchors it again.
+        if not squareMinimap.dayNightHooked then
+            squareMinimap.dayNightHooked = true
+            hooksecurefunc(frame, "SetPoint", function(self)
+                if squareMinimap.active and not squareMinimap.placingDayNight then
+                    SQOL_SquareMinimap_PlaceDayNight(self)
+                end
+            end)
+        end
+        SQOL_SquareMinimap_PlaceDayNight(frame)
+    elseif squareMinimap.dayNightPoints then
+        squareMinimap.placingDayNight = true
+        frame:ClearAllPoints()
+        for _, point in ipairs(squareMinimap.dayNightPoints) do
+            frame:SetPoint(point[1], point[2], point[3], point[4], point[5])
+        end
+        squareMinimap.placingDayNight = false
+        squareMinimap.dayNightPoints = nil
+    end
+end
+
+function SQOL.SquareMinimap_Apply()
+    if not SQOL.IsSquareMinimapSupported() then return end
+    local square = (SQOL.DB and SQOL.DB.SquareMinimap) and true or false
+    if square == squareMinimap.active then return end
+    squareMinimap.active = square
+
+    Minimap:SetMaskTexture(square and SQOL_SQUARE_MINIMAP_MASK or SQOL_SquareMinimap_RoundMask())
+    for _, name in ipairs(SQOL_ROUND_MINIMAP_ART) do
+        local art = rawget(_G, name)
+        if art and art.SetAlpha then
+            art:SetAlpha(square and 0 or 1)
+        end
+    end
+    SQOL_SquareMinimap_GetBorder():SetShown(square)
+    SQOL_SquareMinimap_SetShape(square)
+    SQOL.safe_pcall(SQOL_SquareMinimap_MoveDayNight, square)
+    SQOL.safe_pcall(SQOL_SquareMinimap_ApplyHybrid)
+end
+
+local squareMinimapEvents = CreateFrame("Frame")
+squareMinimapEvents:RegisterEvent("ADDON_LOADED")
+squareMinimapEvents:SetScript("OnEvent", function(_, _, addonName)
+    if addonName == "Blizzard_HybridMinimap" and squareMinimap.active then
+        SQOL.safe_pcall(SQOL_SquareMinimap_ApplyHybrid)
+    end
+end)
+

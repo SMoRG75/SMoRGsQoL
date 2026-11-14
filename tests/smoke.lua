@@ -57,6 +57,11 @@ end
 UIParent = widget()
 PlayerFrame = widget()
 PlayerFrame:Show()
+-- Retail minimap: records the mask and the ring's alpha.
+Minimap = widget()
+function Minimap:SetMaskTexture(mask) self.mask = mask end
+MinimapCompassTexture = widget()
+function MinimapCompassTexture:SetAlpha(alpha) self.alpha = alpha end
 -- Unit tooltip: captures the post-call and records added lines.
 local tooltipPostCalls = {}
 Enum = { TooltipDataType = { Unit = 2 } }
@@ -123,6 +128,12 @@ local fakeLibs = {
         Refresh = function(_, _, db) minimapButton.db = db end,
         Show = function() minimapButton.shown = true end,
         Hide = function() minimapButton.shown = false end,
+        radius = 5,
+        SetButtonRadius = function(_, radius)
+            minimapButton.repositioned = (minimapButton.repositioned or 0) + 1
+            minimapButton.shape = GetMinimapShape and GetMinimapShape() or 'ROUND'
+            assert(radius == 5)
+        end,
     },
 }
 LibStub = setmetatable({}, { __call = function(_, name) return fakeLibs[name] end })
@@ -180,6 +191,46 @@ SlashCmdList.SQOL('minimap')
 assert(minimapButton.shown and sqol.DB.MinimapIcon.hide == false)
 SlashCmdList.SQOL('mm')
 assert(not minimapButton.shown and sqol.DB.MinimapIcon.hide == true)
+
+-- Square minimap: off by default; on gives a square mask, hides the ring and
+-- tells LibDBIcon; off puts Blizzard's round mask and ring back.
+assert(not sqol.DB.SquareMinimap and Minimap.mask == nil and GetMinimapShape == nil, 'Square minimap is off by default')
+SlashCmdList.SQOL('squareminimap')
+assert(sqol.DB.SquareMinimap and Minimap.mask == 'Interface\\Buttons\\WHITE8X8')
+assert(MinimapCompassTexture.alpha == 0 and GetMinimapShape() == 'SQUARE' and minimapButton.shape == 'SQUARE')
+SlashCmdList.SQOL('sqm')
+assert(not sqol.DB.SquareMinimap and Minimap.mask == 'Interface\\Masks\\CircleMaskScalable')
+assert(MinimapCompassTexture.alpha == 1 and GetMinimapShape == nil and minimapButton.shape == 'ROUND')
+assert(minimapButton.repositioned == 2, 'Buttons move to the new edge each time')
+
+-- WoW Forever: the nameless day/night indicator in MinimapCluster.MinimapContainer
+-- moves to the top right corner and back; the calendar (GameTimeFrame) stays.
+local function pointWidget(atlas)
+    local w = widget()
+    w.points = { { 'CENTER', UIParent, 'CENTER', 55, 86 } }
+    function w:GetNumPoints() return #self.points end
+    function w:GetPoint(i) return table.unpack(self.points[i]) end
+    function w:ClearAllPoints() self.points = {} end
+    function w:SetPoint(...) self.points[#self.points + 1] = { ... } end
+    if atlas then
+        w.Background = widget()
+        function w.Background:GetAtlas() return atlas end
+    end
+    return w
+end
+local dayNight = pointWidget('UI-HUD-Minimap-NightCycle')
+GameTimeFrame = pointWidget()
+MinimapCluster = { MinimapContainer = { GetChildren = function() return Minimap, pointWidget('Other'), dayNight end } }
+sqol.IsForever = true
+SlashCmdList.SQOL('sqm')
+assert(#dayNight.points == 1 and dayNight.points[1][1] == 'TOPRIGHT'
+    and dayNight.points[1][2] == Minimap, 'Forever day/night indicator in the corner')
+assert(GameTimeFrame.points[1][1] == 'CENTER', 'The calendar button stays put')
+SlashCmdList.SQOL('sqm')
+assert(#dayNight.points == 1 and dayNight.points[1][1] == 'CENTER'
+    and dayNight.points[1][4] == 55 and dayNight.points[1][5] == 86, 'Back on the round border')
+sqol.IsForever = false
+GameTimeFrame, MinimapCluster = nil, nil
 assert(SMoRGsQoL_OnAddonCompartmentClick and SMoRGsQoL_OnAddonCompartmentEnter and SMoRGsQoL_OnAddonCompartmentLeave)
 GameTooltip.lines = {}
 launcher.OnTooltipShow(GameTooltip)
