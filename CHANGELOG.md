@@ -1,10 +1,18 @@
 # Changelog
 
-## [Unreleased]
+## [1.9.0] - 2026-11-14
 
 ### Added
 
 - **Floating combat banter** — just for fun: floating text near your character, where the reputation gains float, says **FIGHT** when combat starts, then **GG** when you win, **PHEW CLOSE** when combat ends while a living enemy is still targeted (you got away), or **NEXT TIME** when you die. Retail and WoW Forever only. Toggle under **Reputation & XP** or with `/sqol fight` (`gg`). Off by default.
+
+### Changed
+
+- **Floating reputation and skill gains** show up to six lines at once, instead of three. A quest that gives reputation with five factions now shows every gain. When even more arrive at once, the oldest line makes room.
+
+### Fixed
+
+- **Mark new WoW Forever quests**: when you accepted a new WoW Forever quest, the blue star in the objective tracker grew until it covered the whole screen. It now stays small.
 
 ## [1.8.0] - 2026-11-14
 

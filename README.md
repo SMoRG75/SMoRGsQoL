@@ -4,11 +4,13 @@
 
 On top of the quest sounds come a bunch of small quality-of-life tweaks, each one **individually toggleable**. Works in Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
 
-## What's new in 1.8
+## What's new in 1.9
 
-- 🟦 **Square minimap** — a square minimap with a thin black border in place of Blizzard's round frame. Addon minimap buttons follow the square edge, and in WoW Forever the day/night indicator sits in the top right corner. Retail and WoW Forever.
+- 💬 **Floating combat banter** — just for fun: **FIGHT** when combat starts, then **GG**, **PHEW CLOSE** or **NEXT TIME**, floating up near your character. Retail and WoW Forever.
+- 📈 Up to six **floating reputation and skill gains** at once, so a quest that rewards five factions shows them all.
+- ⭐ Fixed: the star on new WoW Forever quests in the objective tracker no longer grows over the whole screen when you accept a quest.
 
-It is off by default; turn it on under **Interface** or with `/sqol sqm`. See the [changelog](CHANGELOG.md) for the full release history.
+Combat banter is off by default; turn it on under **Reputation & XP** or with `/sqol fight`. See the [changelog](CHANGELOG.md) for the full release history.
 
 ## Features
 
@@ -29,6 +31,7 @@ It is off by default; turn it on under **Interface** or with `/sqol sqm`. See th
 - 🧠 **Reputation Memory** — returns to your preferred faction 10 seconds later.
 - ✨ **Floating reputation gains** — `+25 Rep — Valarjar` near the screen center.
 - 📈 **Floating skill gains** — `+1 Staves (18/20)` the same way when a profession or weapon skill goes up.
+- 💬 **Floating combat banter** — **FIGHT**, **GG**, **PHEW CLOSE** or **NEXT TIME** near your character.
 
 **Group**
 - ⏱️ **Ready check countdown** and ⏳ **LFG queue pop countdown**.
@@ -45,7 +48,7 @@ It is off by default; turn it on under **Interface** or with `/sqol sqm`. See th
 
 ## Classic clients
 
-The quest sounds and most features work everywhere. A few need Retail-only parts of the UI and are simply left out of the options in the Classic clients: Smart Quest Radar, nameplate objective counts, auto-track, the range icon, the square minimap and the colored counts in the quest tracker. Classic Era and Anniversary also have no achievements or group finder, so those two features are only in Mists of Pandaria Classic.
+The quest sounds and most features work everywhere. A few need Retail-only parts of the UI and are simply left out of the options in the Classic clients: Smart Quest Radar, nameplate objective counts, auto-track, the range icon, the square minimap, combat banter and the colored counts in the quest tracker. Classic Era and Anniversary also have no achievements or group finder, so those two features are only in Mists of Pandaria Classic.
 
 ## Settings
 
