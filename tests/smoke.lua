@@ -943,10 +943,27 @@ assert(#frames == before, 'Losses and secret messages must be ignored')
 fire('CHAT_MSG_COMBAT_FACTION_CHANGE', '|cff00ff00Reputation with Valarjar increased by 1,250.|r')
 local repFrame = frames[#frames]
 assert(repFrame:IsShown() and repFrame.fontStrings[1].text == '+1250 Rep — Valarjar')
-for i = 1, 6 do
-    fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Your reputation with Stormwind has increased by 10.')
+-- A five-faction turn-in shows every gain; bursts beyond the pool replace the
+-- oldest label, never the one just shown.
+local function shownGains()
+    local list = {}
+    for _, fs in ipairs(repFrame.fontStrings) do
+        if fs:IsShown() then list[#list + 1] = fs.text end
+    end
+    table.sort(list)
+    return table.concat(list, ', ')
 end
-assert(#repFrame.fontStrings == 3, 'Burst gains must reuse the bounded label pool')
+for _, name in ipairs({ 'Ironforge', 'Gnomeregan Exiles', 'Alliance', 'Stormwind', 'Darnassus' }) do
+    fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Reputation with ' .. name .. ' increased by 13.')
+end
+assert(shownGains() == '+1250 Rep — Valarjar, +13 Rep — Alliance, +13 Rep — Darnassus, '
+    .. '+13 Rep — Gnomeregan Exiles, +13 Rep — Ironforge, +13 Rep — Stormwind', shownGains())
+for i = 1, 8 do
+    fire('CHAT_MSG_COMBAT_FACTION_CHANGE', 'Reputation with Faction' .. i .. ' increased by 1.')
+end
+assert(#repFrame.fontStrings == 6, 'Burst gains must reuse the bounded label pool')
+assert(shownGains() == '+1 Rep — Faction3, +1 Rep — Faction4, +1 Rep — Faction5, '
+    .. '+1 Rep — Faction6, +1 Rep — Faction7, +1 Rep — Faction8', 'Bursts replace the oldest labels')
 fire('CHAT_MSG_COMBAT_FACTION_CHANGE', "Your Warband's reputation with The Wild Hunt increased by 30.")
 local warbandShown = false
 for _, fs in ipairs(repFrame.fontStrings) do

@@ -644,6 +644,11 @@ end
 local repGainFrame
 local repGainLines = {}
 local repGainDuration = 2.5
+-- A quest turn-in can give five factions at once, plus a skill or banter line.
+local repGainMaxLines = 6
+-- Gains often arrive in the same frame with equal ages, so the oldest label
+-- is found by the order it was shown in.
+local repGainSerial = 0
 
 -- Hides the labels of one kind ("rep", "skill"), or all of them without a kind.
 function SQOL.FloatingGains_Hide(kind)
@@ -698,16 +703,17 @@ function SQOL.FloatingGains_Show(kind, text, r, g, b)
             available = available or line
         else
             line.offset = line.offset + 28
-            if not oldest or line.age > oldest.age then oldest = line end
+            if not oldest or line.serial < oldest.serial then oldest = line end
         end
     end
-    if not available and #repGainLines < 3 then
+    if not available and #repGainLines < repGainMaxLines then
         available = repGainFrame:CreateFontString(nil, "OVERLAY")
         available:SetFont(STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 22, "OUTLINE")
         repGainLines[#repGainLines + 1] = available
     end
     local line = available or oldest
-    line.age, line.offset, line.kind = 0, 0, kind
+    repGainSerial = repGainSerial + 1
+    line.age, line.offset, line.kind, line.serial = 0, 0, kind, repGainSerial
     line:SetTextColor(r, g, b)
     line:SetText(text)
     line:SetPoint("CENTER", repGainFrame, "CENTER", 0, 65)
