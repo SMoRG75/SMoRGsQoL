@@ -135,6 +135,8 @@ L["Auto-watch reputation gains"] = "Ruf automatisch beobachten"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "Wenn sich dein Ruf bei einer Fraktion ändert, wird automatisch diese Fraktion beobachtet."
 L["Floating reputation gains"] = "Schwebende Rufgewinne"
 L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "Zeigt Rufgewinne als grünen Text in der Nähe deines Charakters, der nach oben schwebt und verblasst. Unabhängig vom automatischen Beobachten."
+L["Floating combat banter"] = "Schwebende Kampfsprüche"
+L["Just for fun: floating text near your character says FIGHT when combat starts, then GG when you win, PHEW CLOSE when combat ends with a living enemy still targeted (you got away), or NEXT TIME when you die. Independent of the floating reputation gains."] = "Nur zum Spaß: Schwebender Text in der Nähe deines Charakters zeigt FIGHT, wenn ein Kampf beginnt, danach GG, wenn du gewinnst, PHEW CLOSE, wenn der Kampf endet, während du noch einen lebenden Gegner im Ziel hast (du bist entkommen), oder NEXT TIME, wenn du stirbst. Unabhängig von den schwebenden Rufgewinnen."
 L["Floating skill gains"] = "Schwebende Fertigkeitsgewinne"
 L["Show skill increases, such as professions and weapon skills, as simple blue text near your character that floats upward and fades out, with your new skill level."] = "Zeigt Fertigkeitssteigerungen, etwa bei Berufen und Waffenfertigkeiten, als blauen Text in der Nähe deines Charakters, der nach oben schwebt und verblasst, mit deiner neuen Fertigkeitsstufe."
 

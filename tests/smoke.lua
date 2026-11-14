@@ -1019,6 +1019,47 @@ assert(not sqol.DB.ShowSkillGains and not skillShown('+1 Mining (4)'), 'Turning 
 assert(repFrame:IsShown(), 'Turning skill text off keeps reputation labels')
 SlashCmdList.SQOL('skilltexttest')
 assert(skillShown('+1 Staves (18/20)'))
+-- Combat banter floats with the gains: FIGHT, then GG, PHEW CLOSE or NEXT TIME.
+local playerDead = false
+local mob = { exists = false, hostile = true, dead = false }
+function UnitIsDeadOrGhost(unit) return unit == 'player' and playerDead end
+function UnitExists(unit) return unit == 'target' and mob.exists end
+function UnitCanAttack(_, unit) return unit == 'target' and mob.hostile end
+function UnitIsDead(unit) return unit == 'target' and mob.dead end
+local function banterCount(text)
+    local count = 0
+    for _, fs in ipairs(repFrame.fontStrings) do
+        if fs.text == text and fs:IsShown() then count = count + 1 end
+    end
+    return count
+end
+fire('PLAYER_REGEN_DISABLED')
+assert(banterCount('FIGHT') == 0, 'Combat banter is off by default')
+SlashCmdList.SQOL('fight')
+assert(sqol.DB.CombatBanter)
+fire('PLAYER_REGEN_DISABLED')
+assert(banterCount('FIGHT') == 1, 'FIGHT when combat starts')
+fire('PLAYER_REGEN_ENABLED')
+assert(banterCount('GG') == 1 and banterCount('FIGHT') == 0, 'GG replaces FIGHT when you win')
+mob.exists = true
+fire('PLAYER_REGEN_DISABLED')
+fire('PLAYER_REGEN_ENABLED')
+assert(banterCount('PHEW CLOSE') == 1, 'Getting away from a living enemy says PHEW CLOSE')
+mob.dead = true
+fire('PLAYER_REGEN_DISABLED')
+fire('PLAYER_REGEN_ENABLED')
+assert(banterCount('GG') == 1, 'A dead target says GG')
+fire('PLAYER_REGEN_DISABLED')
+playerDead = true
+fire('PLAYER_REGEN_ENABLED')
+fire('PLAYER_DEAD')
+assert(banterCount('NEXT TIME') == 1 and banterCount('GG') == 0, 'Dying says NEXT TIME once')
+assert(skillShown('+1 Staves (18/20)'), 'Banter leaves the gain labels alone')
+SlashCmdList.SQOL('fight')
+assert(not sqol.DB.CombatBanter and banterCount('NEXT TIME') == 0, 'Turning banter off hides it')
+fire('PLAYER_REGEN_DISABLED')
+assert(banterCount('FIGHT') == 0)
+UnitIsDeadOrGhost, UnitExists, UnitCanAttack, UnitIsDead = nil, nil, nil, nil
 -- Adventure Recap is routed independently of quest sounds and reputation text.
 sqol.SetOption('QuestCompleteSound', false)
 sqol.SetOption('QuestObjectiveSound', false)

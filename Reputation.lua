@@ -725,6 +725,54 @@ function SQOL.RepGains_HandleMessage(msg)
     if name then SQOL.RepGains_Show(name, amount) end
 end
 
+-- Combat banter in the same floating labels: FIGHT when combat starts, then GG
+-- when you win, PHEW CLOSE when you got away or NEXT TIME when you die.
+local BANTER = {
+    fight = { "FIGHT", 1, 0.15, 0.15 },
+    win = { "GG", 0.3, 1, 0.3 },
+    fled = { "PHEW CLOSE", 1, 1, 0.2 },
+    lose = { "NEXT TIME", 1, 0.55, 0.1 },
+}
+
+local function SQOL_Banter_Show(kind)
+    local entry = BANTER[kind]
+    SQOL.FloatingGains_Hide("banter")
+    SQOL.FloatingGains_Show("banter", entry[1], entry[2], entry[3], entry[4])
+end
+
+-- Plain (non-secret) unit values only.
+local function SQOL_Banter_Plain(value)
+    return SQOL.CanUseValue(value) and value
+end
+
+-- Combat ended with a living enemy still targeted: you got away from it.
+local function SQOL_Banter_GotAway()
+    if type(UnitExists) ~= "function" or type(UnitCanAttack) ~= "function"
+        or type(UnitIsDead) ~= "function" then
+        return false
+    end
+    if not SQOL_Banter_Plain(UnitExists("target"))
+        or not SQOL_Banter_Plain(UnitCanAttack("player", "target")) then
+        return false
+    end
+    local dead = UnitIsDead("target")
+    return SQOL.CanUseValue(dead) and not dead
+end
+
+function SQOL.Banter_HandleEvent(event)
+    if not SQOL.DB or not SQOL.DB.CombatBanter or SQOL.IsClassic then return end
+    if event == "PLAYER_REGEN_DISABLED" then
+        SQOL_Banter_Show("fight")
+    elseif event == "PLAYER_DEAD" then
+        SQOL_Banter_Show("lose")
+    else
+        -- Dying also ends combat; PLAYER_DEAD says NEXT TIME for that.
+        local dead = type(UnitIsDeadOrGhost) == "function" and UnitIsDeadOrGhost("player")
+        if SQOL.CanUseValue(dead) and dead then return end
+        SQOL_Banter_Show(SQOL_Banter_GotAway() and "fled" or "win")
+    end
+end
+
 local function SQOL_Rep_FindFactionIDFromMessage(msg)
     if not SQOL.CanUseValue(msg) or type(msg) ~= "string" then
         return nil, nil

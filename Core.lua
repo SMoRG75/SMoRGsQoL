@@ -62,6 +62,7 @@ SQOL.defaults = {
     ShowSplash    = false,
     ColorProgress = false,
     ColorStatusBarProgress = false,
+    CombatBanter = false,
     QuestCompleteSound = true,
     QuestObjectiveSound = true,
     QuestSoundProfile = "Horde",

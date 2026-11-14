@@ -135,6 +135,8 @@ L["Auto-watch reputation gains"] = "Автоотслеживание репут�
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "Когда меняется репутация у фракции, она автоматически становится отслеживаемой."
 L["Floating reputation gains"] = "Всплывающая репутация"
 L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "Показывает полученную репутацию зеленым текстом рядом с персонажем, который всплывает и исчезает. Не зависит от автоотслеживания."
+L["Floating combat banter"] = "Всплывающие боевые фразы"
+L["Just for fun: floating text near your character says FIGHT when combat starts, then GG when you win, PHEW CLOSE when combat ends with a living enemy still targeted (you got away), or NEXT TIME when you die. Independent of the floating reputation gains."] = "Просто для забавы: всплывающий текст рядом с персонажем показывает FIGHT в начале боя, затем GG, если вы победили, PHEW CLOSE, если бой закончился, а в цели всё ещё живой противник (вы сбежали), или NEXT TIME, если погибли. Не зависит от всплывающих получений репутации."
 L["Floating skill gains"] = "Всплывающий рост навыков"
 L["Show skill increases, such as professions and weapon skills, as simple blue text near your character that floats upward and fades out, with your new skill level."] = "Показывает повышение навыков, например профессий и владения оружием, синим текстом рядом с персонажем, который всплывает и исчезает, вместе с новым уровнем навыка."
 

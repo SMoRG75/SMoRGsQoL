@@ -135,6 +135,8 @@ L["Auto-watch reputation gains"] = "Seguir la reputación automáticamente"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "Cuando cambia tu reputación con una facción, esa facción pasa a ser la que sigues."
 L["Floating reputation gains"] = "Ganancias de reputación flotantes"
 L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "Muestra las ganancias de reputación como texto verde junto a tu personaje que sube y se desvanece. Independiente del seguimiento automático."
+L["Floating combat banter"] = "Frases de combate flotantes"
+L["Just for fun: floating text near your character says FIGHT when combat starts, then GG when you win, PHEW CLOSE when combat ends with a living enemy still targeted (you got away), or NEXT TIME when you die. Independent of the floating reputation gains."] = "Solo por diversión: un texto flotante junto a tu personaje muestra FIGHT al empezar un combate, luego GG si ganas, PHEW CLOSE si el combate termina con un enemigo vivo aún seleccionado (has escapado) o NEXT TIME si mueres. Independiente de las ganancias de reputación flotantes."
 L["Floating skill gains"] = "Ganancias de habilidad flotantes"
 L["Show skill increases, such as professions and weapon skills, as simple blue text near your character that floats upward and fades out, with your new skill level."] = "Muestra las subidas de habilidad, como profesiones y habilidades con armas, como texto azul junto a tu personaje que sube y se desvanece, con tu nuevo nivel de habilidad."
 

@@ -135,6 +135,8 @@ L["Auto-watch reputation gains"] = "평판 자동 추적"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "어떤 진영의 평판이 바뀌면 그 진영을 자동으로 추적합니다."
 L["Floating reputation gains"] = "떠오르는 평판 획득"
 L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "획득한 평판을 캐릭터 근처에 초록색 글자로 띄워 위로 떠오르며 사라지게 합니다. 평판 자동 추적과 따로 설정합니다."
+L["Floating combat banter"] = "떠오르는 전투 멘트"
+L["Just for fun: floating text near your character says FIGHT when combat starts, then GG when you win, PHEW CLOSE when combat ends with a living enemy still targeted (you got away), or NEXT TIME when you die. Independent of the floating reputation gains."] = "재미로: 전투가 시작되면 캐릭터 근처에 떠오르는 텍스트로 FIGHT가 표시되고, 이기면 GG, 살아 있는 적을 대상으로 잡은 채 전투가 끝나면(도망침) PHEW CLOSE, 죽으면 NEXT TIME이 표시됩니다. 떠오르는 평판 획득과는 별개입니다."
 L["Floating skill gains"] = "떠오르는 숙련도 상승"
 L["Show skill increases, such as professions and weapon skills, as simple blue text near your character that floats upward and fades out, with your new skill level."] = "전문 기술과 무기 숙련 등 숙련도 상승을 캐릭터 근처에 파란색 글자로 띄워 새 숙련도와 함께 위로 떠오르며 사라지게 합니다."
 

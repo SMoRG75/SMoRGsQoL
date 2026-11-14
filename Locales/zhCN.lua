@@ -135,6 +135,8 @@ L["Auto-watch reputation gains"] = "自动监视声望变化"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "某个阵营的声望变化时，自动将其设为监视的声望。"
 L["Floating reputation gains"] = "浮动声望提示"
 L["Show reputation gains as simple green text near your character that floats upward and fades out. Independent of auto-watch."] = "在角色附近以绿色文字显示获得的声望，文字向上飘动并淡出。与自动监视声望分开设置。"
+L["Floating combat banter"] = "浮动战斗台词"
+L["Just for fun: floating text near your character says FIGHT when combat starts, then GG when you win, PHEW CLOSE when combat ends with a living enemy still targeted (you got away), or NEXT TIME when you die. Independent of the floating reputation gains."] = "纯属娱乐：战斗开始时角色附近浮现 FIGHT，获胜时显示 GG，战斗结束时目标仍是存活的敌人（你逃脱了）显示 PHEW CLOSE，死亡时显示 NEXT TIME。与浮动声望获取无关。"
 L["Floating skill gains"] = "浮动技能提升提示"
 L["Show skill increases, such as professions and weapon skills, as simple blue text near your character that floats upward and fades out, with your new skill level."] = "在角色附近以蓝色文字显示技能提升（如专业技能和武器技能）及新的技能等级，文字向上飘动并淡出。"
 

@@ -380,6 +380,9 @@ function SQOL.ApplyOption(key)
     elseif key == "ColorStatusBarProgress" then
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
 
+    elseif key == "CombatBanter" then
+        if not SQOL.DB.CombatBanter then SQOL.FloatingGains_Hide("banter") end
+
     elseif key == "ColorProgress" then
         SQOL.RefreshQuestTrackerColors()
         SQOL.NameplateObjectives_ScheduleUpdateAll()
@@ -552,6 +555,7 @@ local SQOL_COMMANDS = {
     { names = { "ilvl", "stats" }, key = "ShowItemLevel" },
     { names = { "speed", "spd" }, key = "ShowMovementSpeed" },
     { names = { "barcolor", "bc" }, key = "ColorStatusBarProgress" },
+    { names = { "fight", "gg" }, key = "CombatBanter" },
     { names = { "rep", "rw" }, key = "RepWatch" },
     { names = { "repmemory", "rm" }, key = "RepMemory" },
     { names = { "repfocus" }, desc = L["Save watched reputation; add 'clear' to forget or 'status' to inspect"],
@@ -687,6 +691,7 @@ f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 f:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 SQOL_RegisterOptionalEvent("PLAYER_REGEN_ENABLED")
 SQOL_RegisterOptionalEvent("PLAYER_REGEN_DISABLED")
+SQOL_RegisterOptionalEvent("PLAYER_DEAD")
 SQOL_RegisterOptionalEvent("TOOLTIP_DATA_UPDATE")
 f:RegisterEvent("GROUP_ROSTER_UPDATE")
 f:RegisterEvent("UNIT_LEVEL")
@@ -838,6 +843,10 @@ f:SetScript("OnEvent", function(self, event, ...)
         if SQOL.DB and SQOL.DB.SmartQuestRadar then
             SQOL.NameplateObjectives_ScheduleUpdateAll()
         end
+        SQOL.Banter_HandleEvent(event)
+
+    elseif event == "PLAYER_DEAD" then
+        SQOL.Banter_HandleEvent(event)
 
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         local unit = ...

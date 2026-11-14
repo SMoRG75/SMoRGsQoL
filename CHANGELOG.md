@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Floating combat banter** — just for fun: floating text near your character, where the reputation gains float, says **FIGHT** when combat starts, then **GG** when you win, **PHEW CLOSE** when combat ends while a living enemy is still targeted (you got away), or **NEXT TIME** when you die. Retail and WoW Forever only. Toggle under **Reputation & XP** or with `/sqol fight` (`gg`). Off by default.
+
 ## [1.8.0] - 2026-11-14
 
 ### Added
