@@ -45,6 +45,7 @@ On top of the quest sounds come a bunch of small quality-of-life tweaks, each on
 [*][b]Colorful unit tooltips[/b] - class colors, guild, level, faction and health on the bar.
 [*][b]Wowhead links[/b] in the quest log and achievement window, plus a "Show web link" key binding for whatever is under the mouse.
 [*][b]Range icon and distance[/b] to your target on its nameplate.
+[*][b]Square minimap[/b] with a thin black border; addon minimap buttons follow the square edge.
 [*][b]Hide completed achievements[/b] by default.
 [*][b]Custom damage text font[/b] and [b]cursor shake highlight[/b].
 [/list]
@@ -52,7 +53,7 @@ On top of the quest sounds come a bunch of small quality-of-life tweaks, each on
 
 [size=4][b]Classic clients[/b][/size]
 
-The quest sounds and most features work everywhere. A few need Retail-only parts of the UI and are simply left out of the options in the Classic clients: Smart Quest Radar, nameplate objective counts, auto-track, the range icon and the colored counts in the quest tracker. Classic Era and Anniversary also have no achievements or group finder, so those two features are only in Mists of Pandaria Classic.
+The quest sounds and most features work everywhere. A few need Retail-only parts of the UI and are simply left out of the options in the Classic clients: Smart Quest Radar, nameplate objective counts, auto-track, the range icon, the square minimap and the colored counts in the quest tracker. Classic Era and Anniversary also have no achievements or group finder, so those two features are only in Mists of Pandaria Classic.
 
 
 [size=4][b]Settings[/b][/size]

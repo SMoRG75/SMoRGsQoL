@@ -4,11 +4,11 @@
 
 On top of the quest sounds come a bunch of small quality-of-life tweaks, each one **individually toggleable**. Works in Retail, WoW Forever, Classic Era, Anniversary and Mists of Pandaria Classic.
 
-## What's new in 1.7
+## What's new in 1.8
 
-- ⭐ **New WoW Forever quests** — a small blue star marks quests that are new in WoW Forever: in the quest giver's list, the quest text, the quest log, the objective tracker and on the world map, where the tooltip also says *New in WoW Forever*.
+- 🟦 **Square minimap** — a square minimap with a thin black border in place of Blizzard's round frame. Addon minimap buttons follow the square edge, and in WoW Forever the day/night indicator sits in the top right corner. Retail and WoW Forever.
 
-It is off by default; turn it on under **Quests** or with `/sqol fq`. 1.7 adds a new file, so **restart the game** after updating (a `/reload` is not enough). See the [changelog](CHANGELOG.md) for the full release history.
+It is off by default; turn it on under **Interface** or with `/sqol sqm`. See the [changelog](CHANGELOG.md) for the full release history.
 
 ## Features
 
