@@ -48,8 +48,9 @@ local function widget()
     function w:EnableKeyboard(value) self.keyboard = value end
     return w
 end
-function CreateFrame(_, name)
+function CreateFrame(_, name, parent)
     local frame = widget()
+    frame.createdParent = parent
     frames[#frames + 1] = frame
     if name then _G[name] = frame end
     return frame
@@ -1180,7 +1181,9 @@ WorldMapFrame = {
 -- Objective tracker block; its "..." button comes with the layout pass.
 local trackerPOI = CreateFrame('Button')
 function trackerPOI:GetFrameLevel() return 1 end
-local trackerBlock = { id = 92474, poiQuestID = 92474 }
+local trackerBlock = CreateFrame('Frame')
+trackerBlock.id, trackerBlock.poiQuestID = 92474, 92474
+function trackerBlock:GetFrameLevel() return 0 end
 QuestObjectiveTracker = { usedBlocks = { QuestBlock = { [92474] = trackerBlock } } }
 function QuestObjectiveTracker:EndLayout() end
 local registryCallbacks = {}
@@ -1235,6 +1238,14 @@ trackerBlock.poiButton = trackerPOI -- added by the block's OnLayout
 QuestObjectiveTracker:EndLayout()
 assert(#frames == framesBefore + 1 and frames[#frames]:IsShown(), 'A new quest in the tracker gets a star')
 local trackerStar = frames[#frames]
+-- The button's AddAnim scales it; a star parented to it grew to fill the screen.
+assert(trackerStar.createdParent == trackerBlock, 'The tracker star belongs to the block, not the animated button')
+trackerBlock.poiButton = nil -- released when the block loses its button
+QuestObjectiveTracker:EndLayout()
+assert(not trackerStar:IsShown(), 'A block without a button hides its star')
+trackerBlock.poiButton = trackerPOI
+QuestObjectiveTracker:EndLayout()
+assert(trackerStar:IsShown() and #frames == framesBefore + 1, 'The block reuses its star')
 trackerBlock.id, trackerBlock.poiQuestID = 176, 176
 QuestObjectiveTracker:EndLayout()
 assert(not trackerStar:IsShown(), 'A reused tracker button for an original quest hides the star')

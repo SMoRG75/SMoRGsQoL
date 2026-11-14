@@ -235,6 +235,9 @@ end
 -- Blocks add their button in OnLayout while the module lays out, so the
 -- stars are set once the module's EndLayout has run. Only reads the blocks;
 -- nothing here asks the tracker to update (that would taint it).
+-- The star belongs to the block, not the button: the button's AddAnim
+-- (ObjectiveTrackerPOIButtonTemplate) scales it when a quest is added, and a
+-- child frame of the button blew up to fill the screen.
 local SQOL_TRACKER_MODULES = { "QuestObjectiveTracker", "CampaignQuestObjectiveTracker" }
 
 local function SQOL_UpdateTrackerModule(module)
@@ -242,11 +245,11 @@ local function SQOL_UpdateTrackerModule(module)
     for _, blocks in pairs(module.usedBlocks) do
         if type(blocks) == "table" then
             for _, block in pairs(blocks) do
-                local button = type(block) == "table" and block.poiButton
-                if button then
-                    SQOL_SetBadge(button, block.poiQuestID or block.id, function(badge)
+                if type(block) == "table" and block.GetFrameLevel then
+                    local button = block.poiButton
+                    SQOL_SetBadge(block, button and (block.poiQuestID or block.id), function(badge)
                         badge:SetPoint("CENTER", button, "TOPRIGHT", -4, -4)
-                    end, 10, 1)
+                    end, 10, 20)
                 end
             end
         end
