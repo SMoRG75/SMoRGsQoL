@@ -1255,6 +1255,56 @@ GameTooltip.lines = {}
 sqol.IsForever = false
 QuestScrollFrame, QuestLogQuests_Update, WorldMapFrame, EventRegistry = nil, nil, nil, nil
 hooksecurefunc = foreverHook
+-- Buff thanks: /thank another player who buffs you, in the open world only.
+local emotes, inInstance, now = {}, false, 500
+local casters = { party1 = { name = 'Healbot' }, nameplate2 = { name = 'Druid', realm = 'Argent Dawn' },
+    pet = { name = 'Wolf', npc = true }, player = { name = 'Me', you = true } }
+function IsInInstance() return inInstance, inInstance and 'party' or 'none' end
+function UnitIsPlayer(unit) return casters[unit] ~= nil and not casters[unit].npc end
+function UnitIsUnit(unit, other) return other == 'player' and casters[unit] ~= nil and casters[unit].you == true end
+function UnitName(unit) if casters[unit] then return casters[unit].name, casters[unit].realm end end
+C_ChatInfo = { PerformEmote = function(emote, target) emotes[#emotes + 1] = emote .. ' ' .. tostring(target) end }
+local realTime = GetTime
+GetTime = function() return now end
+local function buffed(source, helpful, full)
+    pending = {}
+    fire('UNIT_AURA', 'player', { isFullUpdate = full, addedAuras = { { name = 'Buff', isHelpful = helpful ~= false, sourceUnit = source } } })
+    for _, fn in ipairs(pending) do fn() end
+    pending = {}
+end
+SlashCmdList.SQOL('thank')
+assert(not sqol.DB.ThankBuffs, 'Buff thanks are not offered outside WoW Forever')
+sqol.IsForever = true
+SlashCmdList.SQOL('thank')
+assert(sqol.DB.ThankBuffs)
+buffed('party1')
+assert(emotes[1] == 'THANK Healbot', 'A player who buffs you is thanked')
+buffed('party1')
+assert(#emotes == 1, 'The same player is not thanked again within 5 minutes')
+now = now + 301
+buffed('party1')
+assert(#emotes == 2, 'The same player is thanked again after 5 minutes')
+buffed('nameplate2')
+assert(emotes[3] == 'THANK Druid-Argent Dawn', 'Players from other realms are named with their realm')
+buffed('pet'); buffed('player'); buffed(nil); buffed('nameplate2', false); buffed('party1', true, true)
+assert(#emotes == 3, 'NPCs, yourself, unknown casters, debuffs and full updates are not thanked')
+now = now + 301
+inInstance = true
+buffed('party1')
+assert(#emotes == 3, 'Nobody is thanked inside an instance')
+inInstance = false
+pending = {}
+fire('UNIT_AURA', 'player', { addedAuras = { { isHelpful = true, sourceUnit = 'party1' } } })
+inInstance = true
+for _, fn in ipairs(pending) do fn() end
+pending, inInstance = {}, false
+assert(#emotes == 3, 'Entering an instance before the thanks goes out cancels it')
+SlashCmdList.SQOL('thank')
+buffed('party1')
+assert(not sqol.DB.ThankBuffs and #emotes == 3, 'Turning buff thanks off stops them')
+sqol.IsForever = false
+GetTime = realTime
+IsInInstance, UnitIsPlayer, UnitIsUnit, UnitName, C_ChatInfo = nil, nil, nil, nil, nil
 
 for _, message in ipairs(messages) do io.write(message, '\n') end
 io.write('PASS: TOC loading, login, commands, independent options, events, deferred callbacks, Wowhead links, reset\n')

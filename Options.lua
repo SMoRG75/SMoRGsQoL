@@ -158,6 +158,9 @@ SQOL.OptionSections = {
               isAvailable = SQOL_HasLFGProposal },
             { key = "ShowPartyLevel", label = L["Show party member levels"],
               tooltip = L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] },
+            { key = "ThankBuffs", label = L["Thank players who buff you"],
+              tooltip = L["In the open world, do the /thank emote on another player who buffs you. Never in dungeons, raids, battlegrounds or other instances. Each player is thanked at most once every 5 minutes. Only players the game can name are thanked: your target, a group member or someone whose nameplate is shown."],
+              isAvailable = function() return SQOL.IsForever end },
         },
     },
     {

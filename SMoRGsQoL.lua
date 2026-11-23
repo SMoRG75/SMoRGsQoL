@@ -43,6 +43,7 @@ function SQOL.Init(reset)
         SQOL.Recap_OnOptionChanged()
         SQOL.RepMemory_OnOptionChanged()
         SQOL.QuestAutomation_OnOptionChanged()
+        SQOL.BuffThanks_OnOptionChanged()
         SQOL.WowheadLinks_OnOptionChanged()
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
         SQOL.RepGains_Hide()
@@ -479,6 +480,9 @@ function SQOL.ApplyOption(key)
         or key == "AutoAcceptWeeklyQuests" or key == "AutoTurnInQuests" then
         SQOL.QuestAutomation_OnOptionChanged()
 
+    elseif key == "ThankBuffs" then
+        SQOL.BuffThanks_OnOptionChanged()
+
     elseif key == "ShowWowheadLinks" then
         SQOL.WowheadLinks_OnOptionChanged()
 
@@ -579,6 +583,7 @@ local SQOL_COMMANDS = {
     { names = { "lfgtest" }, desc = L["Preview the queue pop countdown"],
       run = function() SQOL_LFGProposal_Test() end },
     { names = { "partylevel", "pl" }, key = "ShowPartyLevel" },
+    { names = { "thank", "ty" }, key = "ThankBuffs" },
     { names = { "tooltiptarget", "tt" }, key = "ShowTooltipTarget" },
     { names = { "tooltipcolor", "tc" }, key = "ColorUnitTooltips" },
     { names = { "range", "rng" }, key = "ShowRangeIndicator" },
@@ -708,6 +713,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         SQOL.DisableUnavailableOptions()
         SQOL.RepMemory_Init()
         SQOL.QuestAutomation_OnOptionChanged()
+        SQOL.BuffThanks_OnOptionChanged()
         SQOL.WowheadLinks_OnOptionChanged()
         SQOL.ForeverQuests_OnOptionChanged()
         SQOL.SquareMinimap_Apply()

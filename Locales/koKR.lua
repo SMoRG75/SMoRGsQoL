@@ -147,6 +147,8 @@ L["LFG queue pop countdown timer"] = "파티 찾기 수락 카운트다운"
 L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."] = "파티 찾기 수락 창에 수락할 수 있는 남은 시간(40초)을 표시합니다."
 L["Show party member levels"] = "파티원 레벨 표시"
 L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] = "파티 창(기본 및 공격대 스타일)에 각 파티원의 레벨을 표시합니다. 5인 던전에서 유용합니다."
+L["Thank players who buff you"] = "버프를 준 플레이어에게 감사하기"
+L["In the open world, do the /thank emote on another player who buffs you. Never in dungeons, raids, battlegrounds or other instances. Each player is thanked at most once every 5 minutes. Only players the game can name are thanked: your target, a group member or someone whose nameplate is shown."] = "필드에서 다른 플레이어가 버프를 걸어 주면 그 플레이어에게 /thank(감사) 감정 표현을 합니다. 던전, 공격대, 전장 등 인스턴스에서는 하지 않습니다. 같은 플레이어에게는 5분에 한 번까지만 감사합니다. 게임이 이름을 알 수 있는 플레이어에게만 감사합니다: 내 대상, 파티원 또는 이름표가 표시된 플레이어."
 
 L["Interface"] = "인터페이스"
 L["Show target in unit tooltips"] = "툴팁에 대상 표시"

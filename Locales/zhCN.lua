@@ -147,6 +147,8 @@ L["LFG queue pop countdown timer"] = "队伍查找器确认倒计时"
 L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."] = "在队伍查找器的确认窗口上显示剩余的接受时间（40秒）。"
 L["Show party member levels"] = "显示队友等级"
 L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] = "在小队框体（默认和团队风格）上显示每位队友的等级，适合5人副本。"
+L["Thank players who buff you"] = "感谢给你加增益的玩家"
+L["In the open world, do the /thank emote on another player who buffs you. Never in dungeons, raids, battlegrounds or other instances. Each player is thanked at most once every 5 minutes. Only players the game can name are thanked: your target, a group member or someone whose nameplate is shown."] = "在野外，当其他玩家给你施加增益效果时，对其使用 /thank（感谢）表情。在地下城、团队副本、战场等副本中从不使用。同一名玩家每5分钟最多感谢一次。只感谢游戏能识别名字的玩家：你的目标、队友或显示了姓名板的玩家。"
 
 L["Interface"] = "界面"
 L["Show target in unit tooltips"] = "在鼠标提示中显示目标"

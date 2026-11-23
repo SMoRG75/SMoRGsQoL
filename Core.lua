@@ -80,6 +80,9 @@ SQOL.defaults = {
     RepMemory    = false,
     ShowRepGains = false,
     ShowSkillGains = false,
+
+    -- /thank players who buff you in the open world (WoW Forever).
+    ThankBuffs = false,
     ShowNameplateObjectives = false,
     SmartQuestRadar = false,
     MarkForeverQuests = false,

@@ -36,6 +36,7 @@ Combat banter is off by default; turn it on under **Reputation & XP** or with `/
 **Group**
 - ⏱️ **Ready check countdown** and ⏳ **LFG queue pop countdown**.
 - 👥 **Party member levels** on the party frames.
+- 🙏 **Thank players who buff you** — the `/thank` emote in the open world, at most once every 5 minutes per player. WoW Forever.
 
 **Interface**
 - 🎯 **Target in unit tooltips** — who the unit is targeting, with a red `You` when it is you.

@@ -147,6 +147,8 @@ L["LFG queue pop countdown timer"] = "Compte à rebours de la recherche de group
 L["Show a live countdown on the group finder queue pop for how long you have left to accept (40 seconds)."] = "Affiche sur la proposition de la recherche de groupe le temps restant pour accepter (40 secondes)."
 L["Show party member levels"] = "Niveaux des membres du groupe"
 L["Show each party member's level on the party frames (both default and raid-style), handy in 5-man instances."] = "Affiche le niveau de chaque membre sur les cadres de groupe (standard et style raid), pratique en instance à 5."
+L["Thank players who buff you"] = "Remercier les joueurs qui vous buffent"
+L["In the open world, do the /thank emote on another player who buffs you. Never in dungeons, raids, battlegrounds or other instances. Each player is thanked at most once every 5 minutes. Only players the game can name are thanked: your target, a group member or someone whose nameplate is shown."] = "Dans le monde ouvert, fait l'emote /thank (remercier) sur un autre joueur qui vous applique une amélioration. Jamais en donjon, raid, champ de bataille ou autre instance. Chaque joueur est remercié au plus une fois toutes les 5 minutes. Seuls les joueurs que le jeu peut nommer sont remerciés : votre cible, un membre du groupe ou quelqu'un dont la barre d'info est affichée."
 
 L["Interface"] = "Interface"
 L["Show target in unit tooltips"] = "Cible dans les infobulles"
