@@ -51,9 +51,9 @@ local function Apply(bar, text)
     local prefix, current, separator, maximum, suffix = text:match("^(.-)(%d+)(%s*/%s*)(%d+)(.-)$")
     local value, total = tonumber(current), tonumber(maximum)
     if not value or not total or total <= 0 then return end
+    local remaining = 100 * (1 - SQOL.clamp01(value / total))
+    suffix = suffix .. " · " .. string.format(L["%.1f%% left"], remaining)
     if state.isReputation then
-        local remaining = 100 * (1 - SQOL.clamp01(value / total))
-        suffix = suffix .. " · " .. string.format(L["%.1f%% left"], remaining)
         local status = GetReputationStatus()
         if type(status) == "string" and status ~= "" then
             suffix = suffix .. " · " .. status

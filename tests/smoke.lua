@@ -325,7 +325,10 @@ local function plainRep() return repBar.OverlayFrame.Text.text:gsub('|c%x%x%x%x%
 assert(plainRep() == 'Avengers of Hyjal 4995 / 6000 · 16.8% left · Friendly')
 sqol.RefreshStatusBarProgress()
 assert(plainRep() == 'Avengers of Hyjal 4995 / 6000 · 16.8% left · Friendly')
-assert(not xpBar.OverlayFrame.Text.text:find('left', 1, true))
+local function plainXP() return xpBar.OverlayFrame.Text.text:gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|r', '') end
+assert(plainXP() == 'XP 4995 / 6000 · 16.8% left', 'XP shows the percentage left, without a standing')
+xpBar:SetBarText('XP: 4122/11400')
+assert(plainXP() == 'XP: 4122/11400 · 63.8% left')
 watched.reaction = 6
 repBar:SetBarText('Avengers of Hyjal 0 / 12000')
 assert(plainRep() == 'Avengers of Hyjal 0 / 12000 · 100.0% left · Honored')

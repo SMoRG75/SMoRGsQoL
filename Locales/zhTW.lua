@@ -137,7 +137,7 @@ L["Show movement speed on the player frame, independently of item level."] = "�
 
 L["Reputation & XP"] = "聲望與經驗值"
 L["Color XP/reputation numbers"] = "經驗值/聲望數值著色"
-L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "為目前經驗值/聲望數值著色並加上外框（紅 → 黃 → 綠）。聲望還會在總值後顯示剩餘百分比和目前聲望等級。標籤和最大值維持白色，進度條顏色不變。與任務進度著色分開設定。"
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text, and show the percentage remaining after the total. Reputation also shows its current standing. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "為目前經驗值/聲望數值著色並加上外框（紅 → 黃 → 綠），並在總值後顯示剩餘百分比。聲望還會顯示目前聲望等級。標籤和最大值維持白色，進度條顏色不變。與任務進度著色分開設定。"
 L["Auto-watch reputation gains"] = "自動監視聲望變化"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "某個陣營的聲望變化時，自動將其設為監視的聲望。"
 L["Floating reputation gains"] = "浮動聲望提示"

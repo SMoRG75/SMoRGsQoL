@@ -137,7 +137,7 @@ L["Show movement speed on the player frame, independently of item level."] = "Ze
 
 L["Reputation & XP"] = "Ruf & EP"
 L["Color XP/reputation numbers"] = "EP-/Rufzahlen einfärben"
-L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "Färbt die aktuelle EP-/Rufzahl ein (rot → gelb → grün), mit umrandetem Text. Beim Ruf werden zusätzlich der verbleibende Prozentsatz und der aktuelle Rang angezeigt. Beschriftungen und Maximalwerte bleiben weiß, die Leistenfarben bleiben unverändert. Unabhängig von den Farben des Questfortschritts."
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text, and show the percentage remaining after the total. Reputation also shows its current standing. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "Färbt die aktuelle EP-/Rufzahl ein (rot → gelb → grün), mit umrandetem Text, und zeigt nach dem Gesamtwert den verbleibenden Prozentsatz. Beim Ruf wird zusätzlich der aktuelle Rang angezeigt. Beschriftungen und Maximalwerte bleiben weiß, die Leistenfarben bleiben unverändert. Unabhängig von den Farben des Questfortschritts."
 L["Auto-watch reputation gains"] = "Ruf automatisch beobachten"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "Wenn sich dein Ruf bei einer Fraktion ändert, wird automatisch diese Fraktion beobachtet."
 L["Floating reputation gains"] = "Schwebende Rufgewinne"

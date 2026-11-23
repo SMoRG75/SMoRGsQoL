@@ -137,7 +137,7 @@ L["Show movement speed on the player frame, independently of item level."] = "�
 
 L["Reputation & XP"] = "평판 및 경험치"
 L["Color XP/reputation numbers"] = "경험치/평판 수치 색상"
-L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "현재 경험치/평판 수치에 색을 입히고 테두리를 넣습니다 (빨강 → 노랑 → 초록). 평판은 전체 수치 뒤에 남은 비율과 현재 평판 등급도 표시합니다. 이름과 최댓값은 흰색 그대로이며 바 색상은 바뀌지 않습니다. 퀘스트 진행 색상과 따로 설정합니다."
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text, and show the percentage remaining after the total. Reputation also shows its current standing. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "현재 경험치/평판 수치에 색을 입히고 테두리를 넣으며 (빨강 → 노랑 → 초록), 전체 수치 뒤에 남은 비율을 표시합니다. 평판은 현재 평판 등급도 표시합니다. 이름과 최댓값은 흰색 그대로이며 바 색상은 바뀌지 않습니다. 퀘스트 진행 색상과 따로 설정합니다."
 L["Auto-watch reputation gains"] = "평판 자동 추적"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "어떤 진영의 평판이 바뀌면 그 진영을 자동으로 추적합니다."
 L["Floating reputation gains"] = "떠오르는 평판 획득"

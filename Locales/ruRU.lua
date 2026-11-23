@@ -137,7 +137,7 @@ L["Show movement speed on the player frame, independently of item level."] = "П
 
 L["Reputation & XP"] = "Репутация и опыт"
 L["Color XP/reputation numbers"] = "Цветные числа опыта/репутации"
-L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "Окрашивает текущее значение опыта/репутации (красный → желтый → зеленый) с обводкой текста. Для репутации также показываются оставшийся процент и текущее отношение после общего значения. Подписи и максимальные значения остаются белыми, цвета полос не меняются. Не зависит от цветов прогресса заданий."
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text, and show the percentage remaining after the total. Reputation also shows its current standing. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "Окрашивает текущее значение опыта/репутации (красный → желтый → зеленый) с обводкой текста и показывает оставшийся процент после общего значения. Для репутации также показывается текущее отношение. Подписи и максимальные значения остаются белыми, цвета полос не меняются. Не зависит от цветов прогресса заданий."
 L["Auto-watch reputation gains"] = "Автоотслеживание репутации"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "Когда меняется репутация у фракции, она автоматически становится отслеживаемой."
 L["Floating reputation gains"] = "Всплывающая репутация"

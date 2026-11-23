@@ -137,7 +137,7 @@ L["Show movement speed on the player frame, independently of item level."] = "Mu
 
 L["Reputation & XP"] = "Reputación y PE"
 L["Color XP/reputation numbers"] = "Cifras de PE/reputación en color"
-L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "Colorea la cifra actual de PE/reputación (rojo → amarillo → verde), con texto contorneado. La reputación también muestra el porcentaje restante y el nivel actual después del total. Las etiquetas y los máximos siguen en blanco y los colores de las barras no cambian. Independiente de los colores del progreso de misiones."
+L["Colorize the current XP/reputation number (red → yellow → green), with outlined text, and show the percentage remaining after the total. Reputation also shows its current standing. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."] = "Colorea la cifra actual de PE/reputación (rojo → amarillo → verde), con texto contorneado, y muestra el porcentaje restante después del total. La reputación también muestra el nivel actual. Las etiquetas y los máximos siguen en blanco y los colores de las barras no cambian. Independiente de los colores del progreso de misiones."
 L["Auto-watch reputation gains"] = "Seguir la reputación automáticamente"
 L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] = "Cuando cambia tu reputación con una facción, esa facción pasa a ser la que sigues."
 L["Floating reputation gains"] = "Ganancias de reputación flotantes"

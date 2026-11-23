@@ -26,7 +26,7 @@ Combat banter is off by default; turn it on under **Reputation & XP** or with `/
 
 **Character, reputation & XP**
 - 🧾 **Item level and speed** on your player frame.
-- 🎨 **Colored XP/reputation numbers**, plus percentage left and standing on the reputation bar.
+- 🎨 **Colored XP/reputation numbers**, plus percentage left on both bars and standing on the reputation bar.
 - 🤝 **Auto-watch reputation** — switches to the faction you just gained reputation with.
 - 🧠 **Reputation Memory** — returns to your preferred faction 10 seconds later.
 - ✨ **Floating reputation gains** — `+25 Rep — Valarjar` near the screen center.

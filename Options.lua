@@ -132,7 +132,7 @@ SQOL.OptionSections = {
         icon = "Interface\\Icons\\INV_Shirt_GuildTabard_01",
         options = {
             { key = "ColorStatusBarProgress", label = L["Color XP/reputation numbers"],
-              tooltip = L["Colorize the current XP/reputation number (red → yellow → green), with outlined text. Reputation also shows the percentage remaining and current standing after the total. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."],
+              tooltip = L["Colorize the current XP/reputation number (red → yellow → green), with outlined text, and show the percentage remaining after the total. Reputation also shows its current standing. Labels and maximum values stay white; bar colors stay unchanged. Independent of quest progress colors."],
               isAvailable = SQOL_HasStatusTrackingBars },
             { key = "RepWatch", label = L["Auto-watch reputation gains"],
               tooltip = L["When a faction reputation changes, automatically switch your watched faction to the one that changed."] },
