@@ -46,8 +46,8 @@ function SQOL.Init(reset)
         SQOL.BuffThanks_OnOptionChanged()
         SQOL.WowheadLinks_OnOptionChanged()
         if SQOL.iLvlHolder then SQOL.iLvlHolder:Hide() end
-        SQOL.RepGains_Hide()
-        SQOL.SkillGains_Hide()
+        SQOL.FloatingGains_Hide()
+        SQOL.FloatingText_StopMoving()
         SQOL.NameplateObjectives_HideAll()
         if SQOL.RefreshStatusBarProgress then SQOL.RefreshStatusBarProgress() end
         print(SQOL_CHAT_PREFIX .. L["Settings have been reset to defaults."])
@@ -570,6 +570,22 @@ local SQOL_COMMANDS = {
     { names = { "skilltext", "sk" }, key = "ShowSkillGains" },
     { names = { "skilltexttest" }, desc = L["Preview floating skill gains"],
       run = function() SQOL.SkillGains_Show("Staves", 18, 20, 1) end },
+    { names = { "movetext", "mt" }, label = L["Move floating text"],
+      desc = L["Move the floating reputation, skill and combat text; add 'reset' to put it back"],
+      isAvailable = function() return not SQOL.IsClassic end,
+      run = function(rest)
+          if rest == "reset" then
+              SQOL.FloatingText_ResetPosition()
+              print(SQOL_CHAT_PREFIX .. L["The floating text is back in its default place."])
+          elseif SQOL.FloatingText_IsMoving() then
+              SQOL.FloatingText_Lock()
+          else
+              SQOL.FloatingText_StartMoving(function()
+                  print(SQOL_CHAT_PREFIX .. L["Floating text locked."])
+              end)
+              print(SQOL_CHAT_PREFIX .. string.format(L["Drag the floating text where you want it, then click %s to lock it."], OKAY or "Okay"))
+          end
+      end },
     { names = { "readycheck", "rc" }, key = "ShowReadyCheckTimer" },
     { names = { "rctest" }, desc = L["Preview the ready check countdown (add 'popup' to show the frame)"],
       run = function(rest)
@@ -625,7 +641,8 @@ SQOL_Help = function()
     SQOL_PrintHeader()
     for _, command in ipairs(SQOL_COMMANDS) do
         local option = command.key and SQOL.GetOption(command.key)
-        if not (option and option.isAvailable and not option.isAvailable()) then
+        local available = command.isAvailable or (option and option.isAvailable)
+        if not (available and not available()) then
             local text = "|cff00ff00/sqol " .. command.names[1] .. "|r"
             if command.names[2] then
                 text = text .. " |cff888888(" .. table.concat(command.names, ", ", 2) .. ")|r"
@@ -655,6 +672,8 @@ SlashCmdList["SQOL"] = function(msg)
         SQOL_PrintStatus()
     elseif command.key then
         SQOL_RunOptionCommand(command.key)
+    elseif command.isAvailable and not command.isAvailable() then
+        print(SQOL_CHAT_PREFIX .. string.format(L["%s is not available in this client."], command.label))
     else
         command.run(rest)
     end

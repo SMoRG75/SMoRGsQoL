@@ -5,6 +5,7 @@
 ### Added
 
 - **Thank players who buff you** — in the open world, the `/thank` emote goes to another player who buffs you. Never in dungeons, raids, battlegrounds or other instances, and each player is thanked at most once every 5 minutes. Only players the game can name are thanked: your target, a group member or someone whose nameplate is shown. WoW Forever only. Toggle under **Group** or with `/sqol thank` (`ty`). Off by default.
+- **Move the floating text** — the **Move floating text** button in the options window, or `/sqol movetext` (`mt`), shows a bar where the floating reputation, skill and combat banter text starts. Drag it anywhere, then click **Okay** to lock it. Right-click the bar or type `/sqol movetext reset` to put the text back above your character. Retail and WoW Forever.
 
 ## [1.9.0] - 2026-11-14
 

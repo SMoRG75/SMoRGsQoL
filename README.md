@@ -32,6 +32,7 @@ Combat banter is off by default; turn it on under **Reputation & XP** or with `/
 - ✨ **Floating reputation gains** — `+25 Rep — Valarjar` near the screen center.
 - 📈 **Floating skill gains** — `+1 Staves (18/20)` the same way when a profession or weapon skill goes up.
 - 💬 **Floating combat banter** — **FIGHT**, **GG**, **PHEW CLOSE** or **NEXT TIME** near your character.
+- ↕️ **Move the floating text** with the button in the options window or `/sqol movetext` — drag the bar, then click **Okay**. Retail and WoW Forever.
 
 **Group**
 - ⏱️ **Ready check countdown** and ⏳ **LFG queue pop countdown**.

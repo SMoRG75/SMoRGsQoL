@@ -649,6 +649,17 @@ local repGainMaxLines = 6
 -- Gains often arrive in the same frame with equal ages, so the oldest label
 -- is found by the order it was shown in.
 local repGainSerial = 0
+-- The labels start just above your character unless /sqol movetext saved an
+-- offset from the screen center.
+local FLOATING_DEFAULT_X, FLOATING_DEFAULT_Y = 0, 65
+
+local function SQOL_FloatingGains_Anchor()
+    local pos = SQOL.DB and SQOL.DB.FloatingTextPosition
+    if type(pos) == "table" and type(pos[1]) == "number" and type(pos[2]) == "number" then
+        return pos[1], pos[2]
+    end
+    return FLOATING_DEFAULT_X, FLOATING_DEFAULT_Y
+end
 
 -- Hides the labels of one kind ("rep", "skill"), or all of them without a kind.
 function SQOL.FloatingGains_Hide(kind)
@@ -680,6 +691,7 @@ function SQOL.FloatingGains_Show(kind, text, r, g, b)
         repGainFrame:EnableMouse(false)
         repGainFrame:SetScript("OnUpdate", function(self, elapsed)
             local active = false
+            local x, y = SQOL_FloatingGains_Anchor()
             for _, line in ipairs(repGainLines) do
                 if line.age then
                     line.age = line.age + elapsed
@@ -688,7 +700,7 @@ function SQOL.FloatingGains_Show(kind, text, r, g, b)
                         line:Hide()
                     else
                         active = true
-                        line:SetPoint("CENTER", self, "CENTER", 0, 65 + line.offset + line.age * 22)
+                        line:SetPoint("CENTER", self, "CENTER", x, y + line.offset + line.age * 22)
                         line:SetAlpha(math.min(1, (repGainDuration - line.age) / 0.8))
                     end
                 end
@@ -716,7 +728,8 @@ function SQOL.FloatingGains_Show(kind, text, r, g, b)
     line.age, line.offset, line.kind, line.serial = 0, 0, kind, repGainSerial
     line:SetTextColor(r, g, b)
     line:SetText(text)
-    line:SetPoint("CENTER", repGainFrame, "CENTER", 0, 65)
+    local x, y = SQOL_FloatingGains_Anchor()
+    line:SetPoint("CENTER", repGainFrame, "CENTER", x, y)
     line:SetAlpha(1)
     line:Show()
     repGainFrame:Show()
@@ -776,6 +789,104 @@ function SQOL.Banter_HandleEvent(event)
         local dead = type(UnitIsDeadOrGhost) == "function" and UnitIsDeadOrGhost("player")
         if SQOL.CanUseValue(dead) and dead then return end
         SQOL_Banter_Show(SQOL_Banter_GotAway() and "fled" or "win")
+    end
+end
+
+-- /sqol movetext shows a bar where the floating labels start. Drag it to move
+-- all of them (reputation, skill and banter stack together); right-click puts
+-- them back above your character. OK locks it again.
+local floatingMover
+local floatingMoverOnLock
+
+local function SQOL_FloatingMover_Place()
+    local x, y = SQOL_FloatingGains_Anchor()
+    floatingMover:ClearAllPoints()
+    floatingMover:SetPoint("CENTER", UIParent, "CENTER", x, y)
+end
+
+local function SQOL_FloatingMover_Preview()
+    SQOL.FloatingGains_Hide()
+    SQOL.SkillGains_Show("Staves", 18, 20, 1)
+    SQOL.RepGains_Show("Valarjar", 25)
+    SQOL_Banter_Show("fight")
+end
+
+local function SQOL_FloatingMover_Create()
+    local mover = CreateFrame("Frame", nil, UIParent)
+    mover:SetFrameStrata("HIGH")
+    mover:SetClampedToScreen(true)
+    mover:SetMovable(true)
+    mover:EnableMouse(true)
+    mover:RegisterForDrag("LeftButton")
+
+    local background = mover:CreateTexture(nil, "BACKGROUND")
+    background:SetAllPoints(mover)
+    background:SetColorTexture(0.2, 0.6, 1, 0.35)
+
+    local label = mover:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    label:SetPoint("CENTER", mover, "CENTER", 0, 0)
+    label:SetText(L["Floating text: drag to move, right-click to reset"])
+    mover:SetSize(math.max(260, label:GetStringWidth() + 24), 28)
+
+    local okay = CreateFrame("Button", nil, mover, "UIPanelButtonTemplate")
+    okay:SetSize(80, 24)
+    okay:SetPoint("LEFT", mover, "RIGHT", 6, 0)
+    okay:SetText(OKAY or "Okay")
+    okay:SetScript("OnClick", function() SQOL.FloatingText_Lock() end)
+    mover.okay = okay
+
+    mover:SetScript("OnDragStart", mover.StartMoving)
+    mover:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        local moverX, moverY = self:GetCenter()
+        local screenX, screenY = UIParent:GetCenter()
+        if moverX and screenX and SQOL.DB then
+            SQOL.DB.FloatingTextPosition = {
+                math.floor(moverX - screenX + 0.5),
+                math.floor(moverY - screenY + 0.5),
+            }
+        end
+        SQOL_FloatingMover_Place()
+        SQOL_FloatingMover_Preview()
+    end)
+    mover:SetScript("OnMouseUp", function(_, button)
+        if button == "RightButton" then SQOL.FloatingText_ResetPosition() end
+    end)
+    return mover
+end
+
+-- Shows the bar. onLock runs once when OK (or the command) locks the text.
+function SQOL.FloatingText_StartMoving(onLock)
+    floatingMover = floatingMover or SQOL_FloatingMover_Create()
+    floatingMoverOnLock = onLock
+    SQOL_FloatingMover_Place()
+    floatingMover:Show()
+    SQOL_FloatingMover_Preview()
+end
+
+function SQOL.FloatingText_IsMoving()
+    return floatingMover ~= nil and floatingMover:IsShown()
+end
+
+function SQOL.FloatingText_Lock()
+    if not SQOL.FloatingText_IsMoving() then return end
+    floatingMover:Hide()
+    local onLock = floatingMoverOnLock
+    floatingMoverOnLock = nil
+    if onLock then onLock() end
+end
+
+-- Hides the bar without its lock callback (settings reset).
+function SQOL.FloatingText_StopMoving()
+    floatingMoverOnLock = nil
+    if floatingMover then floatingMover:Hide() end
+end
+
+function SQOL.FloatingText_ResetPosition()
+    if SQOL.DB then SQOL.DB.FloatingTextPosition = nil end
+    if floatingMover and floatingMover:IsShown() then
+        SQOL_FloatingMover_Place()
+        SQOL_FloatingMover_Preview()
     end
 end
 

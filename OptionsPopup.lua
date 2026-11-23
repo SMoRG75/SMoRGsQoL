@@ -312,6 +312,28 @@ local function SQOL_Popup_Create()
         SQOL.Recap_Command("")
     end)
 
+    -- The floating text starts near the screen center, under this window, so
+    -- the window steps aside while the text is moved and comes back on OK.
+    if not SQOL.IsClassic then
+        local moveButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+        moveButton:SetText(L["Move floating text"])
+        local textWidth = type(moveButton.GetTextWidth) == "function" and moveButton:GetTextWidth() or 0
+        moveButton:SetSize(math.max(170, textWidth + 24), 22)
+        moveButton:SetPoint("RIGHT", recapButton, "LEFT", -8, 0)
+        moveButton:SetScript("OnClick", function()
+            frame:Hide()
+            SQOL.FloatingText_StartMoving(SQOL.OptionsPopup_Open)
+        end)
+        moveButton:SetScript("OnEnter", function(self)
+            SQOL_Popup_ShowTooltip(self, {
+                label = L["Move floating text"],
+                tooltip = string.format(L["Show a bar where the floating reputation, skill and combat banter text starts. Drag it where you want the text, then click %s. Right-click the bar to put the text back above your character."], OKAY or "Okay"),
+            })
+        end)
+        moveButton:SetScript("OnLeave", SQOL_Popup_HideTooltip)
+        frame.moveButton = moveButton
+    end
+
     frame:SetScript("OnShow", function()
         for _, control in ipairs(controls) do
             control:Refresh()

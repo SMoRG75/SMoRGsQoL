@@ -1077,6 +1077,59 @@ SlashCmdList.SQOL('fight')
 assert(not sqol.DB.CombatBanter and banterCount('NEXT TIME') == 0, 'Turning banter off hides it')
 fire('PLAYER_REGEN_DISABLED')
 assert(banterCount('FIGHT') == 0)
+-- /sqol movetext: one bar moves all floating labels and saves the offset.
+local function trackPoint(fs) fs.SetPoint = function(self, _, _, _, x, y) self.px, self.py = x, y end end
+for _, fs in ipairs(repFrame.fontStrings) do trackPoint(fs) end
+local createLabel = repFrame.CreateFontString
+repFrame.CreateFontString = function(self, ...) local fs = createLabel(self, ...); trackPoint(fs); return fs end
+local function fightLabel()
+    for _, fs in ipairs(repFrame.fontStrings) do
+        if fs.text == 'FIGHT' and fs:IsShown() then return fs end
+    end
+end
+local framesBefore = #frames
+SlashCmdList.SQOL('movetext')
+local mover = frames[framesBefore + 1]
+assert(mover and mover:IsShown(), 'movetext shows the bar')
+assert(banterCount('FIGHT') == 1 and skillShown('+1 Staves (18/20)'), 'The bar previews the floating text')
+assert(fightLabel().px == 0 and fightLabel().py == 65, 'Floating text starts above your character by default')
+local screenCenter = UIParent.GetCenter
+function UIParent:GetCenter() return 400, 300 end
+function mover:GetCenter() return 340.4, 210 end
+mover.scripts.OnDragStop(mover)
+assert(sqol.DB.FloatingTextPosition[1] == -60 and sqol.DB.FloatingTextPosition[2] == -90, 'Dragging saves the offset from the screen center')
+assert(fightLabel().px == -60 and fightLabel().py == -90, 'New labels start at the moved place')
+repFrame.scripts.OnUpdate(repFrame, 1)
+assert(fightLabel().px == -60 and fightLabel().py == -68, 'Labels float up from the moved place')
+SlashCmdList.SQOL('movetext')
+assert(not mover:IsShown() and sqol.DB.FloatingTextPosition, 'movetext again locks the text where it is')
+assert(messages[#messages]:find('locked', 1, true))
+SlashCmdList.SQOL('mt')
+mover.okay.scripts.OnClick(mover.okay)
+assert(not mover:IsShown() and messages[#messages]:find('locked', 1, true), 'OK locks the text')
+-- The options window has a button for it; the window steps aside and comes back on OK.
+popup:Show()
+GameTooltip.lines = {}
+popup.moveButton.scripts.OnEnter(popup.moveButton)
+assert(GameTooltip.lines[1].text:find('Right-click', 1, true), 'The button explains how to move the text')
+popup.moveButton.scripts.OnClick(popup.moveButton)
+assert(mover:IsShown() and not popup:IsShown(), 'The window hides while the text is moved')
+mover.okay.scripts.OnClick(mover.okay)
+assert(not mover:IsShown() and popup:IsShown(), 'OK brings the window back')
+popup:Hide()
+SlashCmdList.SQOL('mt')
+mover.scripts.OnMouseUp(mover, 'RightButton')
+assert(sqol.DB.FloatingTextPosition == nil and fightLabel().py == 65, 'Right-click puts the text back above your character')
+mover.scripts.OnDragStop(mover)
+SlashCmdList.SQOL('mt reset')
+assert(sqol.DB.FloatingTextPosition == nil, '/sqol movetext reset puts the text back')
+SlashCmdList.SQOL('mt')
+assert(not mover:IsShown())
+sqol.IsClassic = true
+SlashCmdList.SQOL('movetext')
+assert(not mover:IsShown() and messages[#messages]:find('not available', 1, true), 'Moving floating text is Retail and WoW Forever only')
+sqol.IsClassic = false
+UIParent.GetCenter, repFrame.CreateFontString = screenCenter, createLabel
 UnitIsDeadOrGhost, UnitExists, UnitCanAttack, UnitIsDead = nil, nil, nil, nil
 -- Adventure Recap is routed independently of quest sounds and reputation text.
 sqol.SetOption('QuestCompleteSound', false)
